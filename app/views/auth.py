@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, url_for, redirect, flash, request,
 from flask import current_app as app
 from flask_login import login_user, logout_user, login_required, current_user
 
-from app import models as m
+from app.common import models as m
 from app import forms as f
 from app import mail, db
 from app.logger import log
@@ -16,7 +16,7 @@ auth_blueprint = Blueprint("auth", __name__)
 def register():
     form = f.RegistrationForm()
     if form.validate_on_submit():
-        user = m.Superuser(
+        user = m.SuperUser(
             username=form.username.data,
             email=form.email.data,
             password=form.password.data,
@@ -57,7 +57,7 @@ def register():
 def login():
     form = f.LoginForm(request.form)
     if form.validate_on_submit():
-        user = m.Superuser.authenticate(form.user_id.data, form.password.data)
+        user = m.SuperUser.authenticate(form.user_id.data, form.password.data)
         log(log.INFO, "Form submitted. User: [%s]", user)
         if user:
             login_user(user)
@@ -88,8 +88,8 @@ def activate(reset_password_uid):
 
         return redirect(url_for("main.index"))
 
-    query = m.Superuser.select().where(m.Superuser.unique_id == reset_password_uid)
-    user: m.Superuser | None = db.session.scalar(query)
+    query = m.SuperUser.select().where(m.SuperUser.unique_id == reset_password_uid)
+    user: m.SuperUser | None = db.session.scalar(query)
 
     if not user:
         log(log.INFO, "User not found")
@@ -108,8 +108,8 @@ def activate(reset_password_uid):
 def forgot_pass():
     form = f.ForgotForm(request.form)
     if form.validate_on_submit():
-        query = m.Superuser.select().where(m.Superuser.email == form.email.data)
-        user: m.Superuser = db.session.scalar(query)
+        query = m.SuperUser.select().where(m.SuperUser.email == form.email.data)
+        user: m.SuperUser = db.session.scalar(query)
         # create e-mail message
         msg = Message(
             subject="Reset password",
@@ -145,8 +145,8 @@ def password_recovery(reset_password_uid):
     if current_user.is_authenticated:
         return redirect(url_for("main.index"))
 
-    query = m.Superuser.select().where(m.Superuser.unique_id == reset_password_uid)
-    user: m.Superuser = db.session.scalar(query)
+    query = m.SuperUser.select().where(m.SuperUser.unique_id == reset_password_uid)
+    user: m.SuperUser = db.session.scalar(query)
 
     if not user:
         flash("Incorrect reset password link", "danger")

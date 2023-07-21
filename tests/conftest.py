@@ -3,7 +3,7 @@ from flask import Flask
 from flask.testing import FlaskClient
 
 from app import create_app, db
-from app import models as m
+from app.common import models as m
 from tests.utils import register
 
 

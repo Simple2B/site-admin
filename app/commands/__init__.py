@@ -2,7 +2,7 @@ import click
 from flask import Flask
 import sqlalchemy as sa
 from sqlalchemy import orm
-from app import models as m
+from app.common import models as m
 from app import db, forms
 from app import schema as s
 

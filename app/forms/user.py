@@ -8,7 +8,7 @@ from wtforms import (
 )
 from wtforms.validators import DataRequired, Email, Length, EqualTo
 
-from app import models as m
+from app.common import models as m
 from app import db
 
 

@@ -2,7 +2,7 @@ from typing import Generator
 from faker import Faker
 from sqlalchemy import func
 from app import db
-from app import models as m
+from app.common import models as m
 
 
 faker = Faker()
