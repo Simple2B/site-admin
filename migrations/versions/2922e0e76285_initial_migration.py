@@ -1,8 +1,8 @@
 """Initial migration.
 
-Revision ID: ace11501e3ae
+Revision ID: 2922e0e76285
 Revises: 
-Create Date: 2023-07-21 17:35:55.815115
+Create Date: 2023-07-21 18:06:01.821018
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'ace11501e3ae'
+revision = '2922e0e76285'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -28,6 +28,7 @@ def upgrade():
     sa.Column('email', sa.String(length=128), nullable=True),
     sa.Column('username', sa.String(length=128), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('is_verified', sa.Boolean(), nullable=False),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_candidates')),
     sa.UniqueConstraint('email', name=op.f('uq_candidates_email')),
     sa.UniqueConstraint('username', name=op.f('uq_candidates_username'))
@@ -51,6 +52,7 @@ def upgrade():
     sa.Column('email', sa.String(length=128), nullable=True),
     sa.Column('username', sa.String(length=128), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('is_verified', sa.Boolean(), nullable=False),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_superusers')),
     sa.UniqueConstraint('email', name=op.f('uq_superusers_email')),
     sa.UniqueConstraint('username', name=op.f('uq_superusers_username'))
