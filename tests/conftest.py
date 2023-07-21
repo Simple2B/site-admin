@@ -47,7 +47,7 @@ def runner(app, client):
 def populate(client: FlaskClient):
     NUM_TEST_USERS = 100
     for i in range(NUM_TEST_USERS):
-        m.User(
+        m.SuperUser(
             username=f"user{i+1}",
             email=f"user{i+1}@mail.com",
             password="password",
