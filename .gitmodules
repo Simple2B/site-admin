@@ -1,0 +1,9 @@
+[submodule "models"]
+	path = models
+	url = git@github.com:Simple2B/site-common.git
+[submodule "app/models"]
+	path = app/models
+	url = git@github.com:Simple2B/site-common.git
+[submodule "app/mo"]
+	path = app/mo
+	url = git@github.com:Simple2B/site-common.git
