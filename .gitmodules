@@ -7,3 +7,6 @@
 [submodule "app/mo"]
 	path = app/mo
 	url = git@github.com:Simple2B/site-common.git
+[submodule "app/common"]
+	path = app/common
+	url = git@github.com:Simple2B/site-common.git
