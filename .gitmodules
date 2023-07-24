@@ -10,6 +10,3 @@
 [submodule "app/common"]
 	path = app/common
 	url = git@github.com:Simple2B/site-common.git
-[submodule "app/site-common"]
-	path = app/site-common
-	url = git@github.com:Simple2B/site-common.git
