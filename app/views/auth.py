@@ -56,7 +56,7 @@ def activate(reset_password_uid):
         return redirect(url_for("main.index"))
 
     user.activated = True
-    user.unique_id = m.user.gen_password_reset_id()
+    user.unique_id = m.generate_uuid()
     user.save()
 
     flash("Welcome!", "success")
@@ -116,7 +116,7 @@ def password_recovery(reset_password_uid):
     if form.validate_on_submit():
         user.password = form.password.data
         user.activated = True
-        user.unique_id = m.gen_password_reset_id()
+        user.unique_id = m.generate_uuid()
         user.save()
         login_user(user)
         flash("Login successful.", "success")

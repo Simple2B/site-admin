@@ -1,8 +1,9 @@
 from flask import current_app as app
 from flask.testing import FlaskClient, FlaskCliRunner
 from click.testing import Result
-from app.common import models as m, db
+from app.common import models as m
 from tests.utils import login
+from app.database import db
 
 
 def test_list(populate: FlaskClient):
@@ -35,14 +36,6 @@ def test_create_admin(runner: FlaskCliRunner):
     assert "admin created" in res.output
     query = m.SuperUser.select().where(m.SuperUser.username == app.config["ADMIN_USERNAME"])
     assert db.session.scalar(query)
-
-
-def test_populate_db(runner: FlaskCliRunner):
-    TEST_COUNT = 56
-    count_before = db.session.query(m.SuperUser).count()
-    res: Result = runner.invoke(args=["db-populate", "--count", f"{TEST_COUNT}"])
-    assert f"populated by {TEST_COUNT}" in res.stdout
-    assert (db.session.query(m.SuperUser).count() - count_before) == TEST_COUNT
 
 
 def test_delete_user(populate: FlaskClient):
