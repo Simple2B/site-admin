@@ -69,7 +69,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: simple2b/site-s2b-admin:latest
+          tags: tags: ${{ env.DOCKER_IMAGE_NAME }}:latest:latest
 
   # deploy:
   #   runs-on: Linux
