@@ -3,7 +3,7 @@ from flask import Flask
 from flask.testing import FlaskClient
 
 from app import create_app, db
-from app import models as m
+from app.common import models as m
 from tests.utils import register
 
 
@@ -47,7 +47,7 @@ def runner(app, client):
 def populate(client: FlaskClient):
     NUM_TEST_USERS = 100
     for i in range(NUM_TEST_USERS):
-        m.User(
+        m.SuperUser(
             username=f"user{i+1}",
             email=f"user{i+1}@mail.com",
             password="password",

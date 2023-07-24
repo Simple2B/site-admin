@@ -7,7 +7,7 @@ from flask_migrate import Migrate
 from flask_mail import Mail
 
 from app.logger import log
-from .database import db
+from .database import db, AnonymousUser
 
 # instantiate extensions
 login_manager = LoginManager()
@@ -22,7 +22,7 @@ def create_app(environment="development"):
         auth_blueprint,
         user_blueprint,
     )
-    from app import models as m
+    from app.common import models as m
 
     # Instantiate app.
     app = Flask(__name__)
@@ -48,12 +48,12 @@ def create_app(environment="development"):
     # Set up flask login.
     @login_manager.user_loader
     def get_user(id: int):
-        query = m.User.select().where(m.User.id == int(id))
+        query = m.SuperUser.select().where(m.SuperUser.id == int(id))
         return db.session.scalar(query)
 
     login_manager.login_view = "auth.login"
     login_manager.login_message_category = "info"
-    login_manager.anonymous_user = m.AnonymousUser
+    login_manager.anonymous_user = AnonymousUser
 
     # Error handlers.
     @app.errorhandler(HTTPException)

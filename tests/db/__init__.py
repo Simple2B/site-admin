@@ -2,7 +2,7 @@ from typing import Generator
 from faker import Faker
 from sqlalchemy import func
 from app import db
-from app import models as m
+from app.common import models as m
 
 
 faker = Faker()
@@ -17,7 +17,7 @@ def gen_test_items(num_objects: int) -> Generator[str, None, None]:
 
     DOMAINS = ("com", "com.br", "net", "net.br", "org", "org.br", "gov", "gov.br")
 
-    i = db.session.query(func.max(m.User.id)).scalar()
+    i = db.session.query(func.max(m.SuperUser.id)).scalar()
 
     for _ in range(num_objects):
         i += 1
@@ -38,7 +38,7 @@ def gen_test_items(num_objects: int) -> Generator[str, None, None]:
 
 def populate(count: int = NUM_TEST_USERS):
     for username, email in gen_test_items(count):
-        m.User(
+        m.SuperUser(
             username=username,
             email=email,
         ).save(False)

@@ -2,7 +2,7 @@ import click
 from flask import Flask
 import sqlalchemy as sa
 from sqlalchemy import orm
-from app import models as m
+from app.common import models as m
 from app import db, forms
 from app import schema as s
 
@@ -28,11 +28,11 @@ def init(app: Flask):
     @app.cli.command("create-admin")
     def create_admin():
         """Create super admin account"""
-        query = m.User.select().where(m.User.email == app.config["ADMIN_EMAIL"])
+        query = m.SuperUser.select().where(m.SuperUser.email == app.config["ADMIN_EMAIL"])
         if db.session.execute(query).first():
             print(f"User with e-mail: [{app.config['ADMIN_EMAIL']}] already exists")
             return
-        m.User(
+        m.SuperUser(
             username=app.config["ADMIN_USERNAME"],
             email=app.config["ADMIN_EMAIL"],
             password=app.config["ADMIN_PASSWORD"],

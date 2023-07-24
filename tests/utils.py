@@ -1,4 +1,4 @@
-from app.models import User
+from app.common.models import SuperUser as User
 
 TEST_ADMIN_NAME = "bob"
 TEST_ADMIN_EMAIL = "bob@test.com"
