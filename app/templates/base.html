@@ -7,7 +7,10 @@
     <meta name="description" content="Simple2B Flask App" />
     <meta name="author" content="Simple2B" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="https://static.simple2b.net/logos/main_site_logo.svg" />
     {% block meta %}{% endblock %}
 
     <!-- styles -->
@@ -76,7 +79,7 @@
     <!-- prettier-ignore -->
     {% include 'sidebar.html' %}
 
-    <div class="sm:ml-64 mt-14 h-full overflow-x-scroll">
+    <div class="sm:ml-64 mt-14 h-full overflow-x-hidden">
       <!-- Main Content -->
       {% block content %}{% endblock %}
     </div>
@@ -84,7 +87,7 @@
     <!-- scripts -->
 
     <!-- prettier-ignore -->
-    <script src="{{ url_for('static', filename='js/base.js') }}" type="text/javascript" defer></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}" type="text/javascript" defer></script>
 
     {% block scripts %} {% endblock %}
   </body>

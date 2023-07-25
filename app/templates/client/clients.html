@@ -23,7 +23,7 @@
       class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
     >
       <tr>
-        <th scope="col" class="px-6 py-3">#</th> <th scope="col" class="px-6 py-3">Name</th> <th scope="col" class="px-6 py-3">Active</th>
+        <th scope="col" class="px-6 py-3">#</th> <th scope="col" class="px-6 py-3">Name</th> <th scope="col" class="px-6 py-3">Email</th> <th scope="col" class="px-6 py-3">Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -42,13 +42,20 @@
         >
           <div class="pl-3">
             <div class="text-base font-semibold">{{ user.username }}</div>
-            <div class="font-normal text-gray-500"><a class="hover:text-blue-500" href="mailto:{{ user.email }}">{{ user.email }}</a></div>
           </div>
         </td>
         <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="flex items-center">
             <!-- prettier-ignore -->
-      {% if user.activated %}<div class="flex items-center"><div class="h-2.5 w-2.5 rounded-full bg-green-400 mr-2"></div>  Active</div></div>{% else %}<div class="flex items-center"><div class="h-2.5 w-2.5 rounded-full bg-red-500 mr-2"></div>  Offline</div>{% endif %}
+          <div class="pl-3">
+            <div class="text-base font-semibold"><a class="hover:text-blue-500" href="mailto:{{ user.email }}">{{ user.email }}</a></div>
+          </div>
+        </td>
+        <td class="p-4 space-x-2 whitespace-nowrap">
+          <button data-user-id={{ user.id }} type="button" class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900 delete-user-btn">
+          <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+             Delete client
+          </button>
         </td>
       </tr>
       {% endfor %}
@@ -120,8 +127,8 @@
 </div>
 {% endif %}
 </div>
-{% include 'user/edit.html' %}
-{% include 'user/add.html' %}
 <!-- prettier-ignore -->
 {% endblock %}
+
+
 
