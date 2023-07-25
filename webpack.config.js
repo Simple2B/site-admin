@@ -18,21 +18,21 @@ const defaultConfig = {
 
 const baseConfig = {
   entry: {
-    main: './src/base.ts',
+    main: './src/main.ts',
   },
   output: {
     path: path.resolve(__dirname, './app/static'),
-    filename: 'js/base.js', // <--- Will be compiled to this single file
+    filename: 'js/mainmin.js', // <--- Will be compiled to this single file
   },
 };
 
 const userConfig = {
   entry: {
-    main: './src/user.ts',
+    main: './src/main.ts',
   },
   output: {
     path: path.resolve(__dirname, './app/static'),
-    filename: 'js/user.js', // <--- Will be compiled to this single file
+    filename: 'js/main.js', // <--- Will be compiled to this single file
   },
 };
 

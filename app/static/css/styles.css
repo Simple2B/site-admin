@@ -1514,10 +1514,6 @@ input:checked + .toggle-bg {
   overflow-x: hidden;
 }
 
-.overflow-x-scroll {
-  overflow-x: scroll;
-}
-
 .truncate {
   overflow: hidden;
   text-overflow: ellipsis;
