@@ -20,13 +20,12 @@ const $addUserModalElement: HTMLElement =
   document.querySelector('#add-user-modal');
 
 const modalOptions: ModalOptions = {
-  placement: 'bottom-right',
-  backdrop: 'dynamic',
-  backdropClasses:
-    'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
+  backdrop: 'static',
   closable: true,
   onHide: () => {
     console.log('modal is hidden');
+    const backdrop = document.querySelector('[modal-backdrop]');
+    console.log(backdrop);
   },
   onShow: () => {
     console.log('user id: ');
@@ -58,6 +57,7 @@ if ($buttonClose) {
 const addModalCloseBtn = document.querySelector('#modalAddCloseButton');
 if (addModalCloseBtn) {
   addModalCloseBtn.addEventListener('click', () => {
+    console.log('close');
     addModal.hide();
   });
 }

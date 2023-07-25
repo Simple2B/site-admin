@@ -6,3 +6,6 @@
 .text-danger {
     color: red;
 }
+.w-box{
+    width:calc(100% - 255px);
+}
