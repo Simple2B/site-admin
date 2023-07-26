@@ -5,6 +5,7 @@
     <!-- Modal content -->
     <form action="{{url_for('case.create')}}" method="post" class="relative bg-white rounded-lg shadow dark:bg-gray-700">
       <!-- Modal header -->
+      {{ form.hidden_tag() }}
       <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
         <h3 class="text-xl font-semibold text-gray-900 dark:text-white"> Add new case </h3>
         <button id="modalAddCaseCloseButton" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"> <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"> <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path> </svg> </button>
@@ -13,24 +14,34 @@
       <div class="p-6 space-y-6">
         <div class="grid grid-cols-6 gap-6">
           <div class="col-span-6 sm:col-span-3">
-            <label for="username" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Name</label >
-            <input type="text" name="username" id="user-add-username" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Name" required />
+            <label for="title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Title</label >
+            <input type="text" name="title"  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Title" required />
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Email</label >
-            <input type="email" name="email" id="user-add-email" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="example@company.com" required />
+            <label for="sub_title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Sub title</label >
+            <input type="text" name="sub_title"  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Sub title" required />
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Password</label >
-            <input type="password" name="password" id="user-add-password" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
+            <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Description</label >
+            <input type="text" name="description" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Description" required />
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="password_confirmation" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Confirm Password</label >
-            <input type="password" name="password_confirmation" id="user-add-password_confirmation" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
+            <label for="is_active" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Is active</label >
+            <input type="checkbox" name="is_active" class="shadow-sm bg-gray-50 border border-gray-300 text-green-500 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-green-500 dark:focus:border-green-500"  />
           </div>
           <div class="col-span-full">
-            <label for="activated" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Activated</label >
-            <input type="checkbox" name="activated" id="user-add-activated" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
+            <label for="project_link" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Project link</label >
+            <input type="text" name="project_link" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"  placeholder="https://some.com" required />
+          </div>
+          <div class="col-span-full">
+            <label for="role" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Our role</label >
+            <input type="text" name="role" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Type here" required />
+          </div>
+          <div class="col-span-full">
+            <label for="role" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Stacks</label >
+            <div class="max-h-24 p-2.5 overflow-y-auto shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+              {{ form.stacks }}
+            </div>
           </div>
         </div>
       </div>

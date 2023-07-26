@@ -1,3 +1,4 @@
+# flake8: noqa E712
 from flask import (
     Blueprint,
     render_template,
@@ -19,36 +20,71 @@ from app.database import db
 bp = Blueprint("case", __name__, url_prefix="/case")
 
 
-@bp.route("/", methods=["GET"])
+@bp.route("/", methods=["GET", "POST"])
 @login_required
 def get_all():
+    form = f.NewCaseForm()
+    form.stacks.choices = [(str(s.id), s.name) for s in db.session.query(m.Stack).all()]
     q = request.args.get("q", type=str, default=None)
-    query = m.SuperUser.select().order_by(m.SuperUser.id)
-    count_query = sa.select(sa.func.count()).select_from(m.SuperUser)
+    query = m.Case.select().where(m.Case.is_deleted==False).order_by(m.Case.id)
+    count_query = sa.select(sa.func.count()).where(m.Case.is_deleted==False).select_from(m.Case)
+
     if q:
         query = (
-            m.SuperUser.select()
-            .where(m.SuperUser.username.like(f"{q}%") | m.SuperUser.email.like(f"{q}%"))
-            .order_by(m.SuperUser.id)
+            m.Case.select()
+            .where(m.Case.title.like(f"{q}%") & m.Case.is_deleted==False)
+            .order_by(m.Case.id)
         )
         count_query = (
             sa.select(sa.func.count())
-            .where(m.SuperUser.username.like(f"{q}%") | m.SuperUser.email.like(f"{q}%"))
-            .select_from(m.SuperUser)
+            .where(m.Case.title.like(f"{q}%") & m.Case.is_deleted==False)
+            .select_from(m.Case)
         )
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
     return render_template(
         "case/cases.html",
-        users=db.session.execute(
+        cases=db.session.execute(
             query.offset((pagination.page - 1) * pagination.per_page).limit(
                 pagination.per_page
             )
         ).scalars(),
         page=pagination,
         search_query=q,
+        form=form,
     )
+
+@bp.route("/create", methods=["POST"])
+@login_required
+def create():
+    form = f.NewCaseForm()
+    form.stacks.choices = [(str(s.id), s.name) for s in db.session.query(m.Stack).all()]
+    if form.validate_on_submit():
+        log(log.INFO, "Form submitted. Case: [%s]", form)
+        session = db.session
+        new_case = m.Case(
+            title=form.title.data,
+            sub_title=form.sub_title.data,
+            description=form.description.data,
+            is_active=form.is_active.data,
+            project_link=form.project_link.data,
+            role=form.role.data,
+        )
+        session.add(new_case)
+        session.commit()
+        session.refresh(new_case)
+
+        for id in form.stacks.data:
+            new_stack = m.CaseStack(case_id=new_case.id, stack_id=int(id))
+            session.add(new_stack)
+        session.commit()
+        log(log.INFO, "Form submitted. case: [%s]", new_case.title)
+        flash("Case added!", "success")
+    if form.errors:
+        log(log.ERROR, "Case errors: [%s]", form.errors)
+        flash(f"{form.errors}", "danger")
+    return redirect(url_for("case.get_all"))
 
 
 @bp.route("/save", methods=["POST"])
@@ -77,34 +113,17 @@ def save():
         return redirect(url_for("user.get_all"))
 
 
-@bp.route("/create", methods=["POST"])
-@login_required
-def create():
-    form = f.NewUserForm()
-    if form.validate_on_submit():
-        user = m.SuperUser(
-            username=form.username.data,
-            email=form.email.data,
-            password=form.password.data,
-            activated=form.activated.data,
-        )
-        log(log.INFO, "Form submitted. User: [%s]", user)
-        flash("User added!", "success")
-        user.save()
-        return redirect(url_for("user.get_all"))
-
-
 @bp.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
 def delete(id: int):
-    u = db.session.scalar(m.SuperUser.select().where(m.SuperUser.id == id))
+    u = db.session.scalar(m.Case.select().where(m.Case.id == id))
     if not u:
-        log(log.INFO, "There is no user with id: [%s]", id)
-        flash("There is no such user", "danger")
-        return "no user", 404
+        log(log.INFO, "There is no case with id: [%s]", id)
+        flash("There is no such case", "danger")
+        return "no case", 404
 
-    db.session.delete(u)
+    u.is_deleted = True
     db.session.commit()
-    log(log.INFO, "User deleted. User: [%s]", u)
-    flash("User deleted!", "success")
+    log(log.INFO, "Case deleted. Case: [%s]", u)
+    flash("Case deleted!", "success")
     return "ok", 200
