@@ -69,20 +69,16 @@ export const cases = () => {
       });
     });
   }
-  const editCaseButton = document.querySelector('#edit-case-btn');
-  if (editCaseButton) {
-    editCaseButton.addEventListener('click', () => {
-      editModal.show();
+  const editCaseButton = document.querySelectorAll('#edit-active-case-btn');
+  editCaseButton.forEach(e => {
+    e.addEventListener('change', async () => {
+        let id = e.getAttribute('data-case-id');
+        const response = await fetch(`/case/update/${id}`, {
+          method: 'PATCH',
+        });
+        if (response.status == 200) {
+          location.reload();
+        }
     });
-
-    // closing add user modal
-    const editModalCloseBtn = document.querySelector(
-      '#modalEditCaseCloseButton',
-    );
-    if (editModalCloseBtn) {
-      editModalCloseBtn.addEventListener('click', () => {
-        editModal.hide();
-      });
-    }
-  }
+  });
 };

@@ -4,7 +4,9 @@ from wtforms import (
     SubmitField,
     BooleanField,
     SelectMultipleField,
-    widgets
+    widgets,
+    FileField,
+    MultipleFileField
 )
 from wtforms.validators import DataRequired, Length
 
@@ -17,10 +19,13 @@ class MultiCheckboxField(SelectMultipleField):
 class NewCaseForm(FlaskForm):
     title = StringField("title", [DataRequired(), Length(2, 32)])
     sub_title = StringField("sub_title", [DataRequired(), Length(2, 64)])
+    title_image = FileField('title_image', [DataRequired()])
+    sub_title_image = FileField('sub_title_image', [DataRequired()])
     description = StringField("description", [DataRequired(), Length(1, 512)])
     is_active = BooleanField("is_active")
     project_link = StringField("project_link")
-    role = StringField("role", [DataRequired(), Length(6, 32)])
+    role = StringField("role", [DataRequired(), Length(2, 32)])
     stacks = MultiCheckboxField('stacks')
+    sub_images = MultipleFileField("sub_images")
 
     submit = SubmitField("Save")

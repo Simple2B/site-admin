@@ -34,6 +34,14 @@ class BaseConfig(BaseSettings):
     DEFAULT_PAGE_SIZE: int
     PAGE_LINKS_NUMBER: int
 
+    # AWS
+    AWS_BUCKET_NAME: str
+    AWS_ACCESS_KEY: str
+    AWS_SECRET_ACCESS_KEY: str
+    AWS_DOMAIN: str
+
+    ALLOWED_EXTENSIONS = ['png', 'jpg', 'jpeg', 'cvg']
+
     @staticmethod
     def configure(app: Flask):
         # Implement this method to do further configuration on your app.

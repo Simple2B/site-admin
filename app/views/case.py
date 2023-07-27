@@ -9,7 +9,7 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
-from app.controllers import create_pagination
+from app.controllers import create_pagination, S3Bucket
 
 from app.common import models as m
 from app import forms as f
@@ -32,12 +32,12 @@ def get_all():
     if q:
         query = (
             m.Case.select()
-            .where(m.Case.title.like(f"{q}%") & m.Case.is_deleted==False)
+            .where(sa.and_(m.Case.title.like(f"{q}%"), m.Case.is_deleted==False))
             .order_by(m.Case.id)
         )
         count_query = (
             sa.select(sa.func.count())
-            .where(m.Case.title.like(f"{q}%") & m.Case.is_deleted==False)
+            .where(sa.and_(m.Case.title.like(f"{q}%"), m.Case.is_deleted==False))
             .select_from(m.Case)
         )
 
@@ -60,11 +60,27 @@ def get_all():
 def create():
     form = f.NewCaseForm()
     form.stacks.choices = [(str(s.id), s.name) for s in db.session.query(m.Stack).all()]
+
     if form.validate_on_submit():
         log(log.INFO, "Form submitted. Case: [%s]", form)
+        bucket = S3Bucket()
+        title = form.title.data
+        title_image = bucket.upload_cases_imgs(form.title_image.data, case_name=title, img_type='title')
+
+        if not title_image[0]:
+            flash(title_image[1], "danger")
+            return redirect(url_for("case.get_all"))
+
+        sub_title_image = bucket.upload_cases_imgs(form.sub_title_image.data, case_name=title, img_type='sub_title')
+        if not sub_title_image[0]:
+            flash(sub_title_image[1], "danger")
+            return redirect(url_for("case.get_all"))
+
         session = db.session
         new_case = m.Case(
             title=form.title.data,
+            title_image_url=title_image[1],
+            sub_title_image_url=sub_title_image[1],
             sub_title=form.sub_title.data,
             description=form.description.data,
             is_active=form.is_active.data,
@@ -79,7 +95,15 @@ def create():
             new_stack = m.CaseStack(case_id=new_case.id, stack_id=int(id))
             session.add(new_stack)
         session.commit()
-        log(log.INFO, "Form submitted. case: [%s]", new_case.title)
+
+        if form.sub_images.data:
+            for img in form.sub_images.data:
+                sub_image = bucket.upload_cases_imgs(img, case_name=title, img_type='sub_image')
+                if sub_image:
+                    new_sub_image = m.CaseImage(case_id=new_case.id, url=sub_image[1])
+                    session.add(new_sub_image)
+        session.commit()
+
         flash("Case added!", "success")
     if form.errors:
         log(log.ERROR, "Case errors: [%s]", form.errors)
@@ -87,30 +111,20 @@ def create():
     return redirect(url_for("case.get_all"))
 
 
-@bp.route("/save", methods=["POST"])
+@bp.route("/update/<int:id>", methods=["PATCH"])
 @login_required
-def save():
-    form = f.UserForm()
-    if form.validate_on_submit():
-        query = m.SuperUser.select().where(m.SuperUser.id == int(form.user_id.data))
-        u: m.SuperUser | None = db.session.scalar(query)
-        if not u:
-            log(log.ERROR, "Not found user by id : [%s]", form.SuperUser_id.data)
-            flash("Cannot save user data", "danger")
-        u.username = form.username.data
-        u.email = form.email.data
-        u.activated = form.activated.data
-        if form.password.data.strip("*\n "):
-            u.password = form.password.data
-        u.save()
-        if form.next_url.data:
-            return redirect(form.next_url.data)
-        return redirect(url_for("user.get_all"))
+def update(id: int):
+    u = db.session.scalar(m.Case.select().where(m.Case.id == id))
+    if not u:
+        log(log.INFO, "There is no case with id: [%s]", id)
+        flash("There is no such case", "danger")
+        return "no case", 404
 
-    else:
-        log(log.ERROR, "User save errors: [%s]", form.errors)
-        flash(f"{form.errors}", "danger")
-        return redirect(url_for("user.get_all"))
+    u.is_active = not u.is_active
+    db.session.commit()
+    log(log.INFO, "Case updated. Case: [%s]", u)
+    flash("Case updated!", "success")
+    return "ok", 200
 
 
 @bp.route("/delete/<int:id>", methods=["DELETE"])
