@@ -20,7 +20,7 @@ from app.database import db
 bp = Blueprint("case", __name__, url_prefix="/case")
 
 
-@bp.route("/", methods=["GET", "POST"])
+@bp.route("/", methods=["GET"])
 @login_required
 def get_all():
     form = f.NewCaseForm()
@@ -32,12 +32,12 @@ def get_all():
     if q:
         query = (
             m.Case.select()
-            .where(sa.and_(m.Case.title.like(f"{q}%"), m.Case.is_deleted==False))
+            .where(sa.and_(m.Case.title.ilike(f"%{q}%"), m.Case.is_deleted==False))
             .order_by(m.Case.id)
         )
         count_query = (
             sa.select(sa.func.count())
-            .where(sa.and_(m.Case.title.like(f"{q}%"), m.Case.is_deleted==False))
+            .where(sa.and_(m.Case.title.ilike(f"%{q}%"), m.Case.is_deleted==False))
             .select_from(m.Case)
         )
 
