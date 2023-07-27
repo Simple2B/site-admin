@@ -1,3 +1,4 @@
+# flake8: noqa E712
 from flask import (
     Blueprint,
     render_template,
@@ -23,88 +24,130 @@ bp = Blueprint("quiz", __name__, url_prefix="/quiz")
 @login_required
 def get_all():
     q = request.args.get("q", type=str, default=None)
-    query = m.SuperUser.select().order_by(m.SuperUser.id)
-    count_query = sa.select(sa.func.count()).select_from(m.SuperUser)
+    query = (
+        m.Question.select()
+        .where(m.Question.is_deleted == False)
+        .order_by(m.Question.id)
+    )
+    count_query = sa.select(sa.func.count()).select_from(m.Question)
+    form = f.NewQuestionForm()
     if q:
         query = (
-            m.SuperUser.select()
-            .where(m.SuperUser.username.like(f"{q}%") | m.SuperUser.email.like(f"{q}%"))
-            .order_by(m.SuperUser.id)
+            m.Question.select()
+            .where(
+                sa.and_(m.Question.text.ilike(f"%{q}%"), m.Question.is_deleted == False)
+            )
+            .order_by(m.Question.id)
         )
         count_query = (
             sa.select(sa.func.count())
-            .where(m.SuperUser.username.like(f"{q}%") | m.SuperUser.email.like(f"{q}%"))
-            .select_from(m.SuperUser)
+            .where(
+                sa.and_(m.Question.text.ilike(f"%{q}%"), m.Question.is_deleted == False)
+            )
+            .select_from(m.Question)
         )
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
     return render_template(
         "quiz/quizes.html",
-        users=db.session.execute(
+        questions=db.session.execute(
             query.offset((pagination.page - 1) * pagination.per_page).limit(
                 pagination.per_page
             )
         ).scalars(),
         page=pagination,
         search_query=q,
+        form=form,
     )
+
+
+@bp.route("/get/<int:id>", methods=["GET"])
+@login_required
+def get(id: int):
+    question: m.Question = db.session.scalar(
+        m.Question.select().where(m.Question.id == id)
+    )
+    if not question:
+        log(log.INFO, "There is no question with id: [%s]", id)
+        flash("There is no such question", "danger")
+        return "no question", 404
+
+    return question.s_dict()
 
 
 @bp.route("/save", methods=["POST"])
 @login_required
 def save():
-    form = f.UserForm()
+    form = f.EditQuestionForm()
     if form.validate_on_submit():
-        query = m.SuperUser.select().where(m.SuperUser.id == int(form.user_id.data))
-        u: m.SuperUser | None = db.session.scalar(query)
-        if not u:
-            log(log.ERROR, "Not found user by id : [%s]", form.SuperUser_id.data)
-            flash("Cannot save user data", "danger")
-        u.username = form.username.data
-        u.email = form.email.data
-        u.activated = form.activated.data
-        if form.password.data.strip("*\n "):
-            u.password = form.password.data
-        u.save()
-        if form.next_url.data:
-            return redirect(form.next_url.data)
-        return redirect(url_for("user.get_all"))
-
+        query = m.Question.select().where(m.Question.id == int(form.id.data))
+        question: m.Question | None = db.session.scalar(query)
+        if not question:
+            log(log.ERROR, "Not found question by id : [%s]", form.id.data)
+            flash("Cannot save question data", "danger")
+        question.text = form.text.data
+        question.correct_answer_mark = form.correct_answer_mark.data
+        question.save()
+        for i in range(1, 5):
+            query = m.VariantAnswer.select().where(
+                m.VariantAnswer.question_id == question.id,
+                m.VariantAnswer.answer_mark == i,
+            )
+            variant: m.VariantAnswer | None = db.session.scalar(query)
+            if not variant:
+                log(log.ERROR, "Not found variant by id : [%s]", question.id)
+                flash("Cannot save user data", "danger")
+            else:
+                variant.text = form[f"variant_{i}"].data
+                db.session.add(variant)
+                db.session.commit()
+        return redirect(url_for("quiz.get_all"))
     else:
-        log(log.ERROR, "User save errors: [%s]", form.errors)
+        log(log.ERROR, "Question save errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
-        return redirect(url_for("user.get_all"))
+        return redirect(url_for("quiz.get_all"))
 
 
 @bp.route("/create", methods=["POST"])
 @login_required
 def create():
-    form = f.NewUserForm()
+    form = f.NewQuestionForm()
     if form.validate_on_submit():
-        user = m.SuperUser(
-            username=form.username.data,
-            email=form.email.data,
-            password=form.password.data,
-            activated=form.activated.data,
+        question = m.Question(
+            text=form.text.data,
+            correct_answer_mark=form.correct_answer_mark.data,
         )
-        log(log.INFO, "Form submitted. User: [%s]", user)
-        flash("User added!", "success")
-        user.save()
-        return redirect(url_for("user.get_all"))
+        question.save()
+        for i in range(1, 5):
+            variant = m.VariantAnswer(
+                question_id=question.id,
+                text=form[f"variant_{i}"].data,
+                answer_mark=i,
+            )
+            db.session.add(variant)
+        db.session.commit()
+
+        log(log.INFO, "Form submitted. Question: [%s]", question)
+        flash("Question added!", "success")
+        question.save()
+        return redirect(url_for("quiz.get_all"))
+    else:
+        log(log.ERROR, "Question save errors: [%s]", form.errors)
+        flash(f"{form.errors}", "danger")
+        return redirect(url_for("quiz.get_all"))
 
 
 @bp.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
 def delete(id: int):
-    u = db.session.scalar(m.SuperUser.select().where(m.SuperUser.id == id))
-    if not u:
-        log(log.INFO, "There is no user with id: [%s]", id)
-        flash("There is no such user", "danger")
-        return "no user", 404
-
-    db.session.delete(u)
+    question = db.session.scalar(m.Question.select().where(m.Question.id == id))
+    if not question:
+        log(log.INFO, "There is no question with id: [%s]", id)
+        flash("There is no such question", "danger")
+        return "no question", 404
+    question.is_deleted = True
     db.session.commit()
-    log(log.INFO, "User deleted. User: [%s]", u)
-    flash("User deleted!", "success")
+    log(log.INFO, "question deleted. question: [%s]", question)
+    flash("question deleted!", "success")
     return "ok", 200
