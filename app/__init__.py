@@ -5,6 +5,7 @@ from flask_login import LoginManager
 from werkzeug.exceptions import HTTPException
 from flask_migrate import Migrate
 from flask_mail import Mail
+from app.controllers.s3_bucket import S3Bucket
 
 from app.logger import log
 from .database import db, AnonymousUser
@@ -13,6 +14,7 @@ from .database import db, AnonymousUser
 login_manager = LoginManager()
 migration = Migrate()
 mail = Mail()
+s3bucket = S3Bucket()
 
 
 def create_app(environment="development"):
@@ -42,6 +44,7 @@ def create_app(environment="development"):
     migration.init_app(app, db)
     login_manager.init_app(app)
     mail.init_app(app)
+    s3bucket.init_app(app)
 
     # Register blueprints.
     app.register_blueprint(auth_blueprint)
@@ -60,7 +63,7 @@ def create_app(environment="development"):
     login_manager.login_view = "auth.login"
     login_manager.login_message_category = "info"
     login_manager.anonymous_user = AnonymousUser
-
+    
     # Error handlers.
     @app.errorhandler(HTTPException)
     def handle_http_error(exc):

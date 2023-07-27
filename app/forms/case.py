@@ -1,3 +1,5 @@
+import filetype
+
 from flask_wtf import FlaskForm
 from wtforms import (
     StringField,
@@ -6,7 +8,8 @@ from wtforms import (
     SelectMultipleField,
     widgets,
     FileField,
-    MultipleFileField
+    MultipleFileField,
+    ValidationError
 )
 from wtforms.validators import DataRequired, Length
 
@@ -26,6 +29,24 @@ class NewCaseForm(FlaskForm):
     project_link = StringField("project_link")
     role = StringField("role", [DataRequired(), Length(2, 32)])
     stacks = MultiCheckboxField('stacks')
-    sub_images = MultipleFileField("sub_images")
+    sub_images = MultipleFileField("sub_images", [DataRequired()])
 
     submit = SubmitField("Save")
+
+    def validate_title_image(self, field):
+        is_file = filetype.guess(field.data)
+        if not is_file or not filetype.is_image(field.data):
+            raise ValidationError("File must be an image")
+
+    def validate_sub_title_image(self, field):
+        is_file = filetype.guess(field.data)
+        if not is_file or not filetype.is_image(field.data):
+            raise ValidationError("File must be an image")
+
+    def validate_sub_images(self, field):
+        for file in field.data:
+            is_file = filetype.guess(file)
+            if not is_file or not filetype.is_image(file):
+                raise ValidationError("File must be an image")
+
+

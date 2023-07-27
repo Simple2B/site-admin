@@ -9,12 +9,14 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
-from app.controllers import create_pagination, S3Bucket
+from app.controllers import create_pagination
 
 from app.common import models as m
 from app import forms as f
 from app.logger import log
 from app.database import db
+from app import s3bucket
+
 
 
 bp = Blueprint("case", __name__, url_prefix="/case")
@@ -63,24 +65,22 @@ def create():
 
     if form.validate_on_submit():
         log(log.INFO, "Form submitted. Case: [%s]", form)
-        bucket = S3Bucket()
+
         title = form.title.data
-        title_image = bucket.upload_cases_imgs(form.title_image.data, case_name=title, img_type='title')
-
-        if not title_image[0]:
-            flash(title_image[1], "danger")
-            return redirect(url_for("case.get_all"))
-
-        sub_title_image = bucket.upload_cases_imgs(form.sub_title_image.data, case_name=title, img_type='sub_title')
-        if not sub_title_image[0]:
-            flash(sub_title_image[1], "danger")
+        title_image = form.title_image.data
+        sub_title_image = form.sub_title_image.data
+        try:
+            title_image = s3bucket.upload_cases_imgs(file=title_image, file_name=title_image.filename, case_name=title, img_type='title')
+            sub_title_image = s3bucket.upload_cases_imgs(file=sub_title_image, file_name=sub_title_image.file_name, case_name=title, img_type='sub_title')
+        except TypeError as error:
+            flash(error.args[0], "danger")
             return redirect(url_for("case.get_all"))
 
         session = db.session
         new_case = m.Case(
             title=form.title.data,
-            title_image_url=title_image[1],
-            sub_title_image_url=sub_title_image[1],
+            title_image_url=title_image,
+            sub_title_image_url=sub_title_image,
             sub_title=form.sub_title.data,
             description=form.description.data,
             is_active=form.is_active.data,
@@ -96,12 +96,14 @@ def create():
             session.add(new_stack)
         session.commit()
 
-        if form.sub_images.data:
-            for img in form.sub_images.data:
-                sub_image = bucket.upload_cases_imgs(img, case_name=title, img_type='sub_image')
-                if sub_image:
-                    new_sub_image = m.CaseImage(case_id=new_case.id, url=sub_image[1])
-                    session.add(new_sub_image)
+        for img in form.sub_images.data:
+            try:
+                sub_image = s3bucket.upload_cases_imgs(file=img, file_name=img.filename, case_name=title, img_type='sub_image')
+            except (TypeError, AttributeError):
+                continue
+            if sub_image:
+                new_sub_image = m.CaseImage(case_id=new_case.id, url=sub_image[1])
+                session.add(new_sub_image)
         session.commit()
 
         flash("Case added!", "success")
@@ -114,15 +116,15 @@ def create():
 @bp.route("/update/<int:id>", methods=["PATCH"])
 @login_required
 def update(id: int):
-    u = db.session.scalar(m.Case.select().where(m.Case.id == id))
-    if not u:
+    case = db.session.get(m.Case,id)
+    if not case:
         log(log.INFO, "There is no case with id: [%s]", id)
         flash("There is no such case", "danger")
         return "no case", 404
 
-    u.is_active = not u.is_active
+    case.is_active = not case.is_active
     db.session.commit()
-    log(log.INFO, "Case updated. Case: [%s]", u)
+    log(log.INFO, "Case updated. Case: [%s]", case)
     flash("Case updated!", "success")
     return "ok", 200
 
@@ -130,14 +132,14 @@ def update(id: int):
 @bp.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
 def delete(id: int):
-    u = db.session.scalar(m.Case.select().where(m.Case.id == id))
-    if not u:
+    case = db.session.get(m.Case,id)
+    if not case:
         log(log.INFO, "There is no case with id: [%s]", id)
         flash("There is no such case", "danger")
         return "no case", 404
 
-    u.is_deleted = True
+    case.is_deleted = True
     db.session.commit()
-    log(log.INFO, "Case deleted. Case: [%s]", u)
+    log(log.INFO, "Case deleted. Case: [%s]", case)
     flash("Case deleted!", "success")
     return "ok", 200
