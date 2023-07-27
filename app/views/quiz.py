@@ -35,14 +35,14 @@ def get_all():
         query = (
             m.Question.select()
             .where(
-                sa.and_(m.Question.text.like(f"{q}%"), m.Question.is_deleted == False)
+                sa.and_(m.Question.text.ilike(f"%{q}%"), m.Question.is_deleted == False)
             )
             .order_by(m.Question.id)
         )
         count_query = (
             sa.select(sa.func.count())
             .where(
-                sa.and_(m.Question.text.like(f"{q}%"), m.Question.is_deleted == False)
+                sa.and_(m.Question.text.ilike(f"%{q}%"), m.Question.is_deleted == False)
             )
             .select_from(m.Question)
         )
