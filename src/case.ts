@@ -39,50 +39,46 @@ export const cases = () => {
       });
     }
 
-    // // search flow
-    // const searchInput: HTMLInputElement = document.querySelector(
-    //   '#table-search-users',
-    // );
-    // const searchInputButton = document.querySelector(
-    //   '#table-search-user-button',
-    // );
-    // if (searchInputButton && searchInput) {
-    //   searchInputButton.addEventListener('click', () => {
-    //     const url = new URL(window.location.href);
-    //     url.searchParams.set('q', searchInput.value);
-    //     window.location.href = `${url.href}`;
-    //   });
-    // }
-    // const deleteButtons = document.querySelectorAll('.delete-user-btn');
-
-    // deleteButtons.forEach(e => {
-    //   e.addEventListener('click', async () => {
-    //     if (confirm('Are sure?')) {
-    //       let id = e.getAttribute('data-user-id');
-    //       const response = await fetch(`/user/delete/${id}`, {
-    //         method: 'DELETE',
-    //       });
-    //       if (response.status == 200) {
-    //         location.reload();
-    //       }
-    //     }
-    //   });
-    // });
-  }
-  const editCaseButton = document.querySelector('#edit-case-btn');
-  if (editCaseButton) {
-    editCaseButton.addEventListener('click', () => {
-      editModal.show();
-    });
-
-    // closing add user modal
-    const editModalCloseBtn = document.querySelector(
-      '#modalEditCaseCloseButton',
+    // search flow
+    const searchInput: HTMLInputElement = document.querySelector(
+      '#table-search-cases',
     );
-    if (editModalCloseBtn) {
-      editModalCloseBtn.addEventListener('click', () => {
-        editModal.hide();
+    const searchInputButton = document.querySelector(
+      '#table-search-cases-button',
+    );
+    if (searchInputButton && searchInput) {
+      searchInputButton.addEventListener('click', () => {
+        const url = new URL(window.location.href);
+        url.searchParams.set('q', searchInput.value);
+        window.location.href = `${url.href}`;
       });
     }
+    const deleteButtons = document.querySelectorAll('#delete-case-btn');
+
+    deleteButtons.forEach(e => {
+      e.addEventListener('click', async () => {
+        if (confirm('Are sure?')) {
+          let id = e.getAttribute('data-case-id');
+          const response = await fetch(`/case/delete/${id}`, {
+            method: 'DELETE',
+          });
+          if (response.status == 200) {
+            location.reload();
+          }
+        }
+      });
+    });
   }
+  const editCaseButton = document.querySelectorAll('#edit-active-case-btn');
+  editCaseButton.forEach(e => {
+    e.addEventListener('change', async () => {
+        let id = e.getAttribute('data-case-id');
+        const response = await fetch(`/case/update/${id}`, {
+          method: 'PATCH',
+        });
+        if (response.status == 200) {
+          location.reload();
+        }
+    });
+  });
 };

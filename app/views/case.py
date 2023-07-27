@@ -1,3 +1,4 @@
+# flake8: noqa E712
 from flask import (
     Blueprint,
     render_template,
@@ -14,6 +15,8 @@ from app.common import models as m
 from app import forms as f
 from app.logger import log
 from app.database import db
+from app import s3bucket
+
 
 
 bp = Blueprint("case", __name__, url_prefix="/case")
@@ -22,89 +25,121 @@ bp = Blueprint("case", __name__, url_prefix="/case")
 @bp.route("/", methods=["GET"])
 @login_required
 def get_all():
+    form = f.NewCaseForm()
+    form.stacks.choices = [(str(s.id), s.name) for s in db.session.query(m.Stack).all()]
     q = request.args.get("q", type=str, default=None)
-    query = m.SuperUser.select().order_by(m.SuperUser.id)
-    count_query = sa.select(sa.func.count()).select_from(m.SuperUser)
+    query = m.Case.select().where(m.Case.is_deleted==False).order_by(m.Case.id)
+    count_query = sa.select(sa.func.count()).where(m.Case.is_deleted==False).select_from(m.Case)
+
     if q:
         query = (
-            m.SuperUser.select()
-            .where(m.SuperUser.username.like(f"{q}%") | m.SuperUser.email.like(f"{q}%"))
-            .order_by(m.SuperUser.id)
+            m.Case.select()
+            .where(sa.and_(m.Case.title.ilike(f"%{q}%"), m.Case.is_deleted==False))
+            .order_by(m.Case.id)
         )
         count_query = (
             sa.select(sa.func.count())
-            .where(m.SuperUser.username.like(f"{q}%") | m.SuperUser.email.like(f"{q}%"))
-            .select_from(m.SuperUser)
+            .where(sa.and_(m.Case.title.ilike(f"%{q}%"), m.Case.is_deleted==False))
+            .select_from(m.Case)
         )
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
     return render_template(
         "case/cases.html",
-        users=db.session.execute(
+        cases=db.session.execute(
             query.offset((pagination.page - 1) * pagination.per_page).limit(
                 pagination.per_page
             )
         ).scalars(),
         page=pagination,
         search_query=q,
+        form=form,
     )
-
-
-@bp.route("/save", methods=["POST"])
-@login_required
-def save():
-    form = f.UserForm()
-    if form.validate_on_submit():
-        query = m.SuperUser.select().where(m.SuperUser.id == int(form.user_id.data))
-        u: m.SuperUser | None = db.session.scalar(query)
-        if not u:
-            log(log.ERROR, "Not found user by id : [%s]", form.SuperUser_id.data)
-            flash("Cannot save user data", "danger")
-        u.username = form.username.data
-        u.email = form.email.data
-        u.activated = form.activated.data
-        if form.password.data.strip("*\n "):
-            u.password = form.password.data
-        u.save()
-        if form.next_url.data:
-            return redirect(form.next_url.data)
-        return redirect(url_for("user.get_all"))
-
-    else:
-        log(log.ERROR, "User save errors: [%s]", form.errors)
-        flash(f"{form.errors}", "danger")
-        return redirect(url_for("user.get_all"))
-
 
 @bp.route("/create", methods=["POST"])
 @login_required
 def create():
-    form = f.NewUserForm()
+    form = f.NewCaseForm()
+    form.stacks.choices = [(str(s.id), s.name) for s in db.session.query(m.Stack).all()]
+
     if form.validate_on_submit():
-        user = m.SuperUser(
-            username=form.username.data,
-            email=form.email.data,
-            password=form.password.data,
-            activated=form.activated.data,
+        log(log.INFO, "Form submitted. Case: [%s]", form)
+
+        title = form.title.data
+        title_image = form.title_image.data
+        sub_title_image = form.sub_title_image.data
+        try:
+            title_image = s3bucket.upload_cases_imgs(file=title_image, file_name=title_image.filename, case_name=title, img_type='title')
+            sub_title_image = s3bucket.upload_cases_imgs(file=sub_title_image, file_name=sub_title_image.filename, case_name=title, img_type='sub_title')
+        except TypeError as error:
+            flash(error.args[0], "danger")
+            return redirect(url_for("case.get_all"))
+
+        session = db.session
+        new_case = m.Case(
+            title=form.title.data,
+            title_image_url=title_image,
+            sub_title_image_url=sub_title_image,
+            sub_title=form.sub_title.data,
+            description=form.description.data,
+            is_active=form.is_active.data,
+            project_link=form.project_link.data,
+            role=form.role.data,
         )
-        log(log.INFO, "Form submitted. User: [%s]", user)
-        flash("User added!", "success")
-        user.save()
-        return redirect(url_for("user.get_all"))
+        session.add(new_case)
+        session.commit()
+        session.refresh(new_case)
+
+        for id in form.stacks.data:
+            new_stack = m.CaseStack(case_id=new_case.id, stack_id=int(id))
+            session.add(new_stack)
+        session.commit()
+
+        for img in form.sub_images.data:
+            try:
+                sub_image = s3bucket.upload_cases_imgs(file=img, file_name=img.filename, case_name=title, img_type='sub_image')
+            except (TypeError, AttributeError):
+                continue
+            if sub_image:
+                new_sub_image = m.CaseImage(case_id=new_case.id, url=sub_image[1])
+                session.add(new_sub_image)
+        session.commit()
+
+        flash("Case added!", "success")
+    if form.errors:
+        log(log.ERROR, "Case errors: [%s]", form.errors)
+        flash(f"{form.errors}", "danger")
+    return redirect(url_for("case.get_all"))
+
+
+@bp.route("/update/<int:id>", methods=["PATCH"])
+@login_required
+def update(id: int):
+    case = db.session.get(m.Case,id)
+    if not case:
+        log(log.INFO, "There is no case with id: [%s]", id)
+        flash("There is no such case", "danger")
+        return "no case", 404
+
+    case.is_active = not case.is_active
+    db.session.commit()
+    log(log.INFO, "Case updated. Case: [%s]", case)
+    flash("Case updated!", "success")
+    return "ok", 200
 
 
 @bp.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
 def delete(id: int):
-    u = db.session.scalar(m.SuperUser.select().where(m.SuperUser.id == id))
-    if not u:
-        log(log.INFO, "There is no user with id: [%s]", id)
-        flash("There is no such user", "danger")
-        return "no user", 404
+    case = db.session.get(m.Case,id)
+    if not case:
+        log(log.INFO, "There is no case with id: [%s]", id)
+        flash("There is no such case", "danger")
+        return "no case", 404
 
-    db.session.delete(u)
+    case.is_deleted = True
     db.session.commit()
-    log(log.INFO, "User deleted. User: [%s]", u)
-    flash("User deleted!", "success")
+    log(log.INFO, "Case deleted. Case: [%s]", case)
+    flash("Case deleted!", "success")
     return "ok", 200
