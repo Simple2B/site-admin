@@ -48,5 +48,3 @@ class NewCaseForm(FlaskForm):
             is_file = filetype.guess(file)
             if not is_file or not filetype.is_image(file):
                 raise ValidationError("File must be an image")
-
-

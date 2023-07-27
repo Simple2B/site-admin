@@ -1,8 +1,9 @@
+import filetype
 from app.common import models as m
 from app import db
 import io
-from app.controllers import s3_bucket
 from tests.utils import login
+from app import s3bucket
 
 test_case = {
     "title": "test title",
@@ -13,14 +14,16 @@ test_case = {
     "is_active": True,
     "project_link": "https://test.com",
     "role": "test role",
-    "sub_images": [],
+    "sub_images": [(io.BytesIO(b"sub_images"), 'sub_images.jpg')],
 }
 
 
 def test_crud_case(client, mocker):
     login(client)
     # create
-    mocker.patch.object(s3_bucket.S3Bucket, 'upload_cases_imgs', return_value=(True, 'https://test.com'))
+    mocker.patch.object(s3bucket, 'upload_cases_imgs', return_value="https://test.com")
+    mocker.patch.object(filetype, 'is_image', return_value=True)
+    mocker.patch.object(filetype, 'guess', return_value=True)
     res = client.post('/case/create', data=test_case, content_type='multipart/form-data')
     assert res.status_code == 302
 

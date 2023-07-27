@@ -71,7 +71,7 @@ def create():
         sub_title_image = form.sub_title_image.data
         try:
             title_image = s3bucket.upload_cases_imgs(file=title_image, file_name=title_image.filename, case_name=title, img_type='title')
-            sub_title_image = s3bucket.upload_cases_imgs(file=sub_title_image, file_name=sub_title_image.file_name, case_name=title, img_type='sub_title')
+            sub_title_image = s3bucket.upload_cases_imgs(file=sub_title_image, file_name=sub_title_image.filename, case_name=title, img_type='sub_title')
         except TypeError as error:
             flash(error.args[0], "danger")
             return redirect(url_for("case.get_all"))
