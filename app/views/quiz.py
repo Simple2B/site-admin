@@ -1,3 +1,4 @@
+# flake8: noqa E712
 from flask import (
     Blueprint,
     render_template,
@@ -23,18 +24,26 @@ bp = Blueprint("quiz", __name__, url_prefix="/quiz")
 @login_required
 def get_all():
     q = request.args.get("q", type=str, default=None)
-    query = m.Question.select().order_by(m.Question.id)
+    query = (
+        m.Question.select()
+        .where(m.Question.is_deleted == False)
+        .order_by(m.Question.id)
+    )
     count_query = sa.select(sa.func.count()).select_from(m.Question)
     form = f.NewQuestionForm()
     if q:
         query = (
             m.Question.select()
-            .where(m.Question.text.like(f"{q}%"))
+            .where(
+                sa.and_(m.Question.text.like(f"{q}%"), m.Question.is_deleted == False)
+            )
             .order_by(m.Question.id)
         )
         count_query = (
             sa.select(sa.func.count())
-            .where(m.Question.text.like(f"{q}%"))
+            .where(
+                sa.and_(m.Question.text.like(f"{q}%"), m.Question.is_deleted == False)
+            )
             .select_from(m.Question)
         )
 
@@ -75,8 +84,8 @@ def save():
         query = m.Question.select().where(m.Question.id == int(form.id.data))
         question: m.Question | None = db.session.scalar(query)
         if not question:
-            log(log.ERROR, "Not found user by id : [%s]", form.SuperUser_id.data)
-            flash("Cannot save user data", "danger")
+            log(log.ERROR, "Not found question by id : [%s]", form.id.data)
+            flash("Cannot save question data", "danger")
         question.text = form.text.data
         question.correct_answer_mark = form.correct_answer_mark.data
         question.save()
@@ -137,15 +146,7 @@ def delete(id: int):
         log(log.INFO, "There is no question with id: [%s]", id)
         flash("There is no such question", "danger")
         return "no question", 404
-    for i in range(1, 5):
-        query = m.VariantAnswer.select().where(
-            m.VariantAnswer.question_id == question.id,
-            m.VariantAnswer.answer_mark == i,
-        )
-        variant: m.VariantAnswer | None = db.session.scalar(query)
-        db.session.delete(variant)
-        db.session.commit()
-    db.session.delete(question)
+    question.is_deleted = True
     db.session.commit()
     log(log.INFO, "question deleted. question: [%s]", question)
     flash("question deleted!", "success")

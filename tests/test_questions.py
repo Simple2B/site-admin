@@ -50,4 +50,5 @@ def test_CRUD_questions(client: FlaskClient):
     )
     assert response
     assert response.status_code == 200
-    assert not db.session.query(m.Question).first()
+    deleted_question: m.Question = db.session.query(m.Question).first()
+    assert deleted_question.is_deleted
