@@ -26,12 +26,12 @@ def test_forgot(client):
     )
     assert b"No registered user with this e-mail" in response.data
 
-    user = m.SuperUser(
+    admin = m.SuperUser(
         username="sam",
         email=TEST_EMAIL,
         password="password",
     )
-    user.save()
+    admin.save()
     with mail.record_messages() as outbox:
         response = client.post(
             "/forgot",
