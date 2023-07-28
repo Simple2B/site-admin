@@ -80,15 +80,16 @@ class TestingConfig(BaseConfig):
 class ProductionConfig(BaseConfig):
     """Production configuration."""
 
+    # using URI instead of URL just for production
     ALCHEMICAL_DATABASE_URL: str = os.environ.get(
-        "DATABASE_URL", "sqlite:///" + os.path.join(BASE_DIR, "database.sqlite3")
+        "DATABASE_URI", "sqlite:///" + os.path.join(BASE_DIR, "database.sqlite3")
     )
     WTF_CSRF_ENABLED = True
 
     class Config:
         fields = {
             "ALCHEMICAL_DATABASE_URL": {
-                "env": "DATABASE_URL",
+                "env": "DATABASE_URI",
             }
         }
 
