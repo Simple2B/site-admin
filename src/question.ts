@@ -7,8 +7,17 @@ export const questions = () => {
   const $editQuestionModalElement: HTMLElement =
     document.querySelector('#editQuestionModal');
 
+  const addModalOptions: ModalOptions = {
+    backdrop: 'dynamic',
+    closable: true,
+    onHide: () => {
+      console.log('first');
+    },
+    onShow: () => {},
+    onToggle: () => {},
+  };
   const modalOptions: ModalOptions = {
-    backdrop: 'static',
+    backdrop: 'dynamic',
     closable: true,
     onHide: () => {},
     onShow: () => {},
@@ -17,7 +26,7 @@ export const questions = () => {
 
   const addQuestionModal: ModalInterface = new Modal(
     $addQuestionModalElement,
-    modalOptions,
+    addModalOptions,
   );
   const editQuestionModal: ModalInterface = new Modal(
     $editQuestionModalElement,
@@ -83,7 +92,8 @@ export const questions = () => {
         const data = await response.json();
         const questionId: HTMLInputElement = document.querySelector('#id');
         const questionUuid: HTMLInputElement = document.querySelector('#uuid');
-        const questionText = document.querySelector('#question-text');
+        const questionText: HTMLTextAreaElement =
+          document.querySelector('#question-text');
         const questionVariantOne: HTMLInputElement = document.querySelector(
           '#question-variant-one',
         );
@@ -101,6 +111,10 @@ export const questions = () => {
         const selectedOption = document.querySelector(
           `#select_option_${data.correct_answer_mark}`,
         );
+        const selectOptions = document.querySelectorAll(
+          '[id^="select_option"]',
+        );
+        const questionTitle = document.querySelector('#question-title');
         if (
           data &&
           questionText &&
@@ -110,15 +124,20 @@ export const questions = () => {
           questionVariantFour &&
           questionCorrectAnswerMark &&
           questionId &&
-          questionUuid
+          questionUuid &&
+          questionTitle
         ) {
           questionId.setAttribute('value', data.id);
           questionUuid.setAttribute('value', data.uuid);
-          questionText.setAttribute('value', data.text);
+          questionTitle.textContent = `Question: ${data.id}`;
+          questionText.value = data.text;
           questionVariantOne.setAttribute('value', data.variants[0].text);
           questionVariantTwo.setAttribute('value', data.variants[1].text);
           questionVariantThree.setAttribute('value', data.variants[2].text);
           questionVariantFour.setAttribute('value', data.variants[3].text);
+          selectOptions.forEach((opt, index) => {
+            opt.textContent = `${index + 1}: ${data.variants[index].text}`;
+          });
           selectedOption.setAttribute('selected', 'true');
         }
       });

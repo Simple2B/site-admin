@@ -29,7 +29,11 @@ def get_all():
         .where(m.Question.is_deleted == False)
         .order_by(m.Question.id)
     )
-    count_query = sa.select(sa.func.count()).select_from(m.Question)
+    count_query = (
+        sa.select(sa.func.count())
+        .where(m.Question.is_deleted == False)
+        .select_from(m.Question)
+    )
     form = f.NewQuestionForm()
     if q:
         query = (
@@ -46,7 +50,7 @@ def get_all():
             )
             .select_from(m.Question)
         )
-
+    total = db.session.scalar(count_query)
     pagination = create_pagination(total=db.session.scalar(count_query))
 
     return render_template(
@@ -57,6 +61,7 @@ def get_all():
             )
         ).scalars(),
         page=pagination,
+        total=total,
         search_query=q,
         form=form,
     )

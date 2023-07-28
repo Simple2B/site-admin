@@ -9,39 +9,38 @@
          <input id="uuid" type="hidden" name="uuid" value="" />
       <!-- Modal header -->
       <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
-        <h3 class="text-xl font-semibold text-gray-900 dark:text-white"> Add new question </h3>
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white" id="question-title"></h3>
         <button id="modalEditQuestionCloseButton" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"> <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"> <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path> </svg> </button>
       </div>
       <!-- Modal body -->
       <div class="p-6 space-y-6">
         <div class="grid grid-cols-1 gap-6">
-          <div class="col-span-6 sm:col-span-3">
-            <label for="text" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Text</label >
-            <input id ='question-text' type="textarea" name="text" value=""  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Text" required />
+          <div class="col-span-6 sm:col-span-3 flex flex-row items-center">
+            <p class="mb-2 text-base font-medium text-gray-900 dark:text-white" >Text: </p >
+            <textarea type="text" id="question-text" rows="2" name="text"  class="w-11/12 ml-auto shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Text" required ></textarea>
+          </div>
+          <div class="col-span-6 sm:col-span-3 flex flex-row items-end">
+            <label for="variant_1" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >1: </label >
+            <input type="text" name="variant_1" id="question-variant-one" value=""  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-11/12 ml-auto p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3 flex flex-row items-end">
+            <label for="variant_2" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >2: </label >
+            <input type="text" name="variant_2" id="question-variant-two" value=""  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-11/12 ml-auto p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3 flex flex-row items-end">
+            <label for="variant_3" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >3: </label >
+            <input type="text" name="variant_3" id="question-variant-three" value=""  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-11/12 ml-auto p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3 flex flex-row items-end">
+            <label for="variant_4" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >4: </label >
+            <input type="text" name="variant_4" id="question-variant-four" value=""  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-11/12 ml-auto p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="variant_1" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Variant one</label >
-            <input id ='question-variant-one' type="text" name="variant_1" value=""  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
-          </div>
-                    <div class="col-span-6 sm:col-span-3">
-            <label for="variant_2" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Variant two</label >
-            <input id ='question-variant-two' type="text" name="variant_2" value=""  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
-          </div>
-          <div class="col-span-6 sm:col-span-3">
-            <label for="variant_3" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Variant three</label >
-            <input id ='question-variant-three' type="text" name="variant_3" value=""  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
-          </div>
-          <div class="col-span-6 sm:col-span-3">
-            <label for="variant_4" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Variant four</label >
-            <input id ='question-variant-four' type="text" name="variant_4"  value="" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
-          </div>
-          <div class="col-span-6 sm:col-span-3">
-            <label for="variant_4" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Right answer</label >
-            <select id="correct_answer_mark" name="correct_answer_mark"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
-              <option value='1' id="select_option_1">1</option>
-              <option value='2' id="select_option_2">2</option>
-              <option value='3' id="select_option_3">3</option>
-              <option value='4' id="select_option_4">4</option>
+            <select id="correct_answer_mark" name="correct_answer_mark" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
+              <option id="select_option_1">1</option>
+              <option id="select_option_2">2</option>
+              <option id="select_option_3">3</option>
+              <option id="select_option_4">4</option>
             </select>
           </div>
         </div>
