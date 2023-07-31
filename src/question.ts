@@ -10,9 +10,7 @@ export const questions = () => {
   const addModalOptions: ModalOptions = {
     backdrop: 'dynamic',
     closable: true,
-    onHide: () => {
-      console.log('first');
-    },
+    onHide: () => {},
     onShow: () => {},
     onToggle: () => {},
   };
