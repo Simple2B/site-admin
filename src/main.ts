@@ -1,9 +1,11 @@
 import {base} from './base';
-import {user} from './user';
+import {admin} from './admin';
 import {cases} from './case';
 import {questions} from './question';
+import {stack} from './stack';
 
 base();
-user();
+admin();
 cases();
 questions();
+stack();

@@ -16,7 +16,7 @@ from app.logger import log
 from app.database import db
 
 
-bp = Blueprint("user", __name__, url_prefix="/user")
+bp = Blueprint("admin", __name__, url_prefix="/admin")
 
 
 @bp.route("/", methods=["GET"])
@@ -40,8 +40,8 @@ def get_all():
     pagination = create_pagination(total=db.session.scalar(count_query))
 
     return render_template(
-        "user/users.html",
-        users=db.session.execute(
+        "admin/admins.html",
+        admins=db.session.execute(
             query.offset((pagination.page - 1) * pagination.per_page).limit(
                 pagination.per_page
             )
@@ -69,12 +69,12 @@ def save():
         u.save()
         if form.next_url.data:
             return redirect(form.next_url.data)
-        return redirect(url_for("user.get_all"))
+        return redirect(url_for("admin.get_all"))
 
     else:
         log(log.ERROR, "User save errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
-        return redirect(url_for("user.get_all"))
+        return redirect(url_for("admin.get_all"))
 
 
 @bp.route("/create", methods=["POST"])
@@ -82,29 +82,32 @@ def save():
 def create():
     form = f.NewUserForm()
     if form.validate_on_submit():
-        user = m.SuperUser(
+        admin = m.SuperUser(
             username=form.username.data,
             email=form.email.data,
             password=form.password.data,
-            activated=form.activated.data,
         )
-        log(log.INFO, "Form submitted. User: [%s]", user)
+        log(log.INFO, "Form submitted. Admin: [%s]", admin)
         flash("User added!", "success")
-        user.save()
-        return redirect(url_for("user.get_all"))
+        admin.save()
+        return redirect(url_for("admin.get_all"))
+    else:
+        log(log.ERROR, "Admin save errors: [%s]", form.errors)
+        flash(f"{form.errors}", "danger")
+        return redirect(url_for("admin.get_all"))
 
 
 @bp.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
 def delete(id: int):
-    u = db.session.scalar(m.SuperUser.select().where(m.SuperUser.id == id))
-    if not u:
-        log(log.INFO, "There is no user with id: [%s]", id)
-        flash("There is no such user", "danger")
-        return "no user", 404
+    admin = db.session.scalar(m.SuperUser.select().where(m.SuperUser.id == id))
+    if not admin:
+        log(log.INFO, "There is no admin with id: [%s]", id)
+        flash("There is no such admin", "danger")
+        return "no admin", 404
 
-    db.session.delete(u)
+    db.session.delete(admin)
     db.session.commit()
-    log(log.INFO, "User deleted. User: [%s]", u)
+    log(log.INFO, "Admin deleted. Admin: [%s]", admin)
     flash("User deleted!", "success")
     return "ok", 200

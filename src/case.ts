@@ -4,8 +4,8 @@ import type {ModalOptions, ModalInterface} from 'flowbite';
 export const cases = () => {
   const $addUserModalElement: HTMLElement =
     document.querySelector('#addCaseModal');
-  const $editUserModalElement: HTMLElement =
-    document.querySelector('#editCaseModal');
+  const $stackModalElement: HTMLElement =
+    document.querySelector('#stackModal');
 
   const modalOptions: ModalOptions = {
     backdrop: 'static',
@@ -19,10 +19,29 @@ export const cases = () => {
     $addUserModalElement,
     modalOptions,
   );
-  const editModal: ModalInterface = new Modal(
-    $editUserModalElement,
-    modalOptions,
-  );
+
+  const stackModal: ModalInterface = new Modal(
+    $stackModalElement,
+    modalOptions
+  )
+
+
+
+  const stackButton = document.querySelector('#modal-stack-btn');
+  if ( stackButton ) {
+    stackButton.addEventListener('click', () => {
+      stackModal.show();
+    });
+
+    // closing add stack modal
+    const stackModalCloseBtn = document.querySelector('#modalStackCloseButton');
+    if (stackModalCloseBtn) {
+      stackModalCloseBtn.addEventListener('click', () => {
+        stackModal.hide();
+      });
+    }
+  }
+
 
   // opening add user modal
   const addCaseButton = document.querySelector('#add-case-btn');
