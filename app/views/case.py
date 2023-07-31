@@ -102,7 +102,7 @@ def create():
             except (TypeError, AttributeError):
                 continue
             if sub_image:
-                new_sub_image = m.CaseImage(case_id=new_case.id, url=sub_image[1])
+                new_sub_image = m.CaseImage(case_id=new_case.id, url=sub_image)
                 session.add(new_sub_image)
         session.commit()
 
