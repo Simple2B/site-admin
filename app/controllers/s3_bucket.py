@@ -34,9 +34,9 @@ class S3Bucket:
                 file,
                 self.bucket_name,
                 str(img_path),
-                # ExtraArgs={
-                #     "ContentType": file.content_type
-                # }
+                ExtraArgs={
+                    "ContentType": file.content_type
+                }
             )
             return f'https://{self.bucket_name}/' + str(img_path)
         except botocore.exceptions.ClientError as error:
