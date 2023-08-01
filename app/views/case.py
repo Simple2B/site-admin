@@ -84,6 +84,7 @@ def create():
             sub_title=form.sub_title.data,
             description=form.description.data,
             is_active=form.is_active.data,
+            is_main=form.is_main.data,
             project_link=form.project_link.data,
             role=form.role.data,
         )
