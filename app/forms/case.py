@@ -26,6 +26,7 @@ class NewCaseForm(FlaskForm):
     sub_title_image = FileField('sub_title_image', [DataRequired()])
     description = StringField("description", [DataRequired(), Length(1, 512)])
     is_active = BooleanField("is_active")
+    is_main = BooleanField("is_main")
     project_link = StringField("project_link")
     role = StringField("role", [DataRequired(), Length(2, 32)])
     stacks = MultiCheckboxField('stacks')
