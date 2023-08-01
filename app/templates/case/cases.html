@@ -33,7 +33,7 @@
       class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
     >
       <tr>
-        <th scope="col" class="px-6 py-3">#</th> <th scope="col" class="px-6 py-3">title</th>  <th scope="col" class="px-6 py-3">Is active</th> <th scope="col" class="px-6 py-3">Delete</th>
+        <th scope="col" class="px-6 py-3">#</th> <th scope="col" class="px-6 py-3">title</th>  <th scope="col" class="px-6 py-3">Is active</th> <th scope="col" class="px-6 py-3">Is main</th> <th scope="col" class="px-6 py-3">Delete</th>
       </tr>
     </thead>
     <tbody>
@@ -55,7 +55,13 @@
       </td>
       <td class="w-4 p-4">
         <div class="flex items-center">
-            <input data-case-id={{ case.id }} id="edit-active-case-btn" type="checkbox"{% if case.is_active %} checked=true {% endif %} class="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+            <input data-case-id={{ case.id }} data-field="is_active" id="edit-active-case-btn" type="checkbox"{% if case.is_active %} checked=true {% endif %} class="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+            <label for="checkbox-table-search-1" class="sr-only">checkbox</label>
+        </div>
+      </td >
+      <td class="w-4 p-4">
+        <div class="flex items-center">
+            <input data-case-id={{ case.id }} data-field="is_main" id="edit-active-case-btn" type="checkbox"{% if case.is_main %} checked=true {% endif %} class="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
             <label for="checkbox-table-search-1" class="sr-only">checkbox</label>
         </div>
       </td >

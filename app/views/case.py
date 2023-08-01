@@ -117,17 +117,27 @@ def create():
 @bp.route("/update/<int:id>", methods=["PATCH"])
 @login_required
 def update(id: int):
+    form = f.UpdateCase()
     case = db.session.get(m.Case,id)
     if not case:
         log(log.INFO, "There is no case with id: [%s]", id)
         flash("There is no such case", "danger")
         return "no case", 404
 
-    case.is_active = not case.is_active
-    db.session.commit()
-    log(log.INFO, "Case updated. Case: [%s]", case)
-    flash("Case updated!", "success")
-    return "ok", 200
+    if form.validate_on_submit():
+        field = form.field.data
+        if field == "is_active":
+            case.is_active = not case.is_active
+        if field == "is_main":
+            case.is_main = not case.is_main
+        db.session.commit()
+        log(log.INFO, "Case updated. Case: [%s]", case)
+        flash("Case updated!", "success")
+        return "ok", 200
+    else:
+        log(log.ERROR, "Case errors: [%s]", form.errors)
+        flash(f"{form.errors}", "danger")
+        return "error", 422
 
 
 @bp.route("/delete/<int:id>", methods=["DELETE"])

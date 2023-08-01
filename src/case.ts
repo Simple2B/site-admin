@@ -6,6 +6,8 @@ export const cases = () => {
     document.querySelector('#addCaseModal');
   const $stackModalElement: HTMLElement =
     document.querySelector('#stackModal');
+  const scrfInput: HTMLInputElement =
+    document.querySelector('#csrf_token');
 
   const modalOptions: ModalOptions = {
     backdrop: 'static',
@@ -92,8 +94,13 @@ export const cases = () => {
   editCaseButton.forEach(e => {
     e.addEventListener('change', async () => {
         let id = e.getAttribute('data-case-id');
+        const field = e.getAttribute('data-field');
+        const formData = new FormData();
+        formData.append('field', field);
+        formData.append("csrf_token", scrfInput ? scrfInput.value : '',)
         const response = await fetch(`/case/update/${id}`, {
           method: 'PATCH',
+          body: formData,
         });
         if (response.status == 200) {
           location.reload();
