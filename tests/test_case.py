@@ -36,7 +36,7 @@ def test_crud_case(client, mocker):
     # update
     case: m.Case = db.session.query(m.Case).get(1)
     assert case.is_active == test_case['is_active']
-    res = client.patch(f"/case/update/{case.id}")
+    res = client.patch(f"/case/update/{case.id}", data={"field": "is_active"})
     assert not case.is_active
 
     # delete
