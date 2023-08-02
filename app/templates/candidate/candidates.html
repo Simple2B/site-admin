@@ -55,7 +55,8 @@
           class="w-4 p-4"
         >
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ candidate.quiz_score }}</div>
+            {% set proc = candidate.quiz_score / 30 * 100 %}
+            <div class=" text-re text-base font-semibold {% if proc<25 %} text-red-500 {% elif proc>=25 and proc<=75 %}text-yellow-500 {% elif proc>75 %}text-green-500 {% endif %}">{{'%0.2f' % proc|float}}%</div>
           </div>
       </td>
         <td class="w-4 p-4">
