@@ -18,7 +18,6 @@ from app.database import db
 from app import s3bucket
 
 
-
 bp = Blueprint("case", __name__, url_prefix="/case")
 
 
@@ -28,18 +27,20 @@ def get_all():
     form = f.NewCaseForm()
     form.stacks.choices = [(str(s.id), s.name) for s in db.session.query(m.Stack).all()]
     q = request.args.get("q", type=str, default=None)
-    query = m.Case.select().where(m.Case.is_deleted==False).order_by(m.Case.id)
-    count_query = sa.select(sa.func.count()).where(m.Case.is_deleted==False).select_from(m.Case)
+    query = m.Case.select().where(m.Case.is_deleted == False).order_by(m.Case.id)
+    count_query = (
+        sa.select(sa.func.count()).where(m.Case.is_deleted == False).select_from(m.Case)
+    )
 
     if q:
         query = (
             m.Case.select()
-            .where(sa.and_(m.Case.title.ilike(f"%{q}%"), m.Case.is_deleted==False))
+            .where(sa.and_(m.Case.title.ilike(f"%{q}%"), m.Case.is_deleted == False))
             .order_by(m.Case.id)
         )
         count_query = (
             sa.select(sa.func.count())
-            .where(sa.and_(m.Case.title.ilike(f"%{q}%"), m.Case.is_deleted==False))
+            .where(sa.and_(m.Case.title.ilike(f"%{q}%"), m.Case.is_deleted == False))
             .select_from(m.Case)
         )
 
@@ -57,6 +58,7 @@ def get_all():
         form=form,
     )
 
+
 @bp.route("/create", methods=["POST"])
 @login_required
 def create():
@@ -65,22 +67,54 @@ def create():
 
     if form.validate_on_submit():
         log(log.INFO, "Form submitted. Case: [%s]", form)
+        session = db.session
 
         title = form.title.data
         title_image = form.title_image.data
         sub_title_image = form.sub_title_image.data
         try:
-            title_image = s3bucket.upload_cases_imgs(file=title_image, file_name=title_image.filename, case_name=title, img_type='title')
-            sub_title_image = s3bucket.upload_cases_imgs(file=sub_title_image, file_name=sub_title_image.filename, case_name=title, img_type='sub_title')
+            main_image = s3bucket.upload_cases_imgs(
+                file=title_image,
+                file_name=title_image.filename,
+                case_name=title,
+                img_type="title",
+            )
+            full_main_image = s3bucket.upload_cases_imgs(
+                file=sub_title_image,
+                file_name=sub_title_image.filename,
+                case_name=title,
+                img_type="sub_title",
+            )
+
+            if main_image and full_main_image:
+                new_main_image = m.CaseImage(
+                    url=main_image, origin_file_name=title_image.filename
+                )
+                new_full_main_image = m.CaseImage(
+                    url=full_main_image, origin_file_name=sub_title_image.filename
+                )
+                session.add(new_main_image)
+                session.commit()
+                session.refresh(new_main_image)
+                session.add(new_full_main_image)
+                session.commit()
+                session.refresh(new_full_main_image)
+                main_image_id = new_main_image.id
+                full_main_image_id = new_full_main_image.id
+            else:
+                flash("No uploaded image", "danger")
+                return redirect(url_for("case.get_all"))
+
         except TypeError as error:
             flash(error.args[0], "danger")
             return redirect(url_for("case.get_all"))
 
-        session = db.session
         new_case = m.Case(
             title=form.title.data,
-            title_image_url=title_image,
-            sub_title_image_url=sub_title_image,
+            # title_image_url=title_image,
+            # sub_title_image_url=sub_title_image,
+            main_image_id=main_image_id,
+            full_main_image_id=full_main_image_id,
             sub_title=form.sub_title.data,
             description=form.description.data,
             is_active=form.is_active.data,
@@ -97,14 +131,19 @@ def create():
             session.add(new_stack)
         session.commit()
 
-        for img in form.sub_images.data:
-            try:
-                sub_image = s3bucket.upload_cases_imgs(file=img, file_name=img.filename, case_name=title, img_type='sub_image')
-            except (TypeError, AttributeError):
-                continue
-            if sub_image:
-                new_sub_image = m.CaseImage(case_id=new_case.id, url=sub_image)
-                session.add(new_sub_image)
+        # for img in form.sub_images.data:
+        #     try:
+        #         sub_image = s3bucket.upload_cases_imgs(
+        #             file=img,
+        #             file_name=img.filename,
+        #             case_name=title,
+        #             img_type="sub_image",
+        #         )
+        #     except (TypeError, AttributeError):
+        #         continue
+        #     if sub_image:
+        #         new_sub_image = m.CaseImage(url=sub_image)
+        #         session.add(new_sub_image)
         session.commit()
 
         flash("Case added!", "success")
@@ -118,7 +157,7 @@ def create():
 @login_required
 def update(id: int):
     form = f.UpdateCase()
-    case = db.session.get(m.Case,id)
+    case = db.session.get(m.Case, id)
     if not case:
         log(log.INFO, "There is no case with id: [%s]", id)
         flash("There is no such case", "danger")
@@ -143,7 +182,7 @@ def update(id: int):
 @bp.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
 def delete(id: int):
-    case = db.session.get(m.Case,id)
+    case = db.session.get(m.Case, id)
     if not case:
         log(log.INFO, "There is no case with id: [%s]", id)
         flash("There is no such case", "danger")
