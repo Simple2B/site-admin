@@ -1,15 +1,10 @@
-from flask import (
-    Blueprint,
-    render_template,
-    request,
-)
+from flask import Blueprint, render_template, request, current_app
 from flask_login import login_required
 import sqlalchemy as sa
 from app.controllers import create_pagination
 
 from app.common import models as m
 from app.database import db
-
 
 bp = Blueprint("candidate", __name__, url_prefix="/candidate")
 
@@ -36,6 +31,8 @@ def get_all():
             .select_from(m.Candidate)
         )
 
+    question_count = current_app.config["QUESTIONS_COUNT"]
+
     pagination = create_pagination(total=db.session.scalar(count_query))
 
     return render_template(
@@ -47,4 +44,5 @@ def get_all():
         ).scalars(),
         page=pagination,
         search_query=q,
+        count=question_count,
     )
