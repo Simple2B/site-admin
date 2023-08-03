@@ -39,9 +39,9 @@ def get_all():
             m.SuperUser.select()
             .where(
                 sa.and_(
-                    m.SuperUser.username.like(f"{q}%")
-                    | m.SuperUser.email.like(f"{q}%"),
-                    m.Question.is_deleted == False,
+                    m.SuperUser.username.ilike(f"%{q}%")
+                    | m.SuperUser.email.ilike(f"%{q}%"),
+                    m.SuperUser.is_deleted == False,
                 )
             )
             .order_by(m.SuperUser.id)
@@ -52,7 +52,7 @@ def get_all():
                 sa.and_(
                     m.SuperUser.username.like(f"{q}%")
                     | m.SuperUser.email.like(f"{q}%"),
-                    m.Question.is_deleted == False,
+                    m.SuperUser.is_deleted == False,
                 )
             )
             .select_from(m.SuperUser)
