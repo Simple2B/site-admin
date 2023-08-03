@@ -9,6 +9,8 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
+from app.common.models import case_screenshot
+from app.common.models.case_image import EnumCaseImageType
 from app.controllers import create_pagination
 
 from app.common import models as m
@@ -70,35 +72,75 @@ def create():
         session = db.session
 
         title = form.title.data
-        title_image = form.title_image.data
-        sub_title_image = form.sub_title_image.data
+        main_image_obj = form.title_image.data
+        preview_image_obj = form.sub_title_image.data
+        case_screenshots = form.sub_images.data
+
         try:
             main_image = s3bucket.upload_cases_imgs(
-                file=title_image,
-                file_name=title_image.filename,
+                file=main_image_obj,
+                file_name=main_image_obj.filename,
                 case_name=title,
-                img_type="title",
+                img_type=EnumCaseImageType.case_main_image,
             )
-            full_main_image = s3bucket.upload_cases_imgs(
-                file=sub_title_image,
-                file_name=sub_title_image.filename,
+            preview_image = s3bucket.upload_cases_imgs(
+                file=preview_image_obj,
+                file_name=preview_image_obj.filename,
                 case_name=title,
-                img_type="sub_title",
+                img_type=EnumCaseImageType.case_preview_image,
             )
 
-            if main_image and full_main_image:
+            screenshots = []
+
+            for screenshot in case_screenshots:
+                file_image = s3bucket.upload_cases_imgs(
+                    file=screenshot,
+                    file_name=screenshot.filename,
+                    case_name=title,
+                    img_type=EnumCaseImageType.case_screenshot,
+                )
+                screenshots.append(file_image)
+
+            new_case = m.Case(
+                title=form.title.data,
+                sub_title=form.sub_title.data,
+                description=form.description.data,
+                is_active=form.is_active.data,
+                is_main=form.is_main.data,
+                project_link=form.project_link.data,
+                role=form.role.data,
+                # screenshots=screenshots,
+            )
+            session.add(new_case)
+            session.commit()
+            session.refresh(new_case)
+
+            for index, img in enumerate(screenshots):
+                new_screenshot = m.CaseScreenshot(
+                    url=img,
+                    case_id=new_case.id,
+                    origin_file_name=f"Screenshot {index}",
+                    type_of_image="screenshot",
+                )
+
+                session.add(new_screenshot)
+                session.commit()
+                session.refresh(new_screenshot)
+
+            if main_image and preview_image:
                 new_main_image = m.CaseImage(
                     url=main_image,
-                    origin_file_name=title_image.filename,
-                    case_id="0",
+                    origin_file_name=main_image_obj.filename,
+                    case_id=new_case.id,
                     type_of_image="main_image",
                 )
                 new_full_main_image = m.CaseImage(
-                    url=full_main_image,
-                    origin_file_name=sub_title_image.filename,
-                    case_id="0",
-                    type_of_image="main_image",
+                    url=preview_image,
+                    origin_file_name=preview_image_obj.filename,
+                    case_id=new_case.id,
+                    type_of_image="full_main_image",
                 )
+
                 session.add(new_main_image)
                 session.commit()
                 session.refresh(new_main_image)
@@ -112,19 +154,6 @@ def create():
         except TypeError as error:
             flash(error.args[0], "danger")
             return redirect(url_for("case.get_all"))
-
-        new_case = m.Case(
-            title=form.title.data,
-            sub_title=form.sub_title.data,
-            description=form.description.data,
-            is_active=form.is_active.data,
-            is_main=form.is_main.data,
-            project_link=form.project_link.data,
-            role=form.role.data,
-        )
-        session.add(new_case)
-        session.commit()
-        session.refresh(new_case)
 
         for id in form.stacks.data:
             new_stack = m.CaseStack(case_id=new_case.id, stack_id=int(id))
