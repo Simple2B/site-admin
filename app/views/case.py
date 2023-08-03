@@ -88,10 +88,16 @@ def create():
 
             if main_image and full_main_image:
                 new_main_image = m.CaseImage(
-                    url=main_image, origin_file_name=title_image.filename
+                    url=main_image,
+                    origin_file_name=title_image.filename,
+                    case_id="0",
+                    type_of_image="main_image",
                 )
                 new_full_main_image = m.CaseImage(
-                    url=full_main_image, origin_file_name=sub_title_image.filename
+                    url=full_main_image,
+                    origin_file_name=sub_title_image.filename,
+                    case_id="0",
+                    type_of_image="main_image",
                 )
                 session.add(new_main_image)
                 session.commit()
@@ -99,8 +105,6 @@ def create():
                 session.add(new_full_main_image)
                 session.commit()
                 session.refresh(new_full_main_image)
-                main_image_id = new_main_image.id
-                full_main_image_id = new_full_main_image.id
             else:
                 flash("No uploaded image", "danger")
                 return redirect(url_for("case.get_all"))
@@ -111,10 +115,6 @@ def create():
 
         new_case = m.Case(
             title=form.title.data,
-            # title_image_url=title_image,
-            # sub_title_image_url=sub_title_image,
-            main_image_id=main_image_id,
-            full_main_image_id=full_main_image_id,
             sub_title=form.sub_title.data,
             description=form.description.data,
             is_active=form.is_active.data,
