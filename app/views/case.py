@@ -9,7 +9,7 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
-from app.common.models import case_screenshot
+from werkzeug.datastructures import FileStorage
 from app.common.models.case_image import EnumCaseImageType
 from app.controllers import create_pagination
 
@@ -71,10 +71,10 @@ def create():
         log(log.INFO, "Form submitted. Case: [%s]", form)
         session = db.session
 
-        title = form.title.data
-        main_image_obj = form.title_image.data
-        preview_image_obj = form.sub_title_image.data
-        case_screenshots = form.sub_images.data
+        title: str = form.title.data
+        main_image_obj: FileStorage = form.title_image.data
+        preview_image_obj: FileStorage = form.sub_title_image.data
+        case_screenshots: list[FileStorage] = form.sub_images.data
 
         try:
             main_image = s3bucket.upload_cases_imgs(
@@ -90,14 +90,14 @@ def create():
                 img_type=EnumCaseImageType.case_preview_image,
             )
 
-            screenshots = []
+            screenshots: list[str] = []
 
             for screenshot in case_screenshots:
                 file_image = s3bucket.upload_cases_imgs(
                     file=screenshot,
                     file_name=screenshot.filename,
                     case_name=title,
-                    img_type=EnumCaseImageType.case_screenshot,
+                    img_type="screenshots",
                 )
                 screenshots.append(file_image)
 
@@ -109,7 +109,6 @@ def create():
                 is_main=form.is_main.data,
                 project_link=form.project_link.data,
                 role=form.role.data,
-                # screenshots=screenshots,
             )
             session.add(new_case)
             session.commit()
@@ -120,7 +119,6 @@ def create():
                     url=img,
                     case_id=new_case.id,
                     origin_file_name=f"Screenshot {index}",
-                    type_of_image="screenshot",
                 )
 
                 session.add(new_screenshot)
@@ -132,21 +130,21 @@ def create():
                     url=main_image,
                     origin_file_name=main_image_obj.filename,
                     case_id=new_case.id,
-                    type_of_image="main_image",
+                    type_of_image=EnumCaseImageType.case_main_image,
                 )
-                new_full_main_image = m.CaseImage(
+                new_preview_image = m.CaseImage(
                     url=preview_image,
                     origin_file_name=preview_image_obj.filename,
                     case_id=new_case.id,
-                    type_of_image="full_main_image",
+                    type_of_image=EnumCaseImageType.case_preview_image,
                 )
 
                 session.add(new_main_image)
                 session.commit()
                 session.refresh(new_main_image)
-                session.add(new_full_main_image)
+                session.add(new_preview_image)
                 session.commit()
-                session.refresh(new_full_main_image)
+                session.refresh(new_preview_image)
             else:
                 flash("No uploaded image", "danger")
                 return redirect(url_for("case.get_all"))
@@ -158,21 +156,6 @@ def create():
         for id in form.stacks.data:
             new_stack = m.CaseStack(case_id=new_case.id, stack_id=int(id))
             session.add(new_stack)
-        session.commit()
-
-        # for img in form.sub_images.data:
-        #     try:
-        #         sub_image = s3bucket.upload_cases_imgs(
-        #             file=img,
-        #             file_name=img.filename,
-        #             case_name=title,
-        #             img_type="sub_image",
-        #         )
-        #     except (TypeError, AttributeError):
-        #         continue
-        #     if sub_image:
-        #         new_sub_image = m.CaseImage(url=sub_image)
-        #         session.add(new_sub_image)
         session.commit()
 
         flash("Case added!", "success")

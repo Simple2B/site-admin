@@ -8,7 +8,7 @@ from app import s3bucket
 test_case = {
     "title": "test title",
     "case_id": "1",
-    "type_of_image": "main_image",
+    "type_of_image": "case_main_image",
     "sub_title": "test sub title",
     "title_image": (io.BytesIO(b"title"), "test.jpg"),
     "sub_title_image": (io.BytesIO(b"sub_title"), "test.jpg"),
