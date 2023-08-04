@@ -91,13 +91,13 @@ def create():
                     url=main_image,
                     origin_file_name=title_image.filename,
                     case_id="0",
-                    type_of_image="main_image",
+                    type_of_image="case_main_image",
                 )
                 new_full_main_image = m.CaseImage(
                     url=full_main_image,
                     origin_file_name=sub_title_image.filename,
                     case_id="0",
-                    type_of_image="main_image",
+                    type_of_image="case_main_image",
                 )
                 session.add(new_main_image)
                 session.commit()
