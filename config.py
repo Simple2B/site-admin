@@ -40,7 +40,11 @@ class BaseConfig(BaseSettings):
     AWS_SECRET_ACCESS_KEY: str
     AWS_DOMAIN: str
 
-    ALLOWED_EXTENSIONS = ['png', 'jpg', 'jpeg', 'cvg']
+    # Count of questions
+    QUESTIONS_COUNT = 25
+
+    # Allowed extensions
+    ALLOWED_EXTENSIONS = ["png", "jpg", "jpeg", "cvg"]
 
     @staticmethod
     def configure(app: Flask):
