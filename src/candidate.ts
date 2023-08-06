@@ -13,4 +13,21 @@ export const candidate = () => {
       window.location.href = `${url.href}`;
     });
   }
+  // delte flow
+  const deleteButtons = document.querySelectorAll('#delete-candidate-btn');
+  if (deleteButtons) {
+    deleteButtons.forEach(button => {
+      button.addEventListener('click', async () => {
+        if (confirm('Are sure?')) {
+          let id = button.getAttribute('data-candidate-id');
+          const response = await fetch(`/candidate/delete/${id}`, {
+            method: 'DELETE',
+          });
+          if (response.status == 200) {
+            location.reload();
+          }
+        }
+      });
+    });
+  }
 };

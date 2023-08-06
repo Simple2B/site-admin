@@ -44,7 +44,8 @@ def test_create_admin(runner: FlaskCliRunner):
 
 def test_delete_user(populate: FlaskClient):
     login(populate)
-    uc = db.session.query(m.SuperUser).count()
     response = populate.delete("/admin/delete/1")
-    assert db.session.query(m.SuperUser).count() < uc
+    deleted_admin = db.session.query(m.SuperUser).filter_by(id=1)
+    assert deleted_admin
+    assert deleted_admin[0].is_deleted
     assert response.status_code == 200

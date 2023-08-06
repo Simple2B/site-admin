@@ -4,10 +4,12 @@ import {cases} from './case';
 import {questions} from './question';
 import {stack} from './stack';
 import {candidate} from './candidate';
+import {flash} from './flash';
 
+flash();
 base();
 admin();
-cases();
 questions();
 candidate();
 stack();
+cases();
