@@ -114,6 +114,7 @@ def create():
             session.add(new_case)
             session.commit()
             session.refresh(new_case)
+            case_action_log(m.Action.ActionsType.CREATE, new_case.id, current_user.id)
 
             for index, img in enumerate(screenshots):
                 new_screenshot = m.CaseScreenshot(

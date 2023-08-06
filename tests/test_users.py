@@ -48,4 +48,6 @@ def test_delete_user(populate: FlaskClient):
     deleted_admin = db.session.query(m.SuperUser).filter_by(id=1)
     assert deleted_admin
     assert deleted_admin[0].is_deleted
+    action_log: m.Action = db.session.query(m.Action).get(1)
+    assert action_log.action == m.Action.ActionsType.DELETE
     assert response.status_code == 200

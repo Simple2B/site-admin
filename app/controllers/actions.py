@@ -44,9 +44,22 @@ def case_action_log(action: m.Action.ActionsType, entity_id: int, user_id: int):
 
 def candidate_action_log(action: m.Action.ActionsType, entity_id: int, user_id: int):
     text = None
-    candidate: m.Case = db.session.get(m.Case, entity_id)
+    candidate: m.Candidate = db.session.get(m.Candidate, entity_id)
     match action:
         case m.Action.ActionsType.DELETE:
-            text = f"{current_user.username} delete case {candidate.username}"
+            text = f"{current_user.username} delete candidate {candidate.username}"
 
     create_action_log(m.Action.Entity.CANDIDATE, entity_id, action, user_id, text)
+
+
+def admin_action_log(action: m.Action.ActionsType, entity_id: int, user_id: int):
+    text = None
+    admin: m.Case = db.session.get(m.SuperUser, entity_id)
+    match action:
+        case m.Action.ActionsType.DELETE:
+            text = f"{current_user.username} delete admin {admin.username}"
+
+        case m.Action.ActionsType.CREATE:
+            text = f"{current_user.username} create a new admin {admin.username}"
+
+    create_action_log(m.Action.Entity.ADMIN, entity_id, action, user_id, text)
