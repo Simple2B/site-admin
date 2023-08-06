@@ -7,7 +7,7 @@ from flask import (
     redirect,
     url_for,
 )
-from flask_login import login_required
+from flask_login import login_required, current_user
 import sqlalchemy as sa
 from app.controllers import create_pagination
 
@@ -16,6 +16,7 @@ from app import forms as f
 from app.logger import log
 from app.database import db
 from app import s3bucket
+from app.controllers.actions import case_action_log
 
 
 bp = Blueprint("case", __name__, url_prefix="/case")
@@ -91,13 +92,13 @@ def create():
                     url=main_image,
                     origin_file_name=title_image.filename,
                     case_id="0",
-                    type_of_image="main_image",
+                    type_of_image="case_main_image",
                 )
                 new_full_main_image = m.CaseImage(
                     url=full_main_image,
                     origin_file_name=sub_title_image.filename,
                     case_id="0",
-                    type_of_image="main_image",
+                    type_of_image="case_main_image",
                 )
                 session.add(new_main_image)
                 session.commit()
@@ -129,22 +130,9 @@ def create():
         for id in form.stacks.data:
             new_stack = m.CaseStack(case_id=new_case.id, stack_id=int(id))
             session.add(new_stack)
-        session.commit()
 
-        # for img in form.sub_images.data:
-        #     try:
-        #         sub_image = s3bucket.upload_cases_imgs(
-        #             file=img,
-        #             file_name=img.filename,
-        #             case_name=title,
-        #             img_type="sub_image",
-        #         )
-        #     except (TypeError, AttributeError):
-        #         continue
-        #     if sub_image:
-        #         new_sub_image = m.CaseImage(url=sub_image)
-        #         session.add(new_sub_image)
         session.commit()
+        case_action_log(m.Action.ActionsType.CREATE, new_case.id, current_user.id)
 
         flash("Case added!", "success")
     if form.errors:
@@ -190,6 +178,7 @@ def delete(id: int):
 
     case.is_deleted = True
     db.session.commit()
+    case_action_log(m.Action.ActionsType.DELETE, case.id, current_user.id)
     log(log.INFO, "Case deleted. Case: [%s]", case)
     flash("Case deleted!", "success")
     return "ok", 200

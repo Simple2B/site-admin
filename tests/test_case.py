@@ -8,7 +8,7 @@ from app import s3bucket
 test_case = {
     "title": "test title",
     "case_id": "1",
-    "type_of_image": "main_image",
+    "type_of_image": "case_main_image",
     "sub_title": "test sub title",
     "title_image": (io.BytesIO(b"title"), "test.jpg"),
     "sub_title_image": (io.BytesIO(b"sub_title"), "test.jpg"),
@@ -30,6 +30,10 @@ def test_crud_case(client, mocker):
         "/case/create", data=test_case, content_type="multipart/form-data"
     )
     assert res.status_code == 302
+    case: m.Case = db.session.query(m.Case).get(1)
+    assert case
+    action_log: m.Action = db.session.query(m.Action).get(1)
+    assert action_log.action == m.Action.ActionsType.CREATE
 
     # read
     res = client.get("/case/")
@@ -47,3 +51,5 @@ def test_crud_case(client, mocker):
     assert not case.is_deleted
     res = client.delete(f"/case/delete/{case.id}")
     assert case.is_deleted
+    action_log: m.Action = db.session.query(m.Action).get(2)
+    assert action_log.action == m.Action.ActionsType.DELETE
