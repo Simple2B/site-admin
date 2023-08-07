@@ -1,3 +1,4 @@
+# flake8: noqa E712
 from flask import (
     Blueprint,
     render_template,
@@ -23,17 +24,37 @@ bp = Blueprint("admin", __name__, url_prefix="/admin")
 @login_required
 def get_all():
     q = request.args.get("q", type=str, default=None)
-    query = m.SuperUser.select().order_by(m.SuperUser.id)
-    count_query = sa.select(sa.func.count()).select_from(m.SuperUser)
+    query = (
+        m.SuperUser.select()
+        .where(m.SuperUser.is_deleted == False)
+        .order_by(m.SuperUser.id)
+    )
+    count_query = (
+        sa.select(sa.func.count())
+        .where(m.SuperUser.is_deleted == False)
+        .select_from(m.SuperUser)
+    )
     if q:
         query = (
             m.SuperUser.select()
-            .where(m.SuperUser.username.like(f"{q}%") | m.SuperUser.email.like(f"{q}%"))
+            .where(
+                sa.and_(
+                    m.SuperUser.username.ilike(f"%{q}%")
+                    | m.SuperUser.email.ilike(f"%{q}%"),
+                    m.SuperUser.is_deleted == False,
+                )
+            )
             .order_by(m.SuperUser.id)
         )
         count_query = (
             sa.select(sa.func.count())
-            .where(m.SuperUser.username.like(f"{q}%") | m.SuperUser.email.like(f"{q}%"))
+            .where(
+                sa.and_(
+                    m.SuperUser.username.like(f"{q}%")
+                    | m.SuperUser.email.like(f"{q}%"),
+                    m.SuperUser.is_deleted == False,
+                )
+            )
             .select_from(m.SuperUser)
         )
 
@@ -105,8 +126,8 @@ def delete(id: int):
         log(log.INFO, "There is no admin with id: [%s]", id)
         flash("There is no such admin", "danger")
         return "no admin", 404
-
-    db.session.delete(admin)
+    admin.is_deleted = True
+    db.session.add(admin)
     db.session.commit()
     log(log.INFO, "Admin deleted. Admin: [%s]", admin)
     flash("User deleted!", "success")

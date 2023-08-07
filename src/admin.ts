@@ -33,4 +33,21 @@ export const admin = () => {
       });
     }
   }
+  // delete admin
+  const deleteAdminButtons = document.querySelectorAll('#delete-admin-btn');
+  if (deleteAdminButtons) {
+    deleteAdminButtons.forEach(button => {
+      button.addEventListener('click', async () => {
+        if (confirm('Are sure?')) {
+          let id = button.getAttribute('data-admin-id');
+          const response = await fetch(`/admin/delete/${id}`, {
+            method: 'DELETE',
+          });
+          if (response.status == 200) {
+            location.reload();
+          }
+        }
+      });
+    });
+  }
 };
