@@ -1,4 +1,4 @@
-from flask import current_app as app
+from flask import current_app as app, Response
 from flask.testing import FlaskClient, FlaskCliRunner
 from click.testing import Result
 from app.common import models as m
@@ -33,13 +33,28 @@ def test_list(populate: FlaskClient):
     assert "/admin/?page=2" not in html
 
 
-def test_create_admin(runner: FlaskCliRunner):
+def test_create_admin(runner: FlaskCliRunner, client: FlaskClient):
     res: Result = runner.invoke(args=["create-admin"])
     assert "admin created" in res.output
     query = m.SuperUser.select().where(
         m.SuperUser.username == app.config["ADMIN_USERNAME"]
     )
     assert db.session.scalar(query)
+    login(client)
+    response: Response = client.post(
+        "/admin/create",
+        data=dict(
+            username="admin_2",
+            email="admin_2@gmail.com",
+            password="123456",
+            password_confirmation="123456",
+        ),
+        follow_redirects=True,
+    )
+    assert response
+    assert response.status_code == 200
+    action_log: m.Action = db.session.get(m.Action, 1)
+    assert action_log.action == m.Action.ActionsType.CREATE
 
 
 def test_delete_user(populate: FlaskClient):
@@ -48,6 +63,6 @@ def test_delete_user(populate: FlaskClient):
     deleted_admin = db.session.query(m.SuperUser).filter_by(id=1)
     assert deleted_admin
     assert deleted_admin[0].is_deleted
-    action_log: m.Action = db.session.query(m.Action).get(1)
+    action_log: m.Action = db.session.get(m.Action, 1)
     assert action_log.action == m.Action.ActionsType.DELETE
     assert response.status_code == 200
