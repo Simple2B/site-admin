@@ -7,7 +7,7 @@ from flask import (
     redirect,
     url_for,
 )
-from flask_login import login_required
+from flask_login import login_required, current_user
 import sqlalchemy as sa
 from app.controllers import create_pagination
 
@@ -15,6 +15,7 @@ from app.common import models as m
 from app import forms as f
 from app.logger import log
 from app.database import db
+from app.controllers.actions import question_action_log
 
 
 bp = Blueprint("quiz", __name__, url_prefix="/quiz")
@@ -94,6 +95,7 @@ def save():
         question.text = form.text.data
         question.correct_answer_mark = form.correct_answer_mark.data
         question.save()
+        question_action_log(m.Action.ActionsType.EDIT, question.id, current_user.id)
         for i in range(1, 5):
             query = m.VariantAnswer.select().where(
                 m.VariantAnswer.question_id == question.id,
@@ -107,6 +109,8 @@ def save():
                 variant.text = form[f"variant_{i}"].data
                 db.session.add(variant)
                 db.session.commit()
+        log(log.ERROR, "Question saved!")
+        flash("Question saved!", "success")
         return redirect(url_for("quiz.get_all"))
     else:
         log(log.ERROR, "Question save errors: [%s]", form.errors)
@@ -132,7 +136,7 @@ def create():
             )
             db.session.add(variant)
         db.session.commit()
-
+        question_action_log(m.Action.ActionsType.CREATE, question.id, current_user.id)
         log(log.INFO, "Form submitted. Question: [%s]", question)
         flash("Question added!", "success")
         question.save()
@@ -153,6 +157,7 @@ def delete(id: int):
         return "no question", 404
     question.is_deleted = True
     db.session.commit()
+    question_action_log(m.Action.ActionsType.DELETE, question.id, current_user.id)
     log(log.INFO, "question deleted. question: [%s]", question)
     flash("question deleted!", "success")
     return "ok", 200

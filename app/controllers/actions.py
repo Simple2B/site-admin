@@ -57,9 +57,26 @@ def admin_action_log(action: m.Action.ActionsType, entity_id: int, user_id: int)
     admin: m.Case = db.session.get(m.SuperUser, entity_id)
     match action:
         case m.Action.ActionsType.DELETE:
-            text = f"{current_user.username} delete admin {admin.username}"
+            text = f"{current_user.username.upper() } delete admin {admin.username.upper() }"
 
         case m.Action.ActionsType.CREATE:
-            text = f"{current_user.username} create a new admin {admin.username}"
+            text = f"{current_user.username.upper() } create a new admin {admin.username.upper() }"
 
     create_action_log(m.Action.Entity.ADMIN, entity_id, action, user_id, text)
+
+
+def question_action_log(action: m.Action.ActionsType, entity_id: int, user_id: int):
+    text = None
+    question: m.Case = db.session.get(m.Question, entity_id)
+    match action:
+        case m.Action.ActionsType.DELETE:
+            text = f"{current_user.username.upper() } delete question '{question.text}'"
+
+        case m.Action.ActionsType.CREATE:
+            text = (
+                f"{current_user.username.upper() } create a new question {question.id }"
+            )
+        case m.Action.ActionsType.EDIT:
+            text = f"{current_user.username.upper() } changed a question {question.id }"
+
+    create_action_log(m.Action.Entity.QUESTION, entity_id, action, user_id, text)

@@ -18,10 +18,10 @@ bp = Blueprint("action", __name__, url_prefix="/action")
 @login_required
 def get_all():
     q = request.args.get("q", type=str, default=None)
-    query = m.Action.select().order_by(m.Action.id)
+    query = m.Action.select().order_by(m.Action.created_at.desc())
     count_query = sa.select(sa.func.count()).select_from(m.Action)
     if q:
-        query = m.Action.select().order_by(m.Action.id)
+        query = m.Action.select().order_by(m.Action.created_at.decs())
         count_query = sa.select(sa.func.count()).select_from(m.Action)
 
     pagination = create_pagination(total=db.session.scalar(count_query))
