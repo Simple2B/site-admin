@@ -19,6 +19,7 @@ bp = Blueprint("action", __name__, url_prefix="/action")
 @login_required
 def get_all():
     sort = request.args.get("sort")
+    entity = request.args.get("entity")
     thirty_days_ago = datetime.now() - timedelta(days=30)
     query = (
         m.Action.select()
@@ -33,6 +34,9 @@ def get_all():
     if sort:
         query = query.where(m.Action.action == sort)
         count_query = count_query.where(m.Action.action == sort)
+    if entity:
+        query = query.where(m.Action.entity == entity)
+        count_query = count_query.where(m.Action.entity == entity)
     pagination = create_pagination(total=db.session.scalar(count_query))
 
     return render_template(
@@ -44,4 +48,5 @@ def get_all():
         ).scalars(),
         page=pagination,
         sort=sort,
+        entity=entity,
     )
