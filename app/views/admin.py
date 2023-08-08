@@ -7,7 +7,7 @@ from flask import (
     redirect,
     url_for,
 )
-from flask_login import login_required
+from flask_login import login_required, current_user
 import sqlalchemy as sa
 from app.controllers import create_pagination
 
@@ -15,6 +15,7 @@ from app.common import models as m
 from app import forms as f
 from app.logger import log
 from app.database import db
+from app.controllers.actions import admin_action_log
 
 
 bp = Blueprint("admin", __name__, url_prefix="/admin")
@@ -111,6 +112,7 @@ def create():
         log(log.INFO, "Form submitted. Admin: [%s]", admin)
         flash("User added!", "success")
         admin.save()
+        admin_action_log(m.Action.ActionsType.CREATE, admin.id, current_user.id)
         return redirect(url_for("admin.get_all"))
     else:
         log(log.ERROR, "Admin save errors: [%s]", form.errors)
@@ -129,6 +131,8 @@ def delete(id: int):
     admin.is_deleted = True
     db.session.add(admin)
     db.session.commit()
+    admin_action_log(m.Action.ActionsType.DELETE, admin.id, current_user.id)
+
     log(log.INFO, "Admin deleted. Admin: [%s]", admin)
     flash("User deleted!", "success")
     return "ok", 200

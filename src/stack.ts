@@ -35,7 +35,9 @@ export const stack = () => {
     )
   }
 
-  const stackModalCloseBtn = document.querySelector('#modalStackCloseButtonError');
+  const stackModalCloseBtn = document.querySelector(
+    '#modalStackCloseButtonError',
+  );
   if (stackModalCloseBtn) {
     stackModalCloseBtn.addEventListener('click', () => {
       stackModalWarning.hide();
@@ -105,7 +107,7 @@ export const stack = () => {
         inputElement.value = ""
       }
     }
-  }
+  };
 
   async function handleSubmit(event: Event) {
     event.preventDefault();

@@ -28,6 +28,7 @@ def create_app(environment="development"):
         quiz_blueprint,
         stack_blueprint,
         candidate_blueprint,
+        action_blueprint,
     )
     from app.common import models as m
 
@@ -57,6 +58,7 @@ def create_app(environment="development"):
     app.register_blueprint(quiz_blueprint)
     app.register_blueprint(stack_blueprint)
     app.register_blueprint(candidate_blueprint)
+    app.register_blueprint(action_blueprint)
 
     # Set up flask login.
     @login_manager.user_loader

@@ -109,9 +109,8 @@ export const questions = () => {
         const selectedOption = document.querySelector(
           `#select_option_${data.correct_answer_mark}`,
         );
-        const selectOptions = document.querySelectorAll(
-          '[id^="select_option"]',
-        );
+        const selectOptions: NodeListOf<HTMLOptionElement> =
+          document.querySelectorAll('[id^="select_option"]');
         const questionTitle = document.querySelector('#question-title');
         if (
           data &&
@@ -135,6 +134,7 @@ export const questions = () => {
           questionVariantFour.setAttribute('value', data.variants[3].text);
           selectOptions.forEach((opt, index) => {
             opt.textContent = `${index + 1}: ${data.variants[index].text}`;
+            opt.value = `${index + 1}`;
           });
           selectedOption.setAttribute('selected', 'true');
         }
