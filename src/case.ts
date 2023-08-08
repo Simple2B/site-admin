@@ -1,5 +1,5 @@
-import {Modal} from 'flowbite';
-import type {ModalOptions, ModalInterface} from 'flowbite';
+import { Modal } from 'flowbite';
+import type { ModalOptions, ModalInterface } from 'flowbite';
 
 export const cases = () => {
   const $addUserModalElement: HTMLElement =
@@ -9,12 +9,15 @@ export const cases = () => {
   const scrfInput: HTMLInputElement =
     document.querySelector('#csrf_token');
 
+  const $caseEditModalElement: HTMLElement =
+    document.querySelector('#caseEditModalElement');
+
   const modalOptions: ModalOptions = {
     backdrop: 'static',
     closable: true,
-    onHide: () => {},
-    onShow: () => {},
-    onToggle: () => {},
+    onHide: () => { },
+    onShow: () => { },
+    onToggle: () => { },
   };
 
   const addModal: ModalInterface = new Modal(
@@ -27,10 +30,13 @@ export const cases = () => {
     modalOptions
   )
 
-
+  const editCaseModal: ModalInterface = new Modal(
+    $caseEditModalElement,
+    modalOptions
+  )
 
   const stackButton = document.querySelector('#modal-stack-btn');
-  if ( stackButton ) {
+  if (stackButton) {
     stackButton.addEventListener('click', () => {
       stackModal.show();
     });
@@ -43,7 +49,6 @@ export const cases = () => {
       });
     }
   }
-
 
   // opening add user modal
   const addCaseButton = document.querySelector('#add-case-btn');
@@ -90,21 +95,63 @@ export const cases = () => {
       });
     });
   }
-  const editCaseButton = document.querySelectorAll('#edit-active-case-btn');
+  const editCaseButton = document.querySelectorAll('#edit-case-btn');
+
+  console.log(editCaseButton);
+
   editCaseButton.forEach(e => {
-    e.addEventListener('change', async () => {
-        let id = e.getAttribute('data-case-id');
-        const field = e.getAttribute('data-field');
-        const formData = new FormData();
-        formData.append('field', field);
-        formData.append("csrf_token", scrfInput ? scrfInput.value : '',)
-        const response = await fetch(`/case/update/${id}`, {
-          method: 'PATCH',
-          body: formData,
-        });
-        if (response.status == 200) {
-          location.reload();
+    e.addEventListener('click', async () => {
+      editCaseModal.show();
+
+      const caseId = e.getAttribute('data-edit-id');
+
+      console.log(caseId);
+
+      const response = await fetch(`/case/get/${caseId}`, {
+        method: 'GET',
+      });
+      const caseData = await response.json();
+      console.log(caseData._stacks.map((stack: any) => stack.name));
+
+      const listOfStacks = caseData._stacks.map((stack: any) => stack.name);
+
+      //TODO add check for elements
+      const title: HTMLInputElement = document.querySelector('#edit-case-title');
+      const subTitle: HTMLInputElement = document.querySelector('#edit-case-sub-title');
+      const description: HTMLInputElement = document.querySelector('#edit-case-description');
+      const role: HTMLInputElement = document.querySelector('#edit-case-role');
+      const isActive: HTMLInputElement = document.querySelector('#edit-case-is-active');
+      const isMain: HTMLInputElement = document.querySelector('#edit-case-is-main');
+      const stacks = document.querySelectorAll('#stacks input[type="checkbox"]');
+
+      const caseIdElement: HTMLInputElement = document.querySelector('#caseIdEdit');
+
+      stacks.forEach((checkbox: HTMLInputElement) => {
+        const label = checkbox.nextElementSibling.textContent;
+
+        if (listOfStacks.includes(label)) {
+          checkbox.checked = true;
         }
+      });
+
+      title.value = caseData.title;
+      subTitle.value = caseData.sub_title;
+      description.value = caseData.description;
+      role.value = caseData.role;
+      isActive.checked = caseData.is_active;
+      isMain.checked = caseData.is_main;
+
+      caseIdElement.setAttribute('value', caseId);
+
+      const editModalCloseBtn = document.querySelector(
+        '#editCaseModalClose',
+      );
+
+      if (editModalCloseBtn) {
+        editModalCloseBtn.addEventListener('click', () => {
+          editCaseModal.hide();
+        });
+      }
     });
   });
 };
