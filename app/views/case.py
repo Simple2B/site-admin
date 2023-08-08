@@ -1,6 +1,6 @@
 # flake8: noqa E712
 from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify
-from flask_login import login_required
+from flask_login import login_required, current_user
 import sqlalchemy as sa
 from werkzeug.datastructures import FileStorage
 from app.common.models.case_image import EnumCaseImageType
@@ -11,6 +11,7 @@ from app import forms as f
 from app.logger import log
 from app.database import db
 from app import s3bucket
+from app.controllers.actions import case_action_log
 
 
 bp = Blueprint("case", __name__, url_prefix="/case")
@@ -118,6 +119,7 @@ def create():
             session.add(new_case)
             session.commit()
             session.refresh(new_case)
+            case_action_log(m.Action.ActionsType.CREATE, new_case.id, current_user.id)
 
             for index, img in enumerate(screenshots):
                 new_screenshot = m.CaseScreenshot(
@@ -209,6 +211,7 @@ def delete(id: int):
 
     case.is_deleted = True
     db.session.commit()
+    case_action_log(m.Action.ActionsType.DELETE, case.id, current_user.id)
     log(log.INFO, "Case deleted. Case: [%s]", case)
     flash("Case deleted!", "success")
     return "ok", 200
