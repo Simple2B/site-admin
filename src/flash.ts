@@ -22,13 +22,17 @@ export function flash() {
    */
   const dismiss: DismissInterface = new Dismiss($targetEl, $triggerEl, options);
 
-  if ($targetEl && $triggerEl) {
+  if ($targetEl && $triggerEl && dismiss) {
+    let targetType = $targetEl.getAttribute('id');
     $triggerEl.addEventListener('click', () => {
-      console.log('click');
       dismiss.hide();
     });
     setTimeout(() => {
-      dismiss.hide();
+      if (targetType.includes('danger')) {
+        console.error('Error: ' + $targetEl.textContent);
+      } else {
+        dismiss.hide();
+      }
     }, 5000);
   }
 }

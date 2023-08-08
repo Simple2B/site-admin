@@ -46,11 +46,12 @@ def runner(app, client):
 @pytest.fixture
 def populate(client: FlaskClient):
     NUM_TEST_USERS = 100
-    for i in range(NUM_TEST_USERS):
-        m.SuperUser(
-            username=f"user{i+1}",
-            email=f"user{i+1}@mail.com",
-            password="password",
-        ).save(False)
-    db.session.commit()
+    with db.begin() as session:
+        for i in range(NUM_TEST_USERS):
+            user = m.SuperUser(
+                username=f"user{i+1}",
+                email=f"user{i+1}@mail.com",
+                password="password",
+            )
+            session.add(user)
     yield client

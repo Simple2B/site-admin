@@ -7,3 +7,4 @@ from .case import bp as case_blueprint
 from .quiz import bp as quiz_blueprint
 from .stack import bp as stack_blueprint
 from .candidate import bp as candidate_blueprint
+from .actions import bp as action_blueprint
