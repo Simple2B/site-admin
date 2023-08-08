@@ -7,9 +7,8 @@ from wtforms import (
     BooleanField,
     SelectMultipleField,
     widgets,
-    FileField,
     MultipleFileField,
-    ValidationError
+    ValidationError,
 )
 from wtforms.validators import DataRequired, Length
 
@@ -20,17 +19,17 @@ class MultiCheckboxField(SelectMultipleField):
 
 
 class NewCaseForm(FlaskForm):
+    id = StringField("id", [DataRequired()])
     title = StringField("title", [DataRequired(), Length(2, 32)])
     sub_title = StringField("sub_title", [DataRequired(), Length(2, 64)])
-    title_image = FileField('title_image', [DataRequired()])
-    sub_title_image = FileField('sub_title_image', [DataRequired()])
+    case_images = MultipleFileField("case_images", [DataRequired()])
     description = StringField("description", [DataRequired(), Length(1, 512)])
     is_active = BooleanField("is_active")
     is_main = BooleanField("is_main")
     project_link = StringField("project_link")
     role = StringField("role", [DataRequired(), Length(2, 32)])
-    stacks = MultiCheckboxField('stacks')
-    sub_images = MultipleFileField("sub_images", [DataRequired()])
+    stacks = MultiCheckboxField("stacks")
+    _screenshots = MultipleFileField("screenshots", [DataRequired()])
 
     submit = SubmitField("Save")
 
@@ -51,5 +50,5 @@ class NewCaseForm(FlaskForm):
                 raise ValidationError("File must be an image")
 
 
-class UpdateCase(FlaskForm):
+class UpdateCase(NewCaseForm):
     field = StringField("filed")

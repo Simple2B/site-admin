@@ -1,12 +1,5 @@
 # flake8: noqa E712
-from flask import (
-    Blueprint,
-    render_template,
-    request,
-    flash,
-    redirect,
-    url_for,
-)
+from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify
 from flask_login import login_required
 import sqlalchemy as sa
 from werkzeug.datastructures import FileStorage
@@ -59,6 +52,18 @@ def get_all():
         search_query=q,
         form=form,
     )
+
+
+@bp.route("/get/<int:id>", methods=["GET"])
+@login_required
+def get(id: int):
+    case: m.Case = db.session.scalar(m.Case.select().where(m.Case.id == id))
+    if not case:
+        log(log.INFO, "There is no case with id: [%s]", id)
+        flash("There is no such case", "danger")
+        return "no case", 404
+
+    return jsonify(case.as_dict())
 
 
 @bp.route("/create", methods=["POST"])
@@ -165,23 +170,25 @@ def create():
     return redirect(url_for("case.get_all"))
 
 
-@bp.route("/update/<int:id>", methods=["PATCH"])
+@bp.route("/update", methods=["POST"])
 @login_required
-def update(id: int):
+def update():
     form = f.UpdateCase()
-    case = db.session.get(m.Case, id)
+    case = db.session.get(m.Case, form.data["id"])
+
+    form.stacks.choices = [(str(s.id), s.name) for s in db.session.query(m.Stack).all()]
     if not case:
         log(log.INFO, "There is no case with id: [%s]", id)
         flash("There is no such case", "danger")
         return "no case", 404
 
     if form.validate_on_submit():
-        field = form.field.data
-        if field == "is_active":
-            case.is_active = not case.is_active
-        if field == "is_main":
-            case.is_main = not case.is_main
-        db.session.commit()
+        # field = form.field.data
+        # if field == "is_active":
+        #     case.is_active = not case.is_active
+        # if field == "is_main":
+        #     case.is_main = not case.is_main
+        # db.session.commit()
         log(log.INFO, "Case updated. Case: [%s]", case)
         flash("Case updated!", "success")
         return "ok", 200
