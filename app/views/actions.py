@@ -31,10 +31,10 @@ def get_all():
         .where(m.Action.created_at > thirty_days_ago)
         .select_from(m.Action)
     )
-    if sort:
+    if sort and sort != "ALL":
         query = query.where(m.Action.action == sort)
         count_query = count_query.where(m.Action.action == sort)
-    if entity:
+    if entity and entity != "ALL":
         query = query.where(m.Action.entity == entity)
         count_query = count_query.where(m.Action.entity == entity)
     pagination = create_pagination(total=db.session.scalar(count_query))
