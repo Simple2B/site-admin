@@ -6,7 +6,7 @@
 poetry install
 ```
 
-2. Need to set the up [site](https://github.com/Simple2B/site) project (need to up db, and back to create migrations)
+2. Need to set up the [site](https://github.com/Simple2B/site) project (need to up db, and back to create migrations)
 3. Run in the site project
 
 ```bash
