@@ -10,6 +10,7 @@ poetry install
 3. Run in the site project
 
 ```bash
+docker compose up -d db back
 docker compose exec back inv create-superuser
 ```
 
