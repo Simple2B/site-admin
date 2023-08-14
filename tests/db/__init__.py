@@ -7,7 +7,7 @@ from app.common import models as m
 
 faker = Faker()
 
-NUM_TEST_USERS = 100
+NUM_TEST_USERS = 10
 
 
 def gen_test_items(num_objects: int) -> Generator[str, None, None]:
