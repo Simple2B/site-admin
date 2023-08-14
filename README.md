@@ -1,4 +1,4 @@
-# Simple Flask App
+# Site Admin
 
 1. Run
 
