@@ -17,18 +17,13 @@ class BaseConfig(BaseSettings):
     WTF_CSRF_ENABLED: bool = False
 
     # Mail config
-    MAIL_SERVER: str
-    MAIL_PORT: int
-    MAIL_USE_TLS: bool
-    MAIL_USE_SSL: bool
-    MAIL_USERNAME: str
-    MAIL_PASSWORD: str
-    MAIL_DEFAULT_SENDER: str
-
-    # Super admin
-    ADMIN_USERNAME: str
-    ADMIN_EMAIL: str
-    ADMIN_PASSWORD: str
+    MAIL_SERVER: str = ""
+    MAIL_PORT: int = 465
+    MAIL_USE_TLS: bool = False
+    MAIL_USE_SSL: bool = True
+    MAIL_USERNAME: str = ""
+    MAIL_PASSWORD: str = ""
+    MAIL_DEFAULT_SENDER: str = ""
 
     # Pagination
     DEFAULT_PAGE_SIZE: int

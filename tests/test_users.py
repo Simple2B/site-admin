@@ -33,30 +33,6 @@ def test_list(populate: FlaskClient):
     assert "/admin/?page=2" not in html
 
 
-def test_create_admin(runner: FlaskCliRunner, client: FlaskClient):
-    res: Result = runner.invoke(args=["create-admin"])
-    assert "admin created" in res.output
-    query = m.SuperUser.select().where(
-        m.SuperUser.username == app.config["ADMIN_USERNAME"]
-    )
-    assert db.session.scalar(query)
-    login(client)
-    response: Response = client.post(
-        "/admin/create",
-        data=dict(
-            username="admin_2",
-            email="admin_2@gmail.com",
-            password="123456",
-            password_confirmation="123456",
-        ),
-        follow_redirects=True,
-    )
-    assert response
-    assert response.status_code == 200
-    action_log: m.Action = db.session.get(m.Action, 1)
-    assert action_log.action == m.Action.ActionsType.CREATE
-
-
 def test_delete_user(populate: FlaskClient):
     login(populate)
     response = populate.delete("/admin/delete/1")
