@@ -1,13 +1,13 @@
 # flake8: noqa E712
 from flask import Blueprint, render_template, request, current_app, flash
-from flask_login import login_required, current_user
+from flask_login import login_required
 import sqlalchemy as sa
 from app.controllers import create_pagination
 
 from app.common import models as m
 from app.database import db
 from app.logger import log
-from app.controllers.actions import candidate_action_log
+from app.controllers import ActionLogs
 
 
 bp = Blueprint("candidate", __name__, url_prefix="/candidate")
@@ -81,7 +81,7 @@ def delete(id: int):
     candidate.git_hub_id = f"{candidate.git_hub_id}@"
     candidate.username = f"{candidate.username}@deleted"
     db.session.commit()
-    candidate_action_log(m.Action.ActionsType.DELETE, candidate.id, current_user.id)
+    ActionLogs.create_candidate_log(m.ActionsType.DELETE, candidate.id)
 
     log(log.INFO, "Candidate deleted. Candidate: [%s]", candidate)
     flash("User deleted!", "success")

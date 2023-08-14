@@ -45,7 +45,7 @@ def runner(app, client):
 
 @pytest.fixture
 def populate(client: FlaskClient):
-    NUM_TEST_USERS = 100
+    NUM_TEST_USERS = 15
     with db.begin() as session:
         for i in range(NUM_TEST_USERS):
             user = m.SuperUser(
