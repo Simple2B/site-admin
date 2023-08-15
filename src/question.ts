@@ -87,41 +87,27 @@ export const questions = () => {
           '#close-confirm-modal-btn',
         );
 
-        const confirmCallback = async () => {
-          const response = await fetch(`/quiz/delete/${questionId}`, {
-            method: 'DELETE',
-          });
-          if (response.status == 200) {
-            location.reload();
-          }
-        };
+        if (
+          agreeConfirmModalBtn &&
+          disagreeConfirmModalBtn &&
+          closeConfirmModalBtn
+        ) {
+          const confirmCallback = async () => {
+            const response = await fetch(`/quiz/delete/${questionId}`, {
+              method: 'DELETE',
+            });
+            if (response.status == 200) {
+              location.reload();
+            }
+          };
 
-        if (agreeConfirmModalBtn) {
+          const notConfirmCallback = () => {
+            confirmModal.hide();
+            agreeConfirmModalBtn.removeEventListener('click', confirmCallback);
+          };
           agreeConfirmModalBtn.addEventListener('click', confirmCallback);
-        }
-
-        if (disagreeConfirmModalBtn) {
-          disagreeConfirmModalBtn.addEventListener('click', () => {
-            confirmModal.hide();
-            if (agreeConfirmModalBtn) {
-              agreeConfirmModalBtn.removeEventListener(
-                'click',
-                confirmCallback,
-              );
-            }
-          });
-        }
-
-        if (closeConfirmModalBtn) {
-          closeConfirmModalBtn.addEventListener('click', () => {
-            confirmModal.hide();
-            if (agreeConfirmModalBtn) {
-              agreeConfirmModalBtn.removeEventListener(
-                'click',
-                confirmCallback,
-              );
-            }
-          });
+          disagreeConfirmModalBtn.addEventListener('click', notConfirmCallback);
+          closeConfirmModalBtn.addEventListener('click', notConfirmCallback);
         }
       });
     });

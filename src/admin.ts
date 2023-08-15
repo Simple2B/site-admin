@@ -49,6 +49,7 @@ export const admin = () => {
       button.addEventListener('click', async () => {
         console.log('delete admin');
         confirmModal.show();
+        const id = button.getAttribute('data-admin-id');
         const confirmModalCloseBtn = document.querySelector(
           '#close-confirm-modal-btn',
         );
@@ -58,6 +59,11 @@ export const admin = () => {
         const disagreeConfirmModalBtn = document.querySelector(
           '#disagree-confirm-modal-btn',
         );
+
+        const confirmModalText = document.querySelector('#confirm-modal-text');
+        if (confirmModalText) {
+          confirmModalText.innerHTML = `Are you sure you want to delete admin №${id}?`;
+        }
 
         if (
           confirmModalCloseBtn &&

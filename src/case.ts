@@ -56,6 +56,7 @@ export const cases = () => {
     const caseConfirmModalText: HTMLElement = document.querySelector(
       '#confirm-modal-text',
     );
+    const closeModalBtn = document.querySelector('#close-confirm-modal-btn');
 
     const isCaseActive = caseStatusAtr === 'True';
 
@@ -76,6 +77,10 @@ export const cases = () => {
       '#agree-confirm-modal-btn',
     );
 
+    const disagreeConfirmModalBtn = document.querySelector(
+      '#disagree-confirm-modal-btn',
+    );
+
     const confirmCallback = async () => {
       const formData = new FormData();
       formData.append('field', dataFiled);
@@ -89,31 +94,16 @@ export const cases = () => {
       }
     };
 
-    if (agreeConfirmModalBtn) {
+    const notConfirmCallback = async () => {
+      confirmCaseModal.hide();
+      agreeConfirmModalBtn.removeEventListener('click', confirmCallback);
+    };
+
+    if (agreeConfirmModalBtn && disagreeConfirmModalBtn && closeModalBtn) {
       agreeConfirmModalBtn.addEventListener('click', confirmCallback);
-    }
 
-    const disagreeConfirmModalBtn = document.querySelector(
-      '#disagree-confirm-modal-btn',
-    );
-    if (disagreeConfirmModalBtn) {
-      disagreeConfirmModalBtn.addEventListener('click', () => {
-        confirmCaseModal.hide();
-        agreeConfirmModalBtn &&
-          agreeConfirmModalBtn.removeEventListener('click', confirmCallback);
-      });
-    }
-
-    const activateModalCloseBtn = document.querySelector(
-      '#close-confirm-modal-btn',
-    );
-
-    if (activateModalCloseBtn) {
-      activateModalCloseBtn.addEventListener('click', () => {
-        confirmCaseModal.hide();
-        agreeConfirmModalBtn &&
-          agreeConfirmModalBtn.removeEventListener('click', confirmCallback);
-      });
+      disagreeConfirmModalBtn.addEventListener('click', notConfirmCallback);
+      closeModalBtn.addEventListener('click', notConfirmCallback);
     }
   };
 
@@ -186,52 +176,36 @@ export const cases = () => {
         const caseConfirmModalText: HTMLSpanElement = document.querySelector(
           '#confirm-modal-text',
         );
-        caseConfirmModalText.textContent = `Are you sure you want to delete case ${caseId}?`;
-
         const agreeConfirmModalBtn = document.querySelector(
           '#agree-confirm-modal-btn',
         );
-
-        const confirmCallback = async () => {
-          const response = await fetch(`/case/delete/${caseId}`, {
-            method: 'DELETE',
-          });
-          if (response.status == 200) {
-            location.reload();
-          }
-        };
-
-        if (agreeConfirmModalBtn) {
-          agreeConfirmModalBtn.addEventListener('click', confirmCallback);
-        }
-
         const disagreeConfirmModalBtn = document.querySelector(
           '#disagree-confirm-modal-btn',
         );
-        if (disagreeConfirmModalBtn) {
-          disagreeConfirmModalBtn.addEventListener('click', () => {
-            confirmCaseModal.hide();
-            agreeConfirmModalBtn &&
-              agreeConfirmModalBtn.removeEventListener(
-                'click',
-                confirmCallback,
-              );
-          });
-        }
-
-        const activateModalCloseBtn = document.querySelector(
+        const closeModalBtn = document.querySelector(
           '#close-confirm-modal-btn',
         );
 
-        if (activateModalCloseBtn) {
-          activateModalCloseBtn.addEventListener('click', () => {
+        caseConfirmModalText.textContent = `Are you sure you want to delete case ${caseId}?`;
+
+        if (agreeConfirmModalBtn && disagreeConfirmModalBtn && closeModalBtn) {
+          const confirmCallback = async () => {
+            const response = await fetch(`/case/delete/${caseId}`, {
+              method: 'DELETE',
+            });
+            if (response.status == 200) {
+              location.reload();
+            }
+          };
+
+          const notConfirmCallback = async () => {
             confirmCaseModal.hide();
-            agreeConfirmModalBtn &&
-              agreeConfirmModalBtn.removeEventListener(
-                'click',
-                confirmCallback,
-              );
-          });
+            agreeConfirmModalBtn.removeEventListener('click', confirmCallback);
+          };
+          agreeConfirmModalBtn.addEventListener('click', confirmCallback);
+
+          disagreeConfirmModalBtn.addEventListener('click', notConfirmCallback);
+          closeModalBtn.addEventListener('click', notConfirmCallback);
         }
       });
     });
