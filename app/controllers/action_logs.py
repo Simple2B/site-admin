@@ -13,8 +13,12 @@ class ActionLogs:
         entity: m.Entity,
         entity_id: int,
         action: m.ActionsType,
-        text: str,
+        text: str | None,
     ):
+
+        if not text:
+            log(log.WARNING, "Action log text is empty")
+            return
         action = m.Action(
             text=text,
             user_id=current_user.id,
@@ -40,6 +44,9 @@ class ActionLogs:
 
             case m.ActionsType.DELETE:
                 text = f"{current_user.username} delete case {case.title}"
+
+            case m.ActionsType.EDIT:
+                text = f"{current_user.username} edit case {case.title}"
 
         ActionLogs._create(m.Entity.CASE, entity_id, action, text)
 

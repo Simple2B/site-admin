@@ -130,7 +130,6 @@ def create():
 
                 session.add(new_screenshot)
                 session.commit()
-                session.refresh(new_screenshot)
 
             if main_image and preview_image:
                 new_main_image = m.CaseImage(
@@ -147,11 +146,8 @@ def create():
                 )
 
                 session.add(new_main_image)
-                session.commit()
-                session.refresh(new_main_image)
                 session.add(new_preview_image)
                 session.commit()
-                session.refresh(new_preview_image)
             else:
                 flash("No uploaded image", "danger")
                 return redirect(url_for("case.get_all"))
@@ -172,26 +168,26 @@ def create():
     return redirect(url_for("case.get_all"))
 
 
-@bp.route("/update", methods=["POST"])
+@bp.route("/update-status/<int:id>", methods=["PATCH"])
 @login_required
-def update():
+def update(id: int):
     form = f.UpdateCase()
-    case = db.session.get(m.Case, form.data["id"])
+    case = db.session.get(m.Case, id)
 
-    form.stacks.choices = [(str(s.id), s.name) for s in db.session.query(m.Stack).all()]
     if not case:
         log(log.INFO, "There is no case with id: [%s]", id)
         flash("There is no such case", "danger")
         return "no case", 404
 
     if form.validate_on_submit():
-        # field = form.field.data
-        # if field == "is_active":
-        #     case.is_active = not case.is_active
-        # if field == "is_main":
-        #     case.is_main = not case.is_main
-        # db.session.commit()
+        field = form.field.data
+        if field == "is_active":
+            case.is_active = not case.is_active
+        if field == "is_main":
+            case.is_main = not case.is_main
+        db.session.commit()
         log(log.INFO, "Case updated. Case: [%s]", case)
+        ActionLogs.create_case_log(m.ActionsType.EDIT, case.id)
         flash("Case updated!", "success")
         return "ok", 200
     else:
@@ -204,7 +200,7 @@ def update():
 @login_required
 def delete(id: int):
     case = db.session.get(m.Case, id)
-    if not case:
+    if not case or case.is_deleted:
         log(log.INFO, "There is no case with id: [%s]", id)
         flash("There is no such case", "danger")
         return "no case", 404

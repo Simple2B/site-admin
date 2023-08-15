@@ -6,6 +6,9 @@ export const questions = () => {
     document.querySelector('#addQuestionModal');
   const $editQuestionModalElement: HTMLElement =
     document.querySelector('#editQuestionModal');
+  const $confirmModal: HTMLElement = document.querySelector(
+    '#confirm-modal-element',
+  );
 
   const addModalOptions: ModalOptions = {
     backdrop: 'dynamic',
@@ -30,6 +33,8 @@ export const questions = () => {
     $editQuestionModalElement,
     modalOptions,
   );
+
+  const confirmModal: ModalInterface = new Modal($confirmModal, modalOptions);
 
   // opening add user modal
   const addQuestionButton = document.querySelector('#add-question-btn');
@@ -66,14 +71,57 @@ export const questions = () => {
 
     deleteButtons.forEach(e => {
       e.addEventListener('click', async () => {
-        if (confirm('Are sure?')) {
-          let id = e.getAttribute('data-question-id');
-          const response = await fetch(`/quiz/delete/${id}`, {
+        confirmModal.show();
+        const caseConfirmModalText: HTMLSpanElement = document.querySelector(
+          '#confirm-modal-text',
+        );
+        const questionId = e.getAttribute('data-question-id');
+        caseConfirmModalText.textContent = `Are you sure you want to delete question ${questionId}?`;
+        const agreeConfirmModalBtn = document.querySelector(
+          '#agree-confirm-modal-btn',
+        );
+        const disagreeConfirmModalBtn = document.querySelector(
+          '#disagree-confirm-modal-btn',
+        );
+        const closeConfirmModalBtn = document.querySelector(
+          '#close-confirm-modal-btn',
+        );
+
+        const confirmCallback = async () => {
+          const response = await fetch(`/quiz/delete/${questionId}`, {
             method: 'DELETE',
           });
           if (response.status == 200) {
             location.reload();
           }
+        };
+
+        if (agreeConfirmModalBtn) {
+          agreeConfirmModalBtn.addEventListener('click', confirmCallback);
+        }
+
+        if (disagreeConfirmModalBtn) {
+          disagreeConfirmModalBtn.addEventListener('click', () => {
+            confirmModal.hide();
+            if (agreeConfirmModalBtn) {
+              agreeConfirmModalBtn.removeEventListener(
+                'click',
+                confirmCallback,
+              );
+            }
+          });
+        }
+
+        if (closeConfirmModalBtn) {
+          closeConfirmModalBtn.addEventListener('click', () => {
+            confirmModal.hide();
+            if (agreeConfirmModalBtn) {
+              agreeConfirmModalBtn.removeEventListener(
+                'click',
+                confirmCallback,
+              );
+            }
+          });
         }
       });
     });

@@ -1,23 +1,26 @@
-import { Modal } from 'flowbite';
-import type { ModalOptions, ModalInterface } from 'flowbite';
+import {Modal} from 'flowbite';
+import type {ModalOptions, ModalInterface} from 'flowbite';
 
 export const cases = () => {
   const $addUserModalElement: HTMLElement =
     document.querySelector('#addCaseModal');
-  const $stackModalElement: HTMLElement =
-    document.querySelector('#stackModal');
-  const scrfInput: HTMLInputElement =
-    document.querySelector('#csrf_token');
+  const $stackModalElement: HTMLElement = document.querySelector('#stackModal');
+  const scrfInput: HTMLInputElement = document.querySelector('#csrf_token');
 
-  const $caseEditModalElement: HTMLElement =
-    document.querySelector('#caseEditModalElement');
+  const $caseEditModalElement: HTMLElement = document.querySelector(
+    '#caseEditModalElement',
+  );
+
+  const $confirmCaseModalElement: HTMLElement = document.querySelector(
+    '#confirm-modal-element',
+  );
 
   const modalOptions: ModalOptions = {
     backdrop: 'static',
     closable: true,
-    onHide: () => { },
-    onShow: () => { },
-    onToggle: () => { },
+    onHide: () => {},
+    onShow: () => {},
+    onToggle: () => {},
   };
 
   const addModal: ModalInterface = new Modal(
@@ -27,13 +30,108 @@ export const cases = () => {
 
   const stackModal: ModalInterface = new Modal(
     $stackModalElement,
-    modalOptions
-  )
+    modalOptions,
+  );
 
   const editCaseModal: ModalInterface = new Modal(
     $caseEditModalElement,
-    modalOptions
-  )
+    modalOptions,
+  );
+
+  const confirmCaseModal: ModalInterface = new Modal(
+    $confirmCaseModalElement,
+    modalOptions,
+  );
+
+  // callBack on btn is_active and is_main
+  const caseConfirmModalListener = (
+    event: MouseEvent,
+    btnElement: HTMLInputElement,
+  ) => {
+    event.preventDefault();
+    confirmCaseModal.show();
+    const caseId = btnElement.getAttribute('data-case-id');
+    const caseStatusAtr = btnElement.getAttribute('data-case-status');
+    const dataFiled = btnElement.getAttribute('data-field');
+    const caseConfirmModalText: HTMLElement = document.querySelector(
+      '#confirm-modal-text',
+    );
+
+    const isCaseActive = caseStatusAtr === 'True';
+
+    if (caseConfirmModalText) {
+      const text = 'Are you sure you want to';
+      if (dataFiled === 'is_active') {
+        caseConfirmModalText.textContent = isCaseActive
+          ? `${text} deactivate case ${caseId}`
+          : `${text} activate case ${caseId}`;
+      } else if (dataFiled === 'is_main') {
+        caseConfirmModalText.textContent = isCaseActive
+          ? `${text} deactivate main case ${caseId}`
+          : `${text} activate main case ${caseId}`;
+      }
+    }
+
+    const agreeConfirmModalBtn = document.querySelector(
+      '#agree-confirm-modal-btn',
+    );
+
+    const confirmCallback = async () => {
+      const formData = new FormData();
+      formData.append('field', dataFiled);
+      formData.append('csrf_token', scrfInput.value);
+      const response = await fetch(`/case/update-status/${caseId}`, {
+        method: 'PATCH',
+        body: formData,
+      });
+      if (response.status == 200) {
+        location.reload();
+      }
+    };
+
+    if (agreeConfirmModalBtn) {
+      agreeConfirmModalBtn.addEventListener('click', confirmCallback);
+    }
+
+    const disagreeConfirmModalBtn = document.querySelector(
+      '#disagree-confirm-modal-btn',
+    );
+    if (disagreeConfirmModalBtn) {
+      disagreeConfirmModalBtn.addEventListener('click', () => {
+        confirmCaseModal.hide();
+        agreeConfirmModalBtn &&
+          agreeConfirmModalBtn.removeEventListener('click', confirmCallback);
+      });
+    }
+
+    const activateModalCloseBtn = document.querySelector(
+      '#close-confirm-modal-btn',
+    );
+
+    if (activateModalCloseBtn) {
+      activateModalCloseBtn.addEventListener('click', () => {
+        confirmCaseModal.hide();
+        agreeConfirmModalBtn &&
+          agreeConfirmModalBtn.removeEventListener('click', confirmCallback);
+      });
+    }
+  };
+
+  const activateCaseButton: NodeListOf<HTMLInputElement> =
+    document.querySelectorAll('#activate-case-btn');
+  activateCaseButton.forEach(btnElement => {
+    btnElement.addEventListener('click', e =>
+      caseConfirmModalListener(e, btnElement),
+    );
+  });
+
+  const mainCaseButton: NodeListOf<HTMLInputElement> =
+    document.querySelectorAll('#main-case-btn');
+  mainCaseButton.forEach(btnElement => {
+    btnElement.addEventListener('click', e =>
+      caseConfirmModalListener(e, btnElement),
+    );
+  });
 
   const stackButton = document.querySelector('#modal-stack-btn');
   if (stackButton) {
@@ -83,21 +181,62 @@ export const cases = () => {
 
     deleteButtons.forEach(e => {
       e.addEventListener('click', async () => {
-        if (confirm('Are sure?')) {
-          let id = e.getAttribute('data-case-id');
-          const response = await fetch(`/case/delete/${id}`, {
+        confirmCaseModal.show();
+        const caseId = e.getAttribute('data-case-id');
+        const caseConfirmModalText: HTMLSpanElement = document.querySelector(
+          '#confirm-modal-text',
+        );
+        caseConfirmModalText.textContent = `Are you sure you want to delete case ${caseId}?`;
+
+        const agreeConfirmModalBtn = document.querySelector(
+          '#agree-confirm-modal-btn',
+        );
+
+        const confirmCallback = async () => {
+          const response = await fetch(`/case/delete/${caseId}`, {
             method: 'DELETE',
           });
           if (response.status == 200) {
             location.reload();
           }
+        };
+
+        if (agreeConfirmModalBtn) {
+          agreeConfirmModalBtn.addEventListener('click', confirmCallback);
+        }
+
+        const disagreeConfirmModalBtn = document.querySelector(
+          '#disagree-confirm-modal-btn',
+        );
+        if (disagreeConfirmModalBtn) {
+          disagreeConfirmModalBtn.addEventListener('click', () => {
+            confirmCaseModal.hide();
+            agreeConfirmModalBtn &&
+              agreeConfirmModalBtn.removeEventListener(
+                'click',
+                confirmCallback,
+              );
+          });
+        }
+
+        const activateModalCloseBtn = document.querySelector(
+          '#close-confirm-modal-btn',
+        );
+
+        if (activateModalCloseBtn) {
+          activateModalCloseBtn.addEventListener('click', () => {
+            confirmCaseModal.hide();
+            agreeConfirmModalBtn &&
+              agreeConfirmModalBtn.removeEventListener(
+                'click',
+                confirmCallback,
+              );
+          });
         }
       });
     });
   }
   const editCaseButton = document.querySelectorAll('#edit-case-btn');
-
-  console.log(editCaseButton);
 
   editCaseButton.forEach(e => {
     e.addEventListener('click', async () => {
@@ -116,15 +255,26 @@ export const cases = () => {
       const listOfStacks = caseData._stacks.map((stack: any) => stack.name);
 
       //TODO add check for elements
-      const title: HTMLInputElement = document.querySelector('#edit-case-title');
-      const subTitle: HTMLInputElement = document.querySelector('#edit-case-sub-title');
-      const description: HTMLInputElement = document.querySelector('#edit-case-description');
+      const title: HTMLInputElement =
+        document.querySelector('#edit-case-title');
+      const subTitle: HTMLInputElement = document.querySelector(
+        '#edit-case-sub-title',
+      );
+      const description: HTMLInputElement = document.querySelector(
+        '#edit-case-description',
+      );
       const role: HTMLInputElement = document.querySelector('#edit-case-role');
-      const isActive: HTMLInputElement = document.querySelector('#edit-case-is-active');
-      const isMain: HTMLInputElement = document.querySelector('#edit-case-is-main');
-      const stacks = document.querySelectorAll('#stacks input[type="checkbox"]');
+      const isActive: HTMLInputElement = document.querySelector(
+        '#edit-case-is-active',
+      );
+      const isMain: HTMLInputElement =
+        document.querySelector('#edit-case-is-main');
+      const stacks = document.querySelectorAll(
+        '#stacks input[type="checkbox"]',
+      );
 
-      const caseIdElement: HTMLInputElement = document.querySelector('#caseIdEdit');
+      const caseIdElement: HTMLInputElement =
+        document.querySelector('#caseIdEdit');
 
       stacks.forEach((checkbox: HTMLInputElement) => {
         const label = checkbox.nextElementSibling.textContent;
@@ -143,9 +293,7 @@ export const cases = () => {
 
       caseIdElement.setAttribute('value', caseId);
 
-      const editModalCloseBtn = document.querySelector(
-        '#editCaseModalClose',
-      );
+      const editModalCloseBtn = document.querySelector('#editCaseModalClose');
 
       if (editModalCloseBtn) {
         editModalCloseBtn.addEventListener('click', () => {
