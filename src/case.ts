@@ -84,7 +84,7 @@ export const cases = () => {
     const confirmCallback = async () => {
       const formData = new FormData();
       formData.append('field', dataFiled);
-      formData.append('csrf_token', scrfInput.value);
+      formData.append('csrf_token', scrfInput ? scrfInput.value : '');
       const response = await fetch(`/case/update-status/${caseId}`, {
         method: 'PATCH',
         body: formData,
@@ -220,15 +220,14 @@ export const cases = () => {
 
       console.log(caseId);
 
-      const response = await fetch(`/case/get/${caseId}`, {
+      const response = await fetch(`/case/${caseId}`, {
         method: 'GET',
       });
       const caseData = await response.json();
-      console.log(caseData._stacks.map((stack: any) => stack.name));
 
-      const listOfStacks = caseData._stacks.map((stack: any) => stack.name);
+      const listOfStacks = caseData.stacks;
+      const listOfScreenshots = caseData.screenshots;
 
-      //TODO add check for elements
       const title: HTMLInputElement =
         document.querySelector('#edit-case-title');
       const subTitle: HTMLInputElement = document.querySelector(
@@ -246,6 +245,24 @@ export const cases = () => {
       const stacks = document.querySelectorAll(
         '#stacks input[type="checkbox"]',
       );
+      const mainImage: HTMLImageElement = document.querySelector(
+        '#edit-case-main-image',
+      );
+      const previewImage: HTMLImageElement = document.querySelector(
+        '#edit-case-preview-image',
+      );
+
+      const divCaseScreenShoots = document.querySelector(
+        '#edit-case-screenshots',
+      );
+
+      listOfScreenshots.forEach((screenshot: string) => {
+        const img = document.createElement('img');
+        img.src = screenshot;
+        if (img) {
+          divCaseScreenShoots.appendChild(img);
+        }
+      });
 
       const caseIdElement: HTMLInputElement =
         document.querySelector('#caseIdEdit');
@@ -264,6 +281,8 @@ export const cases = () => {
       role.value = caseData.role;
       isActive.checked = caseData.is_active;
       isMain.checked = caseData.is_main;
+      mainImage.src = caseData.main_image;
+      previewImage.src = caseData.preview_image;
 
       caseIdElement.setAttribute('value', caseId);
 
@@ -272,6 +291,9 @@ export const cases = () => {
       if (editModalCloseBtn) {
         editModalCloseBtn.addEventListener('click', () => {
           editCaseModal.hide();
+          while (divCaseScreenShoots.firstChild) {
+            divCaseScreenShoots.removeChild(divCaseScreenShoots.firstChild);
+          }
         });
       }
     });

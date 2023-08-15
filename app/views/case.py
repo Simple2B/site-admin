@@ -7,6 +7,7 @@ from app.common.models.case_image import EnumCaseImageType
 from app.controllers import create_pagination
 
 from app.common import models as m
+from app import schema as s
 from app import forms as f
 from app.logger import log
 from app.database import db
@@ -55,7 +56,7 @@ def get_all():
     )
 
 
-@bp.route("/get/<int:id>", methods=["GET"])
+@bp.route("/<int:id>", methods=["GET"])
 @login_required
 def get(id: int):
     case: m.Case = db.session.scalar(m.Case.select().where(m.Case.id == id))
@@ -64,7 +65,7 @@ def get(id: int):
         flash("There is no such case", "danger")
         return "no case", 404
 
-    return jsonify(case.as_dict())
+    return s.CaseOut.from_orm(case).json()
 
 
 @bp.route("/create", methods=["POST"])
@@ -106,54 +107,53 @@ def create():
                     img_type="screenshots",
                 )
                 screenshots.append(file_image)
-
-            new_case = m.Case(
-                title=form.title.data,
-                sub_title=form.sub_title.data,
-                description=form.description.data,
-                is_active=form.is_active.data,
-                is_main=form.is_main.data,
-                project_link=form.project_link.data,
-                role=form.role.data,
-            )
-            session.add(new_case)
-            session.commit()
-            session.refresh(new_case)
-            ActionLogs.create_case_log(m.ActionsType.CREATE, new_case.id)
-
-            for index, img in enumerate(screenshots):
-                new_screenshot = m.CaseScreenshot(
-                    url=img,
-                    case_id=new_case.id,
-                    origin_file_name=f"Screenshot {index}",
-                )
-
-                session.add(new_screenshot)
-                session.commit()
-
-            if main_image and preview_image:
-                new_main_image = m.CaseImage(
-                    url=main_image,
-                    origin_file_name=main_image_obj.filename,
-                    case_id=new_case.id,
-                    type_of_image=EnumCaseImageType.case_main_image,
-                )
-                new_preview_image = m.CaseImage(
-                    url=preview_image,
-                    origin_file_name=preview_image_obj.filename,
-                    case_id=new_case.id,
-                    type_of_image=EnumCaseImageType.case_preview_image,
-                )
-
-                session.add(new_main_image)
-                session.add(new_preview_image)
-                session.commit()
-            else:
-                flash("No uploaded image", "danger")
-                return redirect(url_for("case.get_all"))
-
         except TypeError as error:
             flash(error.args[0], "danger")
+            return redirect(url_for("case.get_all"))
+
+        new_case = m.Case(
+            title=form.title.data,
+            sub_title=form.sub_title.data,
+            description=form.description.data,
+            is_active=form.is_active.data,
+            is_main=form.is_main.data,
+            project_link=form.project_link.data,
+            role=form.role.data,
+        )
+        session.add(new_case)
+        session.commit()
+        session.refresh(new_case)
+        ActionLogs.create_case_log(m.ActionsType.CREATE, new_case.id)
+
+        for index, img in enumerate(screenshots):
+            new_screenshot = m.CaseScreenshot(
+                url=img,
+                case_id=new_case.id,
+                origin_file_name=f"Screenshot {index}",
+            )
+
+            session.add(new_screenshot)
+            session.commit()
+
+        if main_image and preview_image:
+            new_main_image = m.CaseImage(
+                url=main_image,
+                origin_file_name=main_image_obj.filename,
+                case_id=new_case.id,
+                type_of_image=EnumCaseImageType.case_main_image,
+            )
+            new_preview_image = m.CaseImage(
+                url=preview_image,
+                origin_file_name=preview_image_obj.filename,
+                case_id=new_case.id,
+                type_of_image=EnumCaseImageType.case_preview_image,
+            )
+
+            session.add(new_main_image)
+            session.add(new_preview_image)
+            session.commit()
+        else:
+            flash("No uploaded image", "danger")
             return redirect(url_for("case.get_all"))
 
         for id in form.stacks.data:
