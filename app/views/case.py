@@ -7,6 +7,7 @@ from app.common.models.case_image import EnumCaseImageType
 from app.controllers import create_pagination
 
 from app.common import models as m
+from app import schema as s
 from app import forms as f
 from app.logger import log
 from app.database import db
@@ -55,16 +56,16 @@ def get_all():
     )
 
 
-@bp.route("/get/<int:id>", methods=["GET"])
+@bp.route("/<int:id>", methods=["GET"])
 @login_required
-def get(id: int):
+def get_case(id: int):
     case: m.Case = db.session.scalar(m.Case.select().where(m.Case.id == id))
     if not case:
         log(log.INFO, "There is no case with id: [%s]", id)
         flash("There is no such case", "danger")
         return "no case", 404
 
-    return jsonify(case.as_dict())
+    return s.CaseOut.from_orm(case).json()
 
 
 @bp.route("/create", methods=["POST"])
@@ -83,20 +84,20 @@ def create():
         case_screenshots: list[FileStorage] = form.sub_images.data
 
         try:
-            main_image = s3bucket.upload_cases_imgs(
+            main_image_url = s3bucket.upload_cases_imgs(
                 file=main_image_obj,
                 file_name=main_image_obj.filename,
                 case_name=title,
                 img_type=EnumCaseImageType.case_main_image,
             )
-            preview_image = s3bucket.upload_cases_imgs(
+            preview_image_url = s3bucket.upload_cases_imgs(
                 file=preview_image_obj,
                 file_name=preview_image_obj.filename,
                 case_name=title,
                 img_type=EnumCaseImageType.case_preview_image,
             )
 
-            screenshots: list[str] = []
+            screenshots_urls: list[str] = []
 
             for screenshot in case_screenshots:
                 file_image = s3bucket.upload_cases_imgs(
@@ -105,59 +106,54 @@ def create():
                     case_name=title,
                     img_type="screenshots",
                 )
-                screenshots.append(file_image)
-
-            new_case = m.Case(
-                title=form.title.data,
-                sub_title=form.sub_title.data,
-                description=form.description.data,
-                is_active=form.is_active.data,
-                is_main=form.is_main.data,
-                project_link=form.project_link.data,
-                role=form.role.data,
-            )
-            session.add(new_case)
-            session.commit()
-            session.refresh(new_case)
-            ActionLogs.create_case_log(m.ActionsType.CREATE, new_case.id)
-
-            for index, img in enumerate(screenshots):
-                new_screenshot = m.CaseScreenshot(
-                    url=img,
-                    case_id=new_case.id,
-                    origin_file_name=f"Screenshot {index}",
-                )
-
-                session.add(new_screenshot)
-                session.commit()
-                session.refresh(new_screenshot)
-
-            if main_image and preview_image:
-                new_main_image = m.CaseImage(
-                    url=main_image,
-                    origin_file_name=main_image_obj.filename,
-                    case_id=new_case.id,
-                    type_of_image=EnumCaseImageType.case_main_image,
-                )
-                new_preview_image = m.CaseImage(
-                    url=preview_image,
-                    origin_file_name=preview_image_obj.filename,
-                    case_id=new_case.id,
-                    type_of_image=EnumCaseImageType.case_preview_image,
-                )
-
-                session.add(new_main_image)
-                session.commit()
-                session.refresh(new_main_image)
-                session.add(new_preview_image)
-                session.commit()
-                session.refresh(new_preview_image)
-            else:
-                flash("No uploaded image", "danger")
-                return redirect(url_for("case.get_all"))
-
+                screenshots_urls.append(file_image)
         except TypeError as error:
             flash(error.args[0], "danger")
+            return redirect(url_for("case.get_all"))
+
+        new_case = m.Case(
+            title=form.title.data,
+            sub_title=form.sub_title.data,
+            description=form.description.data,
+            is_active=form.is_active.data,
+            is_main=form.is_main.data,
+            project_link=form.project_link.data,
+            role=form.role.data,
+        )
+        session.add(new_case)
+        session.commit()
+        session.refresh(new_case)
+        ActionLogs.create_case_log(m.ActionsType.CREATE, new_case.id)
+
+        for index, img in enumerate(screenshots_urls):
+            new_screenshot = m.CaseScreenshot(
+                url=img,
+                case_id=new_case.id,
+                origin_file_name=f"screenshot_{index}",
+            )
+
+            session.add(new_screenshot)
+            session.commit()
+
+        if main_image_url and preview_image_url:
+            new_main_image = m.CaseImage(
+                url=main_image_url,
+                origin_file_name=main_image_obj.filename,
+                case_id=new_case.id,
+                type_of_image=EnumCaseImageType.case_main_image,
+            )
+            new_preview_image = m.CaseImage(
+                url=preview_image_url,
+                origin_file_name=preview_image_obj.filename,
+                case_id=new_case.id,
+                type_of_image=EnumCaseImageType.case_preview_image,
+            )
+
+            session.add(new_main_image)
+            session.add(new_preview_image)
+            session.commit()
+        else:
+            flash("No uploaded image", "danger")
             return redirect(url_for("case.get_all"))
 
         for id in form.stacks.data:
@@ -172,26 +168,26 @@ def create():
     return redirect(url_for("case.get_all"))
 
 
-@bp.route("/update", methods=["POST"])
+@bp.route("/update-status/<int:id>", methods=["PATCH"])
 @login_required
-def update():
+def update_case_status(id: int):
     form = f.UpdateCase()
-    case = db.session.get(m.Case, form.data["id"])
+    case = db.session.get(m.Case, id)
 
-    form.stacks.choices = [(str(s.id), s.name) for s in db.session.query(m.Stack).all()]
     if not case:
         log(log.INFO, "There is no case with id: [%s]", id)
         flash("There is no such case", "danger")
         return "no case", 404
 
     if form.validate_on_submit():
-        # field = form.field.data
-        # if field == "is_active":
-        #     case.is_active = not case.is_active
-        # if field == "is_main":
-        #     case.is_main = not case.is_main
-        # db.session.commit()
+        field = form.field.data
+        if field == "is_active":
+            case.is_active = not case.is_active
+        if field == "is_main":
+            case.is_main = not case.is_main
+        db.session.commit()
         log(log.INFO, "Case updated. Case: [%s]", case)
+        ActionLogs.create_case_log(m.ActionsType.EDIT, case.id)
         flash("Case updated!", "success")
         return "ok", 200
     else:
@@ -204,7 +200,7 @@ def update():
 @login_required
 def delete(id: int):
     case = db.session.get(m.Case, id)
-    if not case:
+    if not case or case.is_deleted:
         log(log.INFO, "There is no case with id: [%s]", id)
         flash("There is no such case", "danger")
         return "no case", 404
@@ -213,5 +209,4 @@ def delete(id: int):
     db.session.commit()
     ActionLogs.create_case_log(m.ActionsType.DELETE, case.id)
     log(log.INFO, "Case deleted. Case: [%s]", case)
-    flash("Case deleted!", "success")
     return "ok", 200

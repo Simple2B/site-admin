@@ -15,6 +15,10 @@ class ActionLogs:
         action: m.ActionsType,
         text: str,
     ):
+
+        if not text:
+            log(log.WARNING, "Action log text is empty")
+            return
         action = m.Action(
             text=text,
             user_id=current_user.id,
@@ -32,7 +36,7 @@ class ActionLogs:
 
     @classmethod
     def create_case_log(self, action: m.ActionsType, entity_id: int):
-        text = None
+        text = ""
         case: m.Case = db.session.get(m.Case, entity_id)
         match action:
             case m.ActionsType.CREATE:
@@ -41,21 +45,20 @@ class ActionLogs:
             case m.ActionsType.DELETE:
                 text = f"{current_user.username} delete case {case.title}"
 
+            case m.ActionsType.EDIT:
+                text = f"{current_user.username} edit case {case.title}"
+
         ActionLogs._create(m.Entity.CASE, entity_id, action, text)
 
     @classmethod
     def create_candidate_log(
         cls,
-        action: m.ActionsType,
         entity_id: int,
     ):
-        text = None
         candidate: m.Candidate = db.session.get(m.Candidate, entity_id)
-        match action:
-            case m.ActionsType.DELETE:
-                text = f"{current_user.username} delete candidate {candidate.username}"
+        text = f"{current_user.username} delete candidate {candidate.username}"
 
-        ActionLogs._create(m.Entity.CANDIDATE, entity_id, action, text)
+        ActionLogs._create(m.Entity.CANDIDATE, entity_id, m.ActionsType.DELETE, text)
 
     @classmethod
     def create_admin_log(
@@ -63,7 +66,7 @@ class ActionLogs:
         action: m.ActionsType,
         entity_id: int,
     ):
-        text = None
+        text = ""
         admin: m.Case = db.session.get(m.SuperUser, entity_id)
         match action:
             case m.ActionsType.DELETE:
@@ -80,7 +83,7 @@ class ActionLogs:
         action: m.ActionsType,
         entity_id: int,
     ):
-        text = None
+        text = ""
         question: m.Case = db.session.get(m.Question, entity_id)
         match action:
             case m.ActionsType.DELETE:
