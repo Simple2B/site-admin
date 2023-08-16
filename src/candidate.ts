@@ -1,16 +1,7 @@
-import {Modal} from 'flowbite';
-import {ModalOptions} from 'flowbite';
-
-const modalOptions: ModalOptions = {
-  backdrop: 'static',
-  closable: true,
-  onHide: () => {},
-  onShow: () => {},
-  onToggle: () => {},
-};
+import {useConfirmModal} from './utils';
 
 export const candidate = () => {
-  // // search flow
+  // search flow
   const searchInput: HTMLInputElement = document.querySelector(
     '#table-search-candidates',
   );
@@ -18,11 +9,7 @@ export const candidate = () => {
     '#table-search-candidates-button',
   );
 
-  const $confirmCaseModalElement: HTMLElement = document.querySelector(
-    '#confirm-modal-element',
-  );
-
-  const confirmModal = new Modal($confirmCaseModalElement, modalOptions);
+  const {openModal} = useConfirmModal();
 
   if (searchInputButton && searchInput) {
     searchInputButton.addEventListener('click', () => {
@@ -35,46 +22,19 @@ export const candidate = () => {
   const deleteButtons = document.querySelectorAll('#delete-candidate-btn');
   deleteButtons.forEach(button => {
     button.addEventListener('click', async () => {
-      confirmModal.show();
       const id = button.getAttribute('data-candidate-id');
-      const caseConfirmModalText: HTMLSpanElement = document.querySelector(
-        '#confirm-modal-text',
-      );
-      const agreeConfirmModalBtn = document.querySelector(
-        '#agree-confirm-modal-btn',
-      );
-      const disagreeConfirmModalBtn = document.querySelector(
-        '#disagree-confirm-modal-btn',
-      );
-      const closeConfirmModalBtn = document.querySelector(
-        '#close-confirm-modal-btn',
-      );
 
-      caseConfirmModalText.textContent = `Are you sure you want to delete question ${id}?`;
+      const textModal = `Are you sure you want to delete question ${id}?`;
 
-      if (
-        agreeConfirmModalBtn &&
-        disagreeConfirmModalBtn &&
-        closeConfirmModalBtn
-      ) {
-        const confirmCallback = async () => {
-          const response = await fetch(`/candidate/delete/${id}`, {
-            method: 'DELETE',
-          });
-          if (response.status == 200) {
-            location.reload();
-          }
-        };
-
-        const notConfirmCallback = () => {
-          confirmModal.hide();
-          agreeConfirmModalBtn.removeEventListener('click', confirmCallback);
-        };
-
-        agreeConfirmModalBtn.addEventListener('click', confirmCallback);
-        disagreeConfirmModalBtn.addEventListener('click', notConfirmCallback);
-        closeConfirmModalBtn.addEventListener('click', notConfirmCallback);
-      }
+      const confirmCallback = async () => {
+        const response = await fetch(`/candidate/delete/${id}`, {
+          method: 'DELETE',
+        });
+        if (response.status == 200) {
+          location.reload();
+        }
+      };
+      openModal(textModal, confirmCallback);
     });
   });
 };

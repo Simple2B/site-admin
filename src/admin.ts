@@ -1,5 +1,6 @@
 import {Modal} from 'flowbite';
 import type {ModalOptions, ModalInterface} from 'flowbite';
+import {useConfirmModal} from './utils';
 
 const modalOptions: ModalOptions = {
   backdrop: 'dynamic',
@@ -13,17 +14,10 @@ export const admin = () => {
   const $addAdminModalElement: HTMLElement =
     document.querySelector('#add-admin-modal');
 
-  const $confirmModalElement: HTMLElement = document.querySelector(
-    '#confirm-modal-element',
-  );
+  const {openModal} = useConfirmModal();
 
   const addModal: ModalInterface = new Modal(
     $addAdminModalElement,
-    modalOptions,
-  );
-
-  const confirmModal: ModalInterface = new Modal(
-    $confirmModalElement,
     modalOptions,
   );
 
@@ -47,48 +41,20 @@ export const admin = () => {
   if (deleteAdminButtons) {
     deleteAdminButtons.forEach(button => {
       button.addEventListener('click', async () => {
-        confirmModal.show();
         const id = button.getAttribute('data-admin-id');
-        const confirmModalCloseBtn = document.querySelector(
-          '#close-confirm-modal-btn',
-        );
-        const agreeConfirmModalBtn = document.querySelector(
-          '#agree-confirm-modal-btn',
-        );
-        const disagreeConfirmModalBtn = document.querySelector(
-          '#disagree-confirm-modal-btn',
-        );
+        const modalText = `Are you sure you want to delete admin №${id}?`;
 
-        const confirmModalText = document.querySelector('#confirm-modal-text');
-        if (confirmModalText) {
-          confirmModalText.innerHTML = `Are you sure you want to delete admin №${id}?`;
-        }
+        const confirmCallback = async () => {
+          const id = button.getAttribute('data-admin-id');
+          const response = await fetch(`/admin/delete/${id}`, {
+            method: 'DELETE',
+          });
+          if (response.status == 200) {
+            location.reload();
+          }
+        };
 
-        if (
-          confirmModalCloseBtn &&
-          agreeConfirmModalBtn &&
-          disagreeConfirmModalBtn
-        ) {
-          const confirmCallback = async () => {
-            const id = button.getAttribute('data-admin-id');
-            const response = await fetch(`/admin/delete/${id}`, {
-              method: 'DELETE',
-            });
-            if (response.status == 200) {
-              location.reload();
-            }
-          };
-
-          const noTConfirmCallback = () => {
-            confirmModal.hide();
-            agreeConfirmModalBtn.removeEventListener('click', confirmCallback);
-          };
-          agreeConfirmModalBtn.addEventListener('click', confirmCallback);
-
-          confirmModalCloseBtn.addEventListener('click', noTConfirmCallback);
-
-          disagreeConfirmModalBtn.addEventListener('click', noTConfirmCallback);
-        }
+        openModal(modalText, confirmCallback);
       });
     });
   }

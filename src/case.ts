@@ -1,5 +1,6 @@
 import {Modal} from 'flowbite';
 import type {ModalOptions, ModalInterface} from 'flowbite';
+import {modalOptions, useConfirmModal} from './utils';
 
 export const cases = () => {
   const $addUserModalElement: HTMLElement =
@@ -11,17 +12,7 @@ export const cases = () => {
     '#caseEditModalElement',
   );
 
-  const $confirmCaseModalElement: HTMLElement = document.querySelector(
-    '#confirm-modal-element',
-  );
-
-  const modalOptions: ModalOptions = {
-    backdrop: 'static',
-    closable: true,
-    onHide: () => {},
-    onShow: () => {},
-    onToggle: () => {},
-  };
+  const {openModal} = useConfirmModal();
 
   const addModal: ModalInterface = new Modal(
     $addUserModalElement,
@@ -38,48 +29,28 @@ export const cases = () => {
     modalOptions,
   );
 
-  const confirmCaseModal: ModalInterface = new Modal(
-    $confirmCaseModalElement,
-    modalOptions,
-  );
-
   // callBack on btn is_active and is_main
   const caseConfirmModalListener = (
     event: MouseEvent,
     inputElement: HTMLInputElement,
   ) => {
     event.preventDefault();
-    confirmCaseModal.show();
     const caseId = inputElement.getAttribute('data-case-id');
     const caseStatusAtr = inputElement.getAttribute('data-case-status');
     const dataFiled = inputElement.getAttribute('data-field');
-    const caseConfirmModalText: HTMLElement = document.querySelector(
-      '#confirm-modal-text',
-    );
-    const closeModalBtn = document.querySelector('#close-confirm-modal-btn');
 
     const isCaseActive = caseStatusAtr === 'True';
-
-    if (caseConfirmModalText) {
-      const text = 'Are you sure you want to';
-      if (dataFiled === 'is_active') {
-        caseConfirmModalText.textContent = isCaseActive
-          ? `${text} deactivate case ${caseId}`
-          : `${text} activate case ${caseId}`;
-      } else if (dataFiled === 'is_main') {
-        caseConfirmModalText.textContent = isCaseActive
-          ? `${text} deactivate main case ${caseId}`
-          : `${text} activate main case ${caseId}`;
-      }
+    let caseConfirmModalText;
+    const text = 'Are you sure you want to';
+    if (dataFiled === 'is_active') {
+      caseConfirmModalText = isCaseActive
+        ? `${text} deactivate case ${caseId}`
+        : `${text} activate case ${caseId}`;
+    } else if (dataFiled === 'is_main') {
+      caseConfirmModalText = isCaseActive
+        ? `${text} deactivate main case ${caseId}`
+        : `${text} activate main case ${caseId}`;
     }
-
-    const agreeConfirmModalBtn = document.querySelector(
-      '#agree-confirm-modal-btn',
-    );
-
-    const disagreeConfirmModalBtn = document.querySelector(
-      '#disagree-confirm-modal-btn',
-    );
 
     const confirmCallback = async () => {
       const formData = new FormData();
@@ -94,17 +65,7 @@ export const cases = () => {
       }
     };
 
-    const notConfirmCallback = async () => {
-      confirmCaseModal.hide();
-      agreeConfirmModalBtn.removeEventListener('click', confirmCallback);
-    };
-
-    if (agreeConfirmModalBtn && disagreeConfirmModalBtn && closeModalBtn) {
-      agreeConfirmModalBtn.addEventListener('click', confirmCallback);
-
-      disagreeConfirmModalBtn.addEventListener('click', notConfirmCallback);
-      closeModalBtn.addEventListener('click', notConfirmCallback);
-    }
+    openModal(caseConfirmModalText, confirmCallback);
   };
 
   const activateCaseButton: NodeListOf<HTMLInputElement> =
@@ -171,42 +132,19 @@ export const cases = () => {
 
     deleteButtons.forEach(e => {
       e.addEventListener('click', async () => {
-        confirmCaseModal.show();
         const caseId = e.getAttribute('data-case-id');
-        const caseConfirmModalText: HTMLSpanElement = document.querySelector(
-          '#confirm-modal-text',
-        );
-        const agreeConfirmModalBtn = document.querySelector(
-          '#agree-confirm-modal-btn',
-        );
-        const disagreeConfirmModalBtn = document.querySelector(
-          '#disagree-confirm-modal-btn',
-        );
-        const closeModalBtn = document.querySelector(
-          '#close-confirm-modal-btn',
-        );
+        const modalText = `Are you sure you want to delete case ${caseId}?`;
 
-        caseConfirmModalText.textContent = `Are you sure you want to delete case ${caseId}?`;
+        const confirmCallback = async () => {
+          const response = await fetch(`/case/delete/${caseId}`, {
+            method: 'DELETE',
+          });
+          if (response.status == 200) {
+            location.reload();
+          }
+        };
 
-        if (agreeConfirmModalBtn && disagreeConfirmModalBtn && closeModalBtn) {
-          const confirmCallback = async () => {
-            const response = await fetch(`/case/delete/${caseId}`, {
-              method: 'DELETE',
-            });
-            if (response.status == 200) {
-              location.reload();
-            }
-          };
-
-          const notConfirmCallback = async () => {
-            confirmCaseModal.hide();
-            agreeConfirmModalBtn.removeEventListener('click', confirmCallback);
-          };
-          agreeConfirmModalBtn.addEventListener('click', confirmCallback);
-
-          disagreeConfirmModalBtn.addEventListener('click', notConfirmCallback);
-          closeModalBtn.addEventListener('click', notConfirmCallback);
-        }
+        openModal(modalText, confirmCallback);
       });
     });
   }
