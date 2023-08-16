@@ -11,7 +11,7 @@ class CaseOut(BaseModel):
     project_link: str
     role: str
 
-    stacks: list[str]
+    stacks_names: list[str]
     screenshots: list[str]
 
     main_image: str

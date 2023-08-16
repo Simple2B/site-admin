@@ -2,6 +2,7 @@ import filetype
 
 from flask_wtf import FlaskForm
 from wtforms import (
+    IntegerField,
     StringField,
     SubmitField,
     BooleanField,
@@ -51,5 +52,47 @@ class NewCaseForm(FlaskForm):
                 raise ValidationError("File must be an image")
 
 
-class UpdateCase(FlaskForm):
+class UpdateCaseState(FlaskForm):
     field = StringField("filed")
+
+
+class UpdateCase(FlaskForm):
+    case_id = IntegerField("case_id", [DataRequired()])
+    title = StringField("title", [Length(2, 32)])
+    sub_title = StringField("sub_title", [Length(2, 64)])
+    title_image = FileField("title_image")
+    sub_title_image = FileField("sub_title_image")
+    description = StringField("description", [Length(1, 512)])
+    is_active = BooleanField("is_active")
+    is_main = BooleanField("is_main")
+    project_link = StringField("project_link")
+    role = StringField("role", [Length(2, 32)])
+    stacks = MultiCheckboxField("stacks")
+    sub_images = MultipleFileField(
+        "sub_images",
+    )
+
+    submit = SubmitField("Save")
+
+    def validate_title_image(self, field):
+        if not field.data:
+            return
+        is_file = filetype.guess(field.data)
+        if not is_file or not filetype.is_image(field.data):
+            raise ValidationError("File must be an image")
+
+    def validate_sub_title_image(self, field):
+        if not field.data:
+            return
+        is_file = filetype.guess(field.data)
+        if not is_file or not filetype.is_image(field.data):
+            raise ValidationError("File must be an image")
+
+    def validate_sub_images(self, field):
+        for file in field.data:
+            # when we not send any file it will come application/octet-stream
+            if file.content_type == "application/octet-stream":
+                continue
+            is_file = filetype.guess(file)
+            if not is_file or not filetype.is_image(file):
+                raise ValidationError("File must be an image")

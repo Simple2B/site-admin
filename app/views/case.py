@@ -171,7 +171,7 @@ def create():
 @bp.route("/update-status/<int:id>", methods=["PATCH"])
 @login_required
 def update_case_status(id: int):
-    form = f.UpdateCase()
+    form = f.UpdateCaseState()
     case = db.session.get(m.Case, id)
 
     if not case:
@@ -194,6 +194,54 @@ def update_case_status(id: int):
         log(log.ERROR, "Case errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
         return "error", 422
+
+
+@bp.route("/update", methods=["POST"])
+@login_required
+def update_case():
+    form = f.UpdateCase()
+    form.stacks.choices = [(str(s.id), s.name) for s in db.session.query(m.Stack).all()]
+
+    if form.validate_on_submit():
+        case = db.session.get(m.Case, form.case_id.data)
+        if not case:
+            log(log.INFO, "There is no case with id: [%s]", id)
+            flash("There is no such case", "danger")
+            return redirect(url_for("case.get_all"))
+
+        case.title = form.title.data
+        case.sub_title = form.sub_title.data
+        case.description = form.description.data
+        case.is_active = form.is_active.data
+        case.is_main = form.is_main.data
+        case.project_link = form.project_link.data
+        case.role = form.role.data
+
+        cases_stacks_ids = [s.id for s in case.stacks]
+        form_stacks_ids = [int(id) for id in form.stacks.data]
+
+        # delete stacks form case
+        for id in cases_stacks_ids:
+            if id not in form_stacks_ids:
+                db.session.query(m.CaseStack).filter(
+                    m.CaseStack.case_id == case.id, m.CaseStack.stack_id == int(id)
+                ).delete()
+
+        # add stacks to case
+        for stack_id in form_stacks_ids:
+            if stack_id not in cases_stacks_ids:
+                new_stack = m.CaseStack(case_id=case.id, stack_id=int(stack_id))
+                db.session.add(new_stack)
+        db.session.commit()
+
+        log(log.INFO, "Case updated. Case: [%s]", case)
+        ActionLogs.create_case_log(m.ActionsType.EDIT, case.id)
+        flash("Case updated!", "success")
+        return redirect(url_for("case.get_all"))
+    else:
+        log(log.ERROR, "Case errors: [%s]", form.errors)
+        flash(f"{form.errors}", "danger")
+        return redirect(url_for("case.get_all"))
 
 
 @bp.route("/delete/<int:id>", methods=["DELETE"])

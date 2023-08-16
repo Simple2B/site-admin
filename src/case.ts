@@ -1,6 +1,108 @@
 import {Modal} from 'flowbite';
-import type {ModalOptions, ModalInterface} from 'flowbite';
+import type {ModalInterface} from 'flowbite';
 import {modalOptions, useConfirmModal} from './utils';
+
+const editCase = async (caseId: number) => {
+  const title: HTMLInputElement = document.querySelector('#edit-case-title');
+  const subTitle: HTMLInputElement = document.querySelector(
+    '#edit-case-sub-title',
+  );
+  const description: HTMLInputElement = document.querySelector(
+    '#edit-case-description',
+  );
+  const role: HTMLInputElement = document.querySelector('#edit-case-role');
+  const isActive: HTMLInputElement = document.querySelector(
+    '#edit-case-is-active',
+  );
+  const isMain: HTMLInputElement = document.querySelector('#edit-case-is-main');
+  const stacks = document.querySelectorAll('#stacks input[type="checkbox"]');
+  const mainImage: HTMLImageElement = document.querySelector(
+    '#edit-case-main-image',
+  );
+  const previewImage: HTMLImageElement = document.querySelector(
+    '#edit-case-preview-image',
+  );
+  const divCaseScreenShoots = document.querySelector('#edit-case-screenshots');
+  const caseIdElement: HTMLInputElement = document.querySelector('#caseIdEdit');
+
+  const mainImageInput: HTMLInputElement = document.querySelector(
+    '#edit-case-main-image-input',
+  );
+  const subMainImageInput: HTMLInputElement = document.querySelector(
+    '#edit-case-sub-main-image-input',
+  );
+
+  if (
+    !title ||
+    !subTitle ||
+    !description ||
+    !role ||
+    !isActive ||
+    !isMain ||
+    !caseIdElement ||
+    !mainImage ||
+    !previewImage ||
+    !divCaseScreenShoots ||
+    !mainImageInput ||
+    !subMainImageInput
+  ) {
+    return;
+  }
+
+  const response = await fetch(`/case/${caseId}`, {
+    method: 'GET',
+  });
+  const caseData = await response.json();
+
+  const listOfScreenshots = caseData.screenshots;
+
+  listOfScreenshots.forEach((screenshot: string) => {
+    const img = document.createElement('img');
+    img.src = screenshot;
+    if (img) {
+      divCaseScreenShoots.appendChild(img);
+    }
+  });
+
+  stacks.forEach((checkbox: HTMLInputElement) => {
+    const label = checkbox.nextElementSibling.textContent;
+
+    if (caseData.stacks_names.includes(label)) {
+      checkbox.checked = true;
+    }
+  });
+
+  title.value = caseData.title;
+  subTitle.value = caseData.sub_title;
+  description.value = caseData.description;
+  role.value = caseData.role;
+  isActive.checked = caseData.is_active;
+  isMain.checked = caseData.is_main;
+  mainImage.src =
+    mainImageInput.files.length > 0
+      ? URL.createObjectURL(mainImageInput.files[0])
+      : caseData.main_image;
+  previewImage.src =
+    subMainImageInput.files.length > 0
+      ? URL.createObjectURL(subMainImageInput.files[0])
+      : caseData.preview_image;
+
+  caseIdElement.setAttribute('value', caseId.toString());
+
+  mainImageInput.addEventListener('change', () => {
+    const files = mainImageInput.files;
+    if (files.length > 0) {
+      mainImage.src = URL.createObjectURL(files[0]);
+    }
+  });
+
+  subMainImageInput.addEventListener('change', () => {
+    const files = subMainImageInput.files;
+    if (files.length > 0) {
+      previewImage.src = URL.createObjectURL(files[0]);
+    }
+  });
+};
 
 export const cases = () => {
   const $addUserModalElement: HTMLElement =
@@ -156,82 +258,16 @@ export const cases = () => {
 
       const caseId = e.getAttribute('data-edit-id');
 
-      console.log(caseId);
-
-      const response = await fetch(`/case/${caseId}`, {
-        method: 'GET',
-      });
-      const caseData = await response.json();
-
-      const listOfStacks = caseData.stacks;
-      const listOfScreenshots = caseData.screenshots;
-
-      const title: HTMLInputElement =
-        document.querySelector('#edit-case-title');
-      const subTitle: HTMLInputElement = document.querySelector(
-        '#edit-case-sub-title',
-      );
-      const description: HTMLInputElement = document.querySelector(
-        '#edit-case-description',
-      );
-      const role: HTMLInputElement = document.querySelector('#edit-case-role');
-      const isActive: HTMLInputElement = document.querySelector(
-        '#edit-case-is-active',
-      );
-      const isMain: HTMLInputElement =
-        document.querySelector('#edit-case-is-main');
-      const stacks = document.querySelectorAll(
-        '#stacks input[type="checkbox"]',
-      );
-      const mainImage: HTMLImageElement = document.querySelector(
-        '#edit-case-main-image',
-      );
-      const previewImage: HTMLImageElement = document.querySelector(
-        '#edit-case-preview-image',
-      );
-
-      const divCaseScreenShoots = document.querySelector(
-        '#edit-case-screenshots',
-      );
-
-      listOfScreenshots.forEach((screenshot: string) => {
-        const img = document.createElement('img');
-        img.src = screenshot;
-        if (img) {
-          divCaseScreenShoots.appendChild(img);
-        }
-      });
-
-      const caseIdElement: HTMLInputElement =
-        document.querySelector('#caseIdEdit');
-
-      stacks.forEach((checkbox: HTMLInputElement) => {
-        const label = checkbox.nextElementSibling.textContent;
-
-        if (listOfStacks.includes(label)) {
-          checkbox.checked = true;
-        }
-      });
-
-      title.value = caseData.title;
-      subTitle.value = caseData.sub_title;
-      description.value = caseData.description;
-      role.value = caseData.role;
-      isActive.checked = caseData.is_active;
-      isMain.checked = caseData.is_main;
-      mainImage.src = caseData.main_image;
-      previewImage.src = caseData.preview_image;
-
-      caseIdElement.setAttribute('value', caseId);
+      await editCase(Number(caseId));
 
       const editModalCloseBtn = document.querySelector('#editCaseModalClose');
 
       if (editModalCloseBtn) {
         editModalCloseBtn.addEventListener('click', () => {
+          // while (divCaseScreenShoots.firstChild) {
+          //   divCaseScreenShoots.removeChild(divCaseScreenShoots.firstChild);
+          // }
           editCaseModal.hide();
-          while (divCaseScreenShoots.firstChild) {
-            divCaseScreenShoots.removeChild(divCaseScreenShoots.firstChild);
-          }
         });
       }
     });
