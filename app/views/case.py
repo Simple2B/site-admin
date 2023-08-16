@@ -58,7 +58,7 @@ def get_all():
 
 @bp.route("/<int:id>", methods=["GET"])
 @login_required
-def get(id: int):
+def get_case(id: int):
     case: m.Case = db.session.scalar(m.Case.select().where(m.Case.id == id))
     if not case:
         log(log.INFO, "There is no case with id: [%s]", id)
@@ -84,20 +84,20 @@ def create():
         case_screenshots: list[FileStorage] = form.sub_images.data
 
         try:
-            main_image = s3bucket.upload_cases_imgs(
+            main_image_url = s3bucket.upload_cases_imgs(
                 file=main_image_obj,
                 file_name=main_image_obj.filename,
                 case_name=title,
                 img_type=EnumCaseImageType.case_main_image,
             )
-            preview_image = s3bucket.upload_cases_imgs(
+            preview_image_url = s3bucket.upload_cases_imgs(
                 file=preview_image_obj,
                 file_name=preview_image_obj.filename,
                 case_name=title,
                 img_type=EnumCaseImageType.case_preview_image,
             )
 
-            screenshots: list[str] = []
+            screenshots_urls: list[str] = []
 
             for screenshot in case_screenshots:
                 file_image = s3bucket.upload_cases_imgs(
@@ -106,7 +106,7 @@ def create():
                     case_name=title,
                     img_type="screenshots",
                 )
-                screenshots.append(file_image)
+                screenshots_urls.append(file_image)
         except TypeError as error:
             flash(error.args[0], "danger")
             return redirect(url_for("case.get_all"))
@@ -125,25 +125,25 @@ def create():
         session.refresh(new_case)
         ActionLogs.create_case_log(m.ActionsType.CREATE, new_case.id)
 
-        for index, img in enumerate(screenshots):
+        for index, img in enumerate(screenshots_urls):
             new_screenshot = m.CaseScreenshot(
                 url=img,
                 case_id=new_case.id,
-                origin_file_name=f"Screenshot {index}",
+                origin_file_name=f"screenshot_{index}",
             )
 
             session.add(new_screenshot)
             session.commit()
 
-        if main_image and preview_image:
+        if main_image_url and preview_image_url:
             new_main_image = m.CaseImage(
-                url=main_image,
+                url=main_image_url,
                 origin_file_name=main_image_obj.filename,
                 case_id=new_case.id,
                 type_of_image=EnumCaseImageType.case_main_image,
             )
             new_preview_image = m.CaseImage(
-                url=preview_image,
+                url=preview_image_url,
                 origin_file_name=preview_image_obj.filename,
                 case_id=new_case.id,
                 type_of_image=EnumCaseImageType.case_preview_image,
@@ -170,7 +170,7 @@ def create():
 
 @bp.route("/update-status/<int:id>", methods=["PATCH"])
 @login_required
-def update(id: int):
+def update_case_status(id: int):
     form = f.UpdateCase()
     case = db.session.get(m.Case, id)
 
@@ -209,5 +209,4 @@ def delete(id: int):
     db.session.commit()
     ActionLogs.create_case_log(m.ActionsType.DELETE, case.id)
     log(log.INFO, "Case deleted. Case: [%s]", case)
-    flash("Case deleted!", "success")
     return "ok", 200

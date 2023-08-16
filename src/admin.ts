@@ -47,7 +47,6 @@ export const admin = () => {
   if (deleteAdminButtons) {
     deleteAdminButtons.forEach(button => {
       button.addEventListener('click', async () => {
-        console.log('delete admin');
         confirmModal.show();
         const id = button.getAttribute('data-admin-id');
         const confirmModalCloseBtn = document.querySelector(

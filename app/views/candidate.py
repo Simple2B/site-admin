@@ -81,7 +81,7 @@ def delete(id: int):
     candidate.git_hub_id = f"{candidate.git_hub_id}@"
     candidate.username = f"{candidate.username}@deleted"
     db.session.commit()
-    ActionLogs.create_candidate_log(m.ActionsType.DELETE, candidate.id)
+    ActionLogs.create_candidate_log(candidate.id)
 
     log(log.INFO, "Candidate deleted. Candidate: [%s]", candidate)
     flash("User deleted!", "success")

@@ -33,50 +33,48 @@ export const candidate = () => {
   }
   // delete candidate
   const deleteButtons = document.querySelectorAll('#delete-candidate-btn');
-  if (deleteButtons) {
-    deleteButtons.forEach(button => {
-      button.addEventListener('click', async () => {
-        confirmModal.show();
-        const id = button.getAttribute('data-candidate-id');
-        const caseConfirmModalText: HTMLSpanElement = document.querySelector(
-          '#confirm-modal-text',
-        );
-        const agreeConfirmModalBtn = document.querySelector(
-          '#agree-confirm-modal-btn',
-        );
-        const disagreeConfirmModalBtn = document.querySelector(
-          '#disagree-confirm-modal-btn',
-        );
-        const closeConfirmModalBtn = document.querySelector(
-          '#close-confirm-modal-btn',
-        );
+  deleteButtons.forEach(button => {
+    button.addEventListener('click', async () => {
+      confirmModal.show();
+      const id = button.getAttribute('data-candidate-id');
+      const caseConfirmModalText: HTMLSpanElement = document.querySelector(
+        '#confirm-modal-text',
+      );
+      const agreeConfirmModalBtn = document.querySelector(
+        '#agree-confirm-modal-btn',
+      );
+      const disagreeConfirmModalBtn = document.querySelector(
+        '#disagree-confirm-modal-btn',
+      );
+      const closeConfirmModalBtn = document.querySelector(
+        '#close-confirm-modal-btn',
+      );
 
-        caseConfirmModalText.textContent = `Are you sure you want to delete question ${id}?`;
+      caseConfirmModalText.textContent = `Are you sure you want to delete question ${id}?`;
 
-        if (
-          agreeConfirmModalBtn &&
-          disagreeConfirmModalBtn &&
-          closeConfirmModalBtn
-        ) {
-          const confirmCallback = async () => {
-            const response = await fetch(`/candidate/delete/${id}`, {
-              method: 'DELETE',
-            });
-            if (response.status == 200) {
-              location.reload();
-            }
-          };
+      if (
+        agreeConfirmModalBtn &&
+        disagreeConfirmModalBtn &&
+        closeConfirmModalBtn
+      ) {
+        const confirmCallback = async () => {
+          const response = await fetch(`/candidate/delete/${id}`, {
+            method: 'DELETE',
+          });
+          if (response.status == 200) {
+            location.reload();
+          }
+        };
 
-          const notConfirmCallback = () => {
-            confirmModal.hide();
-            agreeConfirmModalBtn.removeEventListener('click', confirmCallback);
-          };
+        const notConfirmCallback = () => {
+          confirmModal.hide();
+          agreeConfirmModalBtn.removeEventListener('click', confirmCallback);
+        };
 
-          agreeConfirmModalBtn.addEventListener('click', confirmCallback);
-          disagreeConfirmModalBtn.addEventListener('click', notConfirmCallback);
-          closeConfirmModalBtn.addEventListener('click', notConfirmCallback);
-        }
-      });
+        agreeConfirmModalBtn.addEventListener('click', confirmCallback);
+        disagreeConfirmModalBtn.addEventListener('click', notConfirmCallback);
+        closeConfirmModalBtn.addEventListener('click', notConfirmCallback);
+      }
     });
-  }
+  });
 };

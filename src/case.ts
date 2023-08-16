@@ -46,13 +46,13 @@ export const cases = () => {
   // callBack on btn is_active and is_main
   const caseConfirmModalListener = (
     event: MouseEvent,
-    btnElement: HTMLInputElement,
+    inputElement: HTMLInputElement,
   ) => {
     event.preventDefault();
     confirmCaseModal.show();
-    const caseId = btnElement.getAttribute('data-case-id');
-    const caseStatusAtr = btnElement.getAttribute('data-case-status');
-    const dataFiled = btnElement.getAttribute('data-field');
+    const caseId = inputElement.getAttribute('data-case-id');
+    const caseStatusAtr = inputElement.getAttribute('data-case-status');
+    const dataFiled = inputElement.getAttribute('data-field');
     const caseConfirmModalText: HTMLElement = document.querySelector(
       '#confirm-modal-text',
     );
