@@ -28,7 +28,9 @@ def init(app: Flask):
     @app.cli.command("create-admin")
     def create_admin():
         """Create super admin account"""
-        query = m.SuperUser.select().where(m.SuperUser.email == app.config["ADMIN_EMAIL"])
+        query = m.SuperUser.select().where(
+            m.SuperUser.email == app.config["ADMIN_EMAIL"]
+        )
         if db.session.execute(query).first():
             print(f"User with e-mail: [{app.config['ADMIN_EMAIL']}] already exists")
             return

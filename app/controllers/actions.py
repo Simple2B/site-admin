@@ -7,9 +7,9 @@ from app.logger import log
 
 
 def create_action_log(
-    entity: m.Action.Entity,
+    entity: m.Action.entity,
     entity_id: int,
-    action: m.Action.ActionsType,
+    action: m.ActionsType,
     user_id: int,
     text: str,
 ):
@@ -29,54 +29,54 @@ def create_action_log(
     )
 
 
-def case_action_log(action: m.Action.ActionsType, entity_id: int, user_id: int):
+def case_action_log(action: m.ActionsType, entity_id: int, user_id: int):
     text = None
     case: m.Case = db.session.get(m.Case, entity_id)
     match action:
-        case m.Action.ActionsType.CREATE:
+        case m.ActionsType.CREATE:
             text = f"{current_user.username} create a new case {case.title}"
 
-        case m.Action.ActionsType.DELETE:
+        case m.ActionsType.DELETE:
             text = f"{current_user.username} delete case {case.title}"
 
-    create_action_log(m.Action.Entity.CASE, entity_id, action, user_id, text)
+    create_action_log(m.Entity.CASE, entity_id, action, user_id, text)
 
 
-def candidate_action_log(action: m.Action.ActionsType, entity_id: int, user_id: int):
+def candidate_action_log(action: m.ActionsType, entity_id: int, user_id: int):
     text = None
     candidate: m.Candidate = db.session.get(m.Candidate, entity_id)
     match action:
-        case m.Action.ActionsType.DELETE:
+        case m.ActionsType.DELETE:
             text = f"{current_user.username} delete candidate {candidate.username}"
 
-    create_action_log(m.Action.Entity.CANDIDATE, entity_id, action, user_id, text)
+    create_action_log(m.Entity.CANDIDATE, entity_id, action, user_id, text)
 
 
-def admin_action_log(action: m.Action.ActionsType, entity_id: int, user_id: int):
+def admin_action_log(action: m.ActionsType, entity_id: int, user_id: int):
     text = None
     admin: m.Case = db.session.get(m.SuperUser, entity_id)
     match action:
-        case m.Action.ActionsType.DELETE:
+        case m.ActionsType.DELETE:
             text = f"{current_user.username.upper() } delete admin {admin.username.upper() }"
 
-        case m.Action.ActionsType.CREATE:
+        case m.ActionsType.CREATE:
             text = f"{current_user.username.upper() } create a new admin {admin.username.upper() }"
 
-    create_action_log(m.Action.Entity.ADMIN, entity_id, action, user_id, text)
+    create_action_log(m.Entity.ADMIN, entity_id, action, user_id, text)
 
 
-def question_action_log(action: m.Action.ActionsType, entity_id: int, user_id: int):
+def question_action_log(action: m.ActionsType, entity_id: int, user_id: int):
     text = None
     question: m.Case = db.session.get(m.Question, entity_id)
     match action:
-        case m.Action.ActionsType.DELETE:
+        case m.ActionsType.DELETE:
             text = f"{current_user.username.upper() } delete question '{question.text}'"
 
-        case m.Action.ActionsType.CREATE:
+        case m.ActionsType.CREATE:
             text = (
                 f"{current_user.username.upper() } create a new question {question.id }"
             )
-        case m.Action.ActionsType.EDIT:
+        case m.ActionsType.EDIT:
             text = f"{current_user.username.upper() } changed a question {question.id }"
 
-    create_action_log(m.Action.Entity.QUESTION, entity_id, action, user_id, text)
+    create_action_log(m.Entity.QUESTION, entity_id, action, user_id, text)
