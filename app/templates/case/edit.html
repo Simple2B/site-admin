@@ -4,7 +4,7 @@
   class="fixed top-0 left-0 right-0 z-50 items-center justify-center hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
   <div class="relative w-full max-w-2xl max-h-full">
     <!-- Modal content -->
-    <form action="{{url_for('case.update')}}" method="post"
+    <form action="" method="post"
       class="relative bg-white rounded-lg shadow dark:bg-gray-700">
       <!-- Modal header -->
       {{ form.hidden_tag() }}
@@ -39,6 +39,8 @@
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Sub title" required />
           </div>
+          <div class="col-span-6 sm:col-span-3"><img id="edit-case-main-image" src="" alt=""></div>
+          <div class="col-span-6 sm:col-span-3"><img id="edit-case-preview-image" src="" alt=""></div>
           <div class="col-span-6 sm:col-span-3">
             <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
               title="This image will be displayed on the Case single page">Upload main
@@ -99,6 +101,7 @@
                 class="text-red-500">*</span></label>
             <input type="file" name="sub_images" multiple required accept="image/*">
           </div>
+          <div id="edit-case-screenshots" class="col-span-6 sm:col-span-3"></div>
         </div>
       </div>
       <!-- Modal footer -->
