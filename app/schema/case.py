@@ -14,8 +14,8 @@ class CaseOut(BaseModel):
     stacks: list[str]
     screenshots: list[str]
 
-    main_image: str
-    preview_image: str
+    main_image: str | None
+    preview_image: str | None
 
     class Config:
         orm_mode = True
