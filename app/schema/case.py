@@ -1,6 +1,14 @@
 from pydantic import BaseModel
 
 
+class CaseScreenshot(BaseModel):
+    id: int
+    url: str
+
+    class Config:
+        orm_mode = True
+
+
 class CaseOut(BaseModel):
     id: int
     title: str
@@ -12,10 +20,10 @@ class CaseOut(BaseModel):
     role: str
 
     stacks_names: list[str]
-    screenshots: list[str]
+    screenshots: list[CaseScreenshot]
 
-    main_image: str
-    preview_image: str
+    main_image_url: str
+    preview_image_url: str
 
     class Config:
         orm_mode = True

@@ -88,13 +88,13 @@ def create():
                 file=main_image_obj,
                 file_name=main_image_obj.filename,
                 case_name=title,
-                img_type=EnumCaseImageType.case_main_image,
+                img_type=EnumCaseImageType.case_main_image.value,
             )
             preview_image_url = s3bucket.upload_cases_imgs(
                 file=preview_image_obj,
                 file_name=preview_image_obj.filename,
                 case_name=title,
-                img_type=EnumCaseImageType.case_preview_image,
+                img_type=EnumCaseImageType.case_preview_image.value,
             )
 
             screenshots_urls: list[str] = []
@@ -209,6 +209,87 @@ def update_case():
             flash("There is no such case", "danger")
             return redirect(url_for("case.get_all"))
 
+        main_image_obj: FileStorage = form.main_image.data
+        if main_image_obj:
+            try:
+                s3bucket.delete_cases_imgs(case.main_image_url)
+            except TypeError:
+                log(log.ERROR, "Can't delete main image in case: [%s]", case.id)
+                flash(error.args[0], "danger")
+                return redirect(url_for("case.get_all"))
+            main_image_url = None
+            try:
+                main_image_url = s3bucket.upload_cases_imgs(
+                    file=main_image_obj,
+                    file_name=main_image_obj.filename,
+                    case_name=form.title.data,
+                    img_type=EnumCaseImageType.case_main_image.value,
+                )
+                db.session.add(
+                    m.CaseImage(
+                        url=main_image_url,
+                        origin_file_name=main_image_obj.filename,
+                        case_id=case.id,
+                        type_of_image=EnumCaseImageType.case_main_image,
+                    )
+                )
+            except TypeError as error:
+                log(log.ERROR, "Can't upload main image in case: [%s]", case.id)
+                flash(error.args[0], "danger")
+                return redirect(url_for("case.get_all"))
+            db.session.commit()
+
+        preview_image_obj: FileStorage = form.preview_image.data
+        if preview_image_obj:
+            try:
+                s3bucket.delete_cases_imgs(case.preview_image_url)
+            except TypeError:
+                log(log.ERROR, "Can't delete preview image in case: [%s]", case.id)
+                flash(error.args[0], "danger")
+                return redirect(url_for("case.get_all"))
+            preview_image_url = None
+            try:
+                preview_image_url = s3bucket.upload_cases_imgs(
+                    file=preview_image_obj,
+                    file_name=preview_image_obj.filename,
+                    case_name=form.title.data,
+                    img_type=EnumCaseImageType.case_preview_image.value,
+                )
+                db.session.add(
+                    m.CaseImage(
+                        url=preview_image_url,
+                        origin_file_name=preview_image_obj.filename,
+                        case_id=case.id,
+                        type_of_image=EnumCaseImageType.case_preview_image,
+                    )
+                )
+            except TypeError as error:
+                log(log.ERROR, "Can't upload preview image in case: [%s]", case.id)
+                flash(error.args[0], "danger")
+                return redirect(url_for("case.get_all"))
+            db.session.commit()
+        sub_images = form.screenshots.data
+        if sub_images:
+            for idx, screenshot in enumerate(sub_images):
+                if screenshot.content_type == "application/octet-stream":
+                    continue
+                try:
+                    screenshot_image_url = s3bucket.upload_cases_imgs(
+                        file=screenshot,
+                        file_name=screenshot.filename,
+                        case_name=form.title.data,
+                        img_type="screenshots",
+                    )
+                    new_screenshot = m.CaseScreenshot(
+                        url=screenshot_image_url,
+                        case_id=case.id,
+                        origin_file_name=f"screenshot_{idx}",
+                    )
+                    db.session.add(new_screenshot)
+                except TypeError as error:
+                    log(log.ERROR, "Can't upload sub image in case: [%s]", case.id)
+                    continue
+
         case.title = form.title.data
         case.sub_title = form.sub_title.data
         case.description = form.description.data
@@ -257,4 +338,27 @@ def delete(id: int):
     db.session.commit()
     ActionLogs.create_case_log(m.ActionsType.DELETE, case.id)
     log(log.INFO, "Case deleted. Case: [%s]", case)
+    return "ok", 200
+
+
+@bp.route("/delete/<int:id>/screenshot", methods=["DELETE"])
+@login_required
+def delete_screenshot(id: int):
+    case_screenshot: m.CaseScreenshot = db.session.get(m.CaseScreenshot, id)
+    if not case_screenshot:
+        log(log.INFO, "There is no case screenshot with id: [%s]", id)
+        flash("There is no such case screenshot", "danger")
+        return "no case", 404
+
+    try:
+        s3bucket.delete_cases_imgs(case_screenshot.url)
+    except TypeError:
+        log(log.ERROR, "Can't delete case screenshot: [%s]", case_screenshot.id)
+        return "Can't delete case screenshot", 422
+
+    case_id = case_screenshot.case_id
+    db.session.delete(case_screenshot)
+    db.session.commit()
+    ActionLogs.create_case_log(m.ActionsType.EDIT, case_id)
+    log(log.INFO, "Case screenshot deleted. Case: [%s]", case_id)
     return "ok", 200

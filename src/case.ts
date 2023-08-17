@@ -2,6 +2,53 @@ import {Modal} from 'flowbite';
 import type {ModalInterface} from 'flowbite';
 import {modalOptions, useConfirmModal} from './utils';
 
+interface ICaseScreenshot {
+  id: number;
+  url: string;
+}
+
+interface ICaseOut {
+  id: number;
+  title: string;
+  sub_title: string;
+  description: string;
+  is_active: boolean;
+  is_main: boolean;
+  project_link: string;
+  role: string;
+  stacks_names: string[];
+  screenshots: ICaseScreenshot[];
+  main_image_url: string;
+  preview_image_url: string;
+}
+
+const createCaseScreenshot = (screenshot: ICaseScreenshot): HTMLElement => {
+  const screenshotDiv = document.createElement('div');
+  screenshotDiv.setAttribute('class', 'flex flex-col');
+  const img = document.createElement('img');
+  const deleteBtn = document.createElement('div');
+  deleteBtn.id = 'edit-case-screenshot-delete-icon';
+  deleteBtn.setAttribute(
+    'class',
+    'px-3 py-2 text-xs font-medium text-center text-white bg-red-700 rounded-lg hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800',
+  );
+  deleteBtn.innerHTML = 'Delete';
+  img.src = screenshot.url;
+  screenshotDiv.appendChild(img);
+  screenshotDiv.appendChild(deleteBtn);
+
+  deleteBtn.addEventListener('click', async () => {
+    const response = await fetch(`/case/delete/${screenshot.id}/screenshot`, {
+      method: 'DELETE',
+    });
+    if (response.status == 200) {
+      screenshotDiv.remove();
+    }
+  });
+
+  return screenshotDiv;
+};
+
 const editCase = async (caseId: number) => {
   const title: HTMLInputElement = document.querySelector('#edit-case-title');
   const subTitle: HTMLInputElement = document.querySelector(
@@ -52,16 +99,12 @@ const editCase = async (caseId: number) => {
   const response = await fetch(`/case/${caseId}`, {
     method: 'GET',
   });
-  const caseData = await response.json();
+  const caseData: ICaseOut = await response.json();
 
-  const listOfScreenshots = caseData.screenshots;
+  const listOfScreenshots: ICaseScreenshot[] = caseData.screenshots;
 
-  listOfScreenshots.forEach((screenshot: string) => {
-    const img = document.createElement('img');
-    img.src = screenshot;
-    if (img) {
-      divCaseScreenShoots.appendChild(img);
-    }
+  listOfScreenshots.forEach((screenshot: ICaseScreenshot) => {
+    divCaseScreenShoots.appendChild(createCaseScreenshot(screenshot));
   });
 
   stacks.forEach((checkbox: HTMLInputElement) => {
@@ -81,11 +124,11 @@ const editCase = async (caseId: number) => {
   mainImage.src =
     mainImageInput.files.length > 0
       ? URL.createObjectURL(mainImageInput.files[0])
-      : caseData.main_image;
+      : caseData.main_image_url;
   previewImage.src =
     subMainImageInput.files.length > 0
       ? URL.createObjectURL(subMainImageInput.files[0])
-      : caseData.preview_image;
+      : caseData.preview_image_url;
 
   caseIdElement.setAttribute('value', caseId.toString());
 
@@ -261,12 +304,17 @@ export const cases = () => {
       await editCase(Number(caseId));
 
       const editModalCloseBtn = document.querySelector('#editCaseModalClose');
+      const divCaseScreenShoots = document.querySelector(
+        '#edit-case-screenshots',
+      );
 
       if (editModalCloseBtn) {
         editModalCloseBtn.addEventListener('click', () => {
-          // while (divCaseScreenShoots.firstChild) {
-          //   divCaseScreenShoots.removeChild(divCaseScreenShoots.firstChild);
-          // }
+          if (divCaseScreenShoots) {
+            while (divCaseScreenShoots.firstChild) {
+              divCaseScreenShoots.removeChild(divCaseScreenShoots.firstChild);
+            }
+          }
           editCaseModal.hide();
         });
       }

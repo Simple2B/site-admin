@@ -60,16 +60,16 @@ class UpdateCase(FlaskForm):
     case_id = IntegerField("case_id", [DataRequired()])
     title = StringField("title", [Length(2, 32)])
     sub_title = StringField("sub_title", [Length(2, 64)])
-    title_image = FileField("title_image")
-    sub_title_image = FileField("sub_title_image")
+    main_image = FileField("title_image")
+    preview_image = FileField("sub_title_image")
     description = StringField("description", [Length(1, 512)])
     is_active = BooleanField("is_active")
     is_main = BooleanField("is_main")
     project_link = StringField("project_link")
     role = StringField("role", [Length(2, 32)])
     stacks = MultiCheckboxField("stacks")
-    sub_images = MultipleFileField(
-        "sub_images",
+    screenshots = MultipleFileField(
+        "screenshots",
     )
 
     submit = SubmitField("Save")
