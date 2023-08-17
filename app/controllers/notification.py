@@ -69,14 +69,20 @@ class PushHandler:
 
 def case_created_notify(case: s.PushNotificationPayload):
     db.session.refresh(case)
-    devices: list[str] = db.session.query(m.Device.token).all()
+    all_devices: list[m.Device] = db.session.query(m.Device).all()
+
+    devices: list[str] = list()
+
+    if all_devices:
+        for device in all_devices:
+            devices.append(device.token)
 
     push_handler = PushHandler()
     push_handler.send_notification(
         s.PushNotificationMessage(
             device_tokens=devices,
             payload=get_notification_payload(
-                notification_type=s.NotificationType.CASE_CREATED, case=case
+                notification_type=s.NotificationType.CASE_CREATED.value, case=case
             ),
         )
     )
