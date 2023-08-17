@@ -95,7 +95,7 @@ def save():
         question.text = form.text.data
         question.correct_answer_mark = form.correct_answer_mark.data
         question.save()
-        question_action_log(m.Action.ActionsType.EDIT, question.id, current_user.id)
+        question_action_log(m.ActionsType.EDIT, question.id, current_user.id)
         for i in range(1, 5):
             query = m.VariantAnswer.select().where(
                 m.VariantAnswer.question_id == question.id,
@@ -136,7 +136,7 @@ def create():
             )
             db.session.add(variant)
         db.session.commit()
-        question_action_log(m.Action.ActionsType.CREATE, question.id, current_user.id)
+        question_action_log(m.ActionsType.CREATE, question.id, current_user.id)
         log(log.INFO, "Form submitted. Question: [%s]", question)
         flash("Question added!", "success")
         question.save()
@@ -157,7 +157,7 @@ def delete(id: int):
         return "no question", 404
     question.is_deleted = True
     db.session.commit()
-    question_action_log(m.Action.ActionsType.DELETE, question.id, current_user.id)
+    question_action_log(m.ActionsType.DELETE, question.id, current_user.id)
     log(log.INFO, "question deleted. question: [%s]", question)
     flash("question deleted!", "success")
     return "ok", 200

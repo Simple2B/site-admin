@@ -27,7 +27,7 @@ def test_CRUD_questions(client: FlaskClient):
     assert question.correct_answer_mark == 1
     action_log: m.Action = db.session.get(m.Action, 1)
     assert action_log
-    assert action_log.action == m.Action.ActionsType.CREATE
+    assert action_log.action == m.ActionsType.CREATE
     response: Response = client.post(
         "/quiz/save",
         json=dict(
@@ -49,7 +49,7 @@ def test_CRUD_questions(client: FlaskClient):
     assert edited_question.correct_answer_mark == 2
     action_log: m.Action = db.session.get(m.Action, 2)
     assert action_log
-    assert action_log.action == m.Action.ActionsType.EDIT
+    assert action_log.action == m.ActionsType.EDIT
     response: Response = client.delete(
         "/quiz/delete/1",
         follow_redirects=True,
@@ -60,4 +60,4 @@ def test_CRUD_questions(client: FlaskClient):
     assert deleted_question.is_deleted
     action_log: m.Action = db.session.get(m.Action, 3)
     assert action_log
-    assert action_log.action == m.Action.ActionsType.DELETE
+    assert action_log.action == m.ActionsType.DELETE

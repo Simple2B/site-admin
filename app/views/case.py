@@ -8,6 +8,7 @@ from app.controllers import create_pagination
 
 from app.common import models as m
 from app import forms as f
+from app.controllers import case_created_notify
 from app.logger import log
 from app.database import db
 from app import s3bucket
@@ -119,7 +120,7 @@ def create():
             session.add(new_case)
             session.commit()
             session.refresh(new_case)
-            case_action_log(m.Action.ActionsType.CREATE, new_case.id, current_user.id)
+            case_action_log(m.ActionsType.CREATE, new_case.id, current_user.id)
 
             for index, img in enumerate(screenshots):
                 new_screenshot = m.CaseScreenshot(
@@ -165,7 +166,10 @@ def create():
             session.add(new_stack)
         session.commit()
 
+        case_created_notify(new_case)
+        log(log.INFO, "Case created. Case: [%s]", new_case)
         flash("Case added!", "success")
+
     if form.errors:
         log(log.ERROR, "Case errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
@@ -211,7 +215,7 @@ def delete(id: int):
 
     case.is_deleted = True
     db.session.commit()
-    case_action_log(m.Action.ActionsType.DELETE, case.id, current_user.id)
+    case_action_log(m.ActionsType.DELETE, case.id, current_user.id)
     log(log.INFO, "Case deleted. Case: [%s]", case)
     flash("Case deleted!", "success")
     return "ok", 200

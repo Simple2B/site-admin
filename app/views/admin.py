@@ -112,7 +112,7 @@ def create():
         log(log.INFO, "Form submitted. Admin: [%s]", admin)
         flash("User added!", "success")
         admin.save()
-        admin_action_log(m.Action.ActionsType.CREATE, admin.id, current_user.id)
+        admin_action_log(m.ActionsType.CREATE, admin.id, current_user.id)
         return redirect(url_for("admin.get_all"))
     else:
         log(log.ERROR, "Admin save errors: [%s]", form.errors)
@@ -131,7 +131,7 @@ def delete(id: int):
     admin.is_deleted = True
     db.session.add(admin)
     db.session.commit()
-    admin_action_log(m.Action.ActionsType.DELETE, admin.id, current_user.id)
+    admin_action_log(m.ActionsType.DELETE, admin.id, current_user.id)
 
     log(log.INFO, "Admin deleted. Admin: [%s]", admin)
     flash("User deleted!", "success")

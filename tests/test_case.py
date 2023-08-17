@@ -33,7 +33,7 @@ def test_crud_case(client, mocker):
     case: m.Case = db.session.get(m.Case, 1)
     assert case
     action_log: m.Action = db.session.get(m.Action, 1)
-    assert action_log.action == m.Action.ActionsType.CREATE
+    assert action_log.action == m.ActionsType.CREATE
 
     # read
     res = client.get("/case/")
@@ -53,4 +53,4 @@ def test_crud_case(client, mocker):
     res = client.delete(f"/case/delete/{case.id}")
     assert case.is_deleted
     action_log: m.Action = db.session.get(m.Action, 2)
-    assert action_log.action == m.Action.ActionsType.DELETE
+    assert action_log.action == m.ActionsType.DELETE

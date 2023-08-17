@@ -54,7 +54,7 @@ def test_create_admin(runner: FlaskCliRunner, client: FlaskClient):
     assert response
     assert response.status_code == 200
     action_log: m.Action = db.session.get(m.Action, 1)
-    assert action_log.action == m.Action.ActionsType.CREATE
+    assert action_log.action == m.ActionsType.CREATE
 
 
 def test_delete_user(populate: FlaskClient):
@@ -64,5 +64,5 @@ def test_delete_user(populate: FlaskClient):
     assert deleted_admin
     assert deleted_admin[0].is_deleted
     action_log: m.Action = db.session.get(m.Action, 1)
-    assert action_log.action == m.Action.ActionsType.DELETE
+    assert action_log.action == m.ActionsType.DELETE
     assert response.status_code == 200
