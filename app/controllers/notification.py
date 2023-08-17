@@ -1,3 +1,4 @@
+from flask import current_app
 import firebase_admin
 
 # from fastapi import status, HTTPException
@@ -20,7 +21,9 @@ class PushHandler:
             log(log.INFO, "Firebase was initialized")
             return
 
-        cred = credentials.Certificate("firebase_credentials.json")
+        GOOGLE_SERVICE_ACCOUNT_PATH = current_app.config["GOOGLE_SERVICE_ACCOUNT_PATH"]
+
+        cred = credentials.Certificate(GOOGLE_SERVICE_ACCOUNT_PATH)
         firebase_admin.initialize_app(cred)
         PushHandler._is_initialized = True
 
