@@ -72,8 +72,6 @@ class UpdateCase(FlaskForm):
         "screenshots",
     )
 
-    submit = SubmitField("Save")
-
     def validate_title_image(self, field):
         if not field.data:
             return

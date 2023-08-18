@@ -9,7 +9,6 @@ from pathlib import Path
 class S3Bucket:
     def init_app(self, app):
         self.bucket_name = app.config["AWS_BUCKET_NAME"]
-        self.allowed_extensions = app.config["ALLOWED_EXTENSIONS"]
         self.s3 = boto3.client(
             "s3",
             aws_access_key_id=app.config["AWS_ACCESS_KEY"],
@@ -42,7 +41,4 @@ class S3Bucket:
 
     def delete_cases_imgs(self, file_url: str):
         file_path = file_url.replace(f"https://{self.bucket_name}/", "").strip()
-        try:
-            self.s3.delete_object(Bucket=self.bucket_name, Key=file_path)
-        except botocore.exceptions.ClientError as error:
-            raise TypeError(error.response["Error"]["Message"])
+        self.s3.delete_object(Bucket=self.bucket_name, Key=file_path)

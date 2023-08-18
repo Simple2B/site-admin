@@ -10,16 +10,16 @@ interface ICaseScreenshot {
 interface ICaseOut {
   id: number;
   title: string;
-  sub_title: string;
+  subTitle: string;
   description: string;
-  is_active: boolean;
-  is_main: boolean;
-  project_link: string;
+  isActive: boolean;
+  isMain: boolean;
+  projectLink: string;
   role: string;
-  stacks_names: string[];
+  stacksNames: string[];
   screenshots: ICaseScreenshot[];
-  main_image_url: string;
-  preview_image_url: string;
+  mainImageUrl: string;
+  previewImageUrl: string;
 }
 
 const createCaseScreenshot = (screenshot: ICaseScreenshot): HTMLElement => {
@@ -101,6 +101,8 @@ const editCase = async (caseId: number) => {
   });
   const caseData: ICaseOut = await response.json();
 
+  console.log(caseData);
+
   const listOfScreenshots: ICaseScreenshot[] = caseData.screenshots;
 
   listOfScreenshots.forEach((screenshot: ICaseScreenshot) => {
@@ -110,25 +112,25 @@ const editCase = async (caseId: number) => {
   stacks.forEach((checkbox: HTMLInputElement) => {
     const label = checkbox.nextElementSibling.textContent;
 
-    if (caseData.stacks_names.includes(label)) {
+    if (caseData.stacksNames.includes(label)) {
       checkbox.checked = true;
     }
   });
 
   title.value = caseData.title;
-  subTitle.value = caseData.sub_title;
+  subTitle.value = caseData.subTitle;
   description.value = caseData.description;
   role.value = caseData.role;
-  isActive.checked = caseData.is_active;
-  isMain.checked = caseData.is_main;
+  isActive.checked = caseData.isActive;
+  isMain.checked = caseData.isMain;
   mainImage.src =
     mainImageInput.files.length > 0
       ? URL.createObjectURL(mainImageInput.files[0])
-      : caseData.main_image_url;
+      : caseData.mainImageUrl;
   previewImage.src =
     subMainImageInput.files.length > 0
       ? URL.createObjectURL(subMainImageInput.files[0])
-      : caseData.preview_image_url;
+      : caseData.previewImageUrl;
 
   caseIdElement.setAttribute('value', caseId.toString());
 
