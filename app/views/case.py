@@ -74,7 +74,7 @@ def get_case(id: int):
 @login_required
 def create():
     form = f.NewCaseForm()
-    form.stacks.choices = [(str(s.id), s.name) for s in db.session.query(m.Stack).all()]
+    form.stacks.choices = db.session.scalars(sa.select(m.Stack.id, m.Stack.name)).all()
     if form.validate_on_submit():
         log(log.INFO, "Form submitted. Case: [%s]", form)
         session = db.session

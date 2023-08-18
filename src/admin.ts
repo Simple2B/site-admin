@@ -22,7 +22,8 @@ export const admin = () => {
   );
 
   // opening add user modal
-  const addAdminButton = document.querySelector('#add-admin-btn');
+  const addAdminButton: HTMLButtonElement =
+    document.querySelector('#add-admin-btn');
   if (addAdminButton) {
     addAdminButton.addEventListener('click', () => {
       addModal.show();

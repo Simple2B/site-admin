@@ -62,14 +62,18 @@ const editCase = async (caseId: number) => {
     '#edit-case-is-active',
   );
   const isMain: HTMLInputElement = document.querySelector('#edit-case-is-main');
-  const stacks = document.querySelectorAll('#stacks input[type="checkbox"]');
+  const stacks: NodeList = document.querySelectorAll(
+    '#stacks input[type="checkbox"]',
+  );
   const mainImage: HTMLImageElement = document.querySelector(
     '#edit-case-main-image',
   );
   const previewImage: HTMLImageElement = document.querySelector(
     '#edit-case-preview-image',
   );
-  const divCaseScreenShoots = document.querySelector('#edit-case-screenshots');
+  const divCaseScreenShoots: HTMLDivElement = document.querySelector(
+    '#edit-case-screenshots',
+  );
   const caseIdElement: HTMLInputElement = document.querySelector('#caseIdEdit');
 
   const mainImageInput: HTMLInputElement = document.querySelector(
@@ -79,29 +83,34 @@ const editCase = async (caseId: number) => {
     '#edit-case-sub-main-image-input',
   );
 
-  if (
-    !title ||
-    !subTitle ||
-    !description ||
-    !role ||
-    !isActive ||
-    !isMain ||
-    !caseIdElement ||
-    !mainImage ||
-    !previewImage ||
-    !divCaseScreenShoots ||
-    !mainImageInput ||
-    !subMainImageInput
-  ) {
+  const elements = [
+    title,
+    subTitle,
+    description,
+    role,
+    isActive,
+    isMain,
+    caseIdElement,
+    mainImage,
+    previewImage,
+    divCaseScreenShoots,
+    mainImageInput,
+    subMainImageInput,
+  ];
+
+  if (elements.includes(undefined)) {
     return;
   }
-
-  const response = await fetch(`/case/${caseId}`, {
-    method: 'GET',
-  });
+  let response;
+  try {
+    response = await fetch(`/case/${caseId}`, {
+      method: 'GET',
+    });
+  } catch (error) {
+    console.error(error);
+    return;
+  }
   const caseData: ICaseOut = await response.json();
-
-  console.log(caseData);
 
   const listOfScreenshots: ICaseScreenshot[] = caseData.screenshots;
 
@@ -117,8 +126,8 @@ const editCase = async (caseId: number) => {
     }
   });
 
-  title.value = caseData.title;
-  subTitle.value = caseData.subTitle;
+  title.value = caseData.title.trim();
+  subTitle.value = caseData.subTitle.trim();
   description.value = caseData.description;
   role.value = caseData.role;
   isActive.checked = caseData.isActive;

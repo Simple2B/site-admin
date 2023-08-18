@@ -7,18 +7,17 @@ export const stack = () => {
   const inputElement = document.getElementById(
     'add-stack-form-input',
   ) as HTMLInputElement;
-  const stacksDiv = document.getElementById('add-stack-form-stacks');
+  const stacksDiv: HTMLElement = document.getElementById(
+    'add-stack-form-stacks',
+  );
   const scrfInput: HTMLInputElement = document.querySelector('#csrf_token');
 
   let oldSpansName: string[];
+  stacksDiv
+    .querySelectorAll('span')
+    .forEach(span => oldSpansName.push(span.textContent));
 
-  if (stacksDiv) {
-    oldSpansName = Array.from(stacksDiv.querySelectorAll('span')).map(
-      span => span.textContent,
-    );
-  }
-
-  const listElementsCases = document.getElementById('listOfCases');
+  const listElementsCases: HTMLElement = document.getElementById('listOfCases');
   const $deleteStackModal: HTMLElement =
     document.querySelector('#deleteStackModal');
 
