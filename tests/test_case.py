@@ -24,6 +24,7 @@ def test_crud_case(client, mocker):
     login(client)
     # create
     mocker.patch.object(s3bucket, "upload_cases_imgs", return_value="https://test.com")
+    mocker.patch.object(s3bucket, "delete_cases_imgs", return_value="https://test.com")
     mocker.patch.object(filetype, "is_image", return_value=True)
     mocker.patch.object(filetype, "guess", return_value=True)
     res = client.post(
@@ -50,13 +51,36 @@ def test_crud_case(client, mocker):
     assert new_action_log_count == action_log_count + 1
     assert not case.is_active
 
+    # update full case
+    res = client.post(
+        "/case/update",
+        data={
+            "is_active": True,
+            "title": "new title",
+            "case_id": case.id,
+            "role": "test role",
+            "sub_title": "test sub title",
+            "description": "test description",
+            "project_link": "https://test.com",
+        },
+        content_type="multipart/form-data",
+    )
+    assert res.status_code == 302
+    assert case.title == "new title"
+    assert case.is_active
     # get case by id
     res = client.get(f"/case/{case.id}")
     assert res.status_code == 200
+
+    # test delete case screenshot
+    assert case.screenshots
+    res = client.delete(f"/case/delete/{case.screenshots[0].id}/screenshot")
+    assert res.status_code == 200
+    assert not case.screenshots
 
     # delete
     assert not case.is_deleted
     res = client.delete(f"/case/delete/{case.id}")
     assert case.is_deleted
-    action_log: m.Action = db.session.get(m.Action, new_action_log_count + 1)
+    action_log: m.Action = db.session.get(m.Action, new_action_log_count + 3)
     assert action_log.action == m.ActionsType.DELETE

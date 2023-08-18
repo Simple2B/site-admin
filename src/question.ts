@@ -1,40 +1,23 @@
 import {Modal} from 'flowbite';
 import type {ModalOptions, ModalInterface} from 'flowbite';
+import {modalOptions, useConfirmModal} from './utils';
 
 export const questions = () => {
   const $addQuestionModalElement: HTMLElement =
     document.querySelector('#addQuestionModal');
   const $editQuestionModalElement: HTMLElement =
     document.querySelector('#editQuestionModal');
-  const $confirmModal: HTMLElement = document.querySelector(
-    '#confirm-modal-element',
-  );
 
-  const addModalOptions: ModalOptions = {
-    backdrop: 'dynamic',
-    closable: true,
-    onHide: () => {},
-    onShow: () => {},
-    onToggle: () => {},
-  };
-  const modalOptions: ModalOptions = {
-    backdrop: 'dynamic',
-    closable: true,
-    onHide: () => {},
-    onShow: () => {},
-    onToggle: () => {},
-  };
+  const {openModal} = useConfirmModal();
 
   const addQuestionModal: ModalInterface = new Modal(
     $addQuestionModalElement,
-    addModalOptions,
+    modalOptions,
   );
   const editQuestionModal: ModalInterface = new Modal(
     $editQuestionModalElement,
     modalOptions,
   );
-
-  const confirmModal: ModalInterface = new Modal($confirmModal, modalOptions);
 
   // opening add user modal
   const addQuestionButton = document.querySelector('#add-question-btn');
@@ -71,44 +54,19 @@ export const questions = () => {
 
     deleteButtons.forEach(e => {
       e.addEventListener('click', async () => {
-        confirmModal.show();
-        const caseConfirmModalText: HTMLSpanElement = document.querySelector(
-          '#confirm-modal-text',
-        );
         const questionId = e.getAttribute('data-question-id');
-        caseConfirmModalText.textContent = `Are you sure you want to delete question ${questionId}?`;
-        const agreeConfirmModalBtn = document.querySelector(
-          '#agree-confirm-modal-btn',
-        );
-        const disagreeConfirmModalBtn = document.querySelector(
-          '#disagree-confirm-modal-btn',
-        );
-        const closeConfirmModalBtn = document.querySelector(
-          '#close-confirm-modal-btn',
-        );
+        const modalText = `Are you sure you want to delete question ${questionId}?`;
 
-        if (
-          agreeConfirmModalBtn &&
-          disagreeConfirmModalBtn &&
-          closeConfirmModalBtn
-        ) {
-          const confirmCallback = async () => {
-            const response = await fetch(`/quiz/delete/${questionId}`, {
-              method: 'DELETE',
-            });
-            if (response.status == 200) {
-              location.reload();
-            }
-          };
+        const confirmCallback = async () => {
+          const response = await fetch(`/quiz/delete/${questionId}`, {
+            method: 'DELETE',
+          });
+          if (response.status == 200) {
+            location.reload();
+          }
+        };
 
-          const notConfirmCallback = () => {
-            confirmModal.hide();
-            agreeConfirmModalBtn.removeEventListener('click', confirmCallback);
-          };
-          agreeConfirmModalBtn.addEventListener('click', confirmCallback);
-          disagreeConfirmModalBtn.addEventListener('click', notConfirmCallback);
-          closeConfirmModalBtn.addEventListener('click', notConfirmCallback);
-        }
+        openModal(modalText, confirmCallback);
       });
     });
   }

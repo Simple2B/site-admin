@@ -41,9 +41,6 @@ class BaseConfig(BaseSettings):
     # Count of questions
     QUESTIONS_COUNT = 25
 
-    # Allowed extensions
-    ALLOWED_EXTENSIONS = ["png", "jpg", "jpeg", "cvg"]
-
     @staticmethod
     def configure(app: Flask):
         # Implement this method to do further configuration on your app.

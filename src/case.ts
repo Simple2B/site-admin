@@ -1,5 +1,162 @@
 import {Modal} from 'flowbite';
-import type {ModalOptions, ModalInterface} from 'flowbite';
+import type {ModalInterface} from 'flowbite';
+import {modalOptions, useConfirmModal} from './utils';
+
+interface ICaseScreenshot {
+  id: number;
+  url: string;
+}
+
+interface ICaseOut {
+  id: number;
+  title: string;
+  subTitle: string;
+  description: string;
+  isActive: boolean;
+  isMain: boolean;
+  projectLink: string;
+  role: string;
+  stacksNames: string[];
+  screenshots: ICaseScreenshot[];
+  mainImageUrl: string;
+  previewImageUrl: string;
+}
+
+const createCaseScreenshot = (screenshot: ICaseScreenshot): HTMLElement => {
+  const screenshotDiv = document.createElement('div');
+  screenshotDiv.setAttribute('class', 'flex flex-col');
+  const img = document.createElement('img');
+  const deleteBtn = document.createElement('div');
+  deleteBtn.id = 'edit-case-screenshot-delete-icon';
+  deleteBtn.setAttribute(
+    'class',
+    'px-3 py-2 text-xs font-medium text-center text-white bg-red-700 rounded-lg hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800',
+  );
+  deleteBtn.innerHTML = 'Delete';
+  img.src = screenshot.url;
+  screenshotDiv.appendChild(img);
+  screenshotDiv.appendChild(deleteBtn);
+
+  deleteBtn.addEventListener('click', async () => {
+    const response = await fetch(`/case/delete/${screenshot.id}/screenshot`, {
+      method: 'DELETE',
+    });
+    if (response.status == 200) {
+      screenshotDiv.remove();
+    }
+  });
+
+  return screenshotDiv;
+};
+
+const editCase = async (caseId: number) => {
+  const title: HTMLInputElement = document.querySelector('#edit-case-title');
+  const subTitle: HTMLInputElement = document.querySelector(
+    '#edit-case-sub-title',
+  );
+  const description: HTMLInputElement = document.querySelector(
+    '#edit-case-description',
+  );
+  const role: HTMLInputElement = document.querySelector('#edit-case-role');
+  const isActive: HTMLInputElement = document.querySelector(
+    '#edit-case-is-active',
+  );
+  const isMain: HTMLInputElement = document.querySelector('#edit-case-is-main');
+  const stacks: NodeList = document.querySelectorAll(
+    '#stacks input[type="checkbox"]',
+  );
+  const mainImage: HTMLImageElement = document.querySelector(
+    '#edit-case-main-image',
+  );
+  const previewImage: HTMLImageElement = document.querySelector(
+    '#edit-case-preview-image',
+  );
+  const divCaseScreenShoots: HTMLDivElement = document.querySelector(
+    '#edit-case-screenshots',
+  );
+  const caseIdElement: HTMLInputElement = document.querySelector('#caseIdEdit');
+
+  const mainImageInput: HTMLInputElement = document.querySelector(
+    '#edit-case-main-image-input',
+  );
+  const subMainImageInput: HTMLInputElement = document.querySelector(
+    '#edit-case-sub-main-image-input',
+  );
+
+  const elements = [
+    title,
+    subTitle,
+    description,
+    role,
+    isActive,
+    isMain,
+    caseIdElement,
+    mainImage,
+    previewImage,
+    divCaseScreenShoots,
+    mainImageInput,
+    subMainImageInput,
+  ];
+
+  if (elements.includes(undefined)) {
+    return;
+  }
+  let response;
+  try {
+    response = await fetch(`/case/${caseId}`, {
+      method: 'GET',
+    });
+  } catch (error) {
+    console.error(error);
+    return;
+  }
+  const caseData: ICaseOut = await response.json();
+
+  const listOfScreenshots: ICaseScreenshot[] = caseData.screenshots;
+
+  listOfScreenshots.forEach((screenshot: ICaseScreenshot) => {
+    divCaseScreenShoots.appendChild(createCaseScreenshot(screenshot));
+  });
+
+  stacks.forEach((checkbox: HTMLInputElement) => {
+    const label = checkbox.nextElementSibling.textContent;
+
+    if (caseData.stacksNames.includes(label)) {
+      checkbox.checked = true;
+    }
+  });
+
+  title.value = caseData.title.trim();
+  subTitle.value = caseData.subTitle.trim();
+  description.value = caseData.description;
+  role.value = caseData.role;
+  isActive.checked = caseData.isActive;
+  isMain.checked = caseData.isMain;
+  mainImage.src =
+    mainImageInput.files.length > 0
+      ? URL.createObjectURL(mainImageInput.files[0])
+      : caseData.mainImageUrl;
+  previewImage.src =
+    subMainImageInput.files.length > 0
+      ? URL.createObjectURL(subMainImageInput.files[0])
+      : caseData.previewImageUrl;
+
+  caseIdElement.setAttribute('value', caseId.toString());
+
+  mainImageInput.addEventListener('change', () => {
+    const files = mainImageInput.files;
+    if (files.length > 0) {
+      mainImage.src = URL.createObjectURL(files[0]);
+    }
+  });
+
+  subMainImageInput.addEventListener('change', () => {
+    const files = subMainImageInput.files;
+    if (files.length > 0) {
+      previewImage.src = URL.createObjectURL(files[0]);
+    }
+  });
+};
 
 export const cases = () => {
   const $addUserModalElement: HTMLElement =
@@ -11,17 +168,7 @@ export const cases = () => {
     '#caseEditModalElement',
   );
 
-  const $confirmCaseModalElement: HTMLElement = document.querySelector(
-    '#confirm-modal-element',
-  );
-
-  const modalOptions: ModalOptions = {
-    backdrop: 'static',
-    closable: true,
-    onHide: () => {},
-    onShow: () => {},
-    onToggle: () => {},
-  };
+  const {openModal} = useConfirmModal();
 
   const addModal: ModalInterface = new Modal(
     $addUserModalElement,
@@ -38,48 +185,28 @@ export const cases = () => {
     modalOptions,
   );
 
-  const confirmCaseModal: ModalInterface = new Modal(
-    $confirmCaseModalElement,
-    modalOptions,
-  );
-
   // callBack on btn is_active and is_main
   const caseConfirmModalListener = (
     event: MouseEvent,
     inputElement: HTMLInputElement,
   ) => {
     event.preventDefault();
-    confirmCaseModal.show();
     const caseId = inputElement.getAttribute('data-case-id');
     const caseStatusAtr = inputElement.getAttribute('data-case-status');
     const dataFiled = inputElement.getAttribute('data-field');
-    const caseConfirmModalText: HTMLElement = document.querySelector(
-      '#confirm-modal-text',
-    );
-    const closeModalBtn = document.querySelector('#close-confirm-modal-btn');
 
     const isCaseActive = caseStatusAtr === 'True';
-
-    if (caseConfirmModalText) {
-      const text = 'Are you sure you want to';
-      if (dataFiled === 'is_active') {
-        caseConfirmModalText.textContent = isCaseActive
-          ? `${text} deactivate case ${caseId}`
-          : `${text} activate case ${caseId}`;
-      } else if (dataFiled === 'is_main') {
-        caseConfirmModalText.textContent = isCaseActive
-          ? `${text} deactivate main case ${caseId}`
-          : `${text} activate main case ${caseId}`;
-      }
+    let caseConfirmModalText;
+    const text = 'Are you sure you want to';
+    if (dataFiled === 'is_active') {
+      caseConfirmModalText = isCaseActive
+        ? `${text} deactivate case ${caseId}`
+        : `${text} activate case ${caseId}`;
+    } else if (dataFiled === 'is_main') {
+      caseConfirmModalText = isCaseActive
+        ? `${text} deactivate main case ${caseId}`
+        : `${text} activate main case ${caseId}`;
     }
-
-    const agreeConfirmModalBtn = document.querySelector(
-      '#agree-confirm-modal-btn',
-    );
-
-    const disagreeConfirmModalBtn = document.querySelector(
-      '#disagree-confirm-modal-btn',
-    );
 
     const confirmCallback = async () => {
       const formData = new FormData();
@@ -94,17 +221,7 @@ export const cases = () => {
       }
     };
 
-    const notConfirmCallback = async () => {
-      confirmCaseModal.hide();
-      agreeConfirmModalBtn.removeEventListener('click', confirmCallback);
-    };
-
-    if (agreeConfirmModalBtn && disagreeConfirmModalBtn && closeModalBtn) {
-      agreeConfirmModalBtn.addEventListener('click', confirmCallback);
-
-      disagreeConfirmModalBtn.addEventListener('click', notConfirmCallback);
-      closeModalBtn.addEventListener('click', notConfirmCallback);
-    }
+    openModal(caseConfirmModalText, confirmCallback);
   };
 
   const activateCaseButton: NodeListOf<HTMLInputElement> =
@@ -171,42 +288,19 @@ export const cases = () => {
 
     deleteButtons.forEach(e => {
       e.addEventListener('click', async () => {
-        confirmCaseModal.show();
         const caseId = e.getAttribute('data-case-id');
-        const caseConfirmModalText: HTMLSpanElement = document.querySelector(
-          '#confirm-modal-text',
-        );
-        const agreeConfirmModalBtn = document.querySelector(
-          '#agree-confirm-modal-btn',
-        );
-        const disagreeConfirmModalBtn = document.querySelector(
-          '#disagree-confirm-modal-btn',
-        );
-        const closeModalBtn = document.querySelector(
-          '#close-confirm-modal-btn',
-        );
+        const modalText = `Are you sure you want to delete case ${caseId}?`;
 
-        caseConfirmModalText.textContent = `Are you sure you want to delete case ${caseId}?`;
+        const confirmCallback = async () => {
+          const response = await fetch(`/case/delete/${caseId}`, {
+            method: 'DELETE',
+          });
+          if (response.status == 200) {
+            location.reload();
+          }
+        };
 
-        if (agreeConfirmModalBtn && disagreeConfirmModalBtn && closeModalBtn) {
-          const confirmCallback = async () => {
-            const response = await fetch(`/case/delete/${caseId}`, {
-              method: 'DELETE',
-            });
-            if (response.status == 200) {
-              location.reload();
-            }
-          };
-
-          const notConfirmCallback = async () => {
-            confirmCaseModal.hide();
-            agreeConfirmModalBtn.removeEventListener('click', confirmCallback);
-          };
-          agreeConfirmModalBtn.addEventListener('click', confirmCallback);
-
-          disagreeConfirmModalBtn.addEventListener('click', notConfirmCallback);
-          closeModalBtn.addEventListener('click', notConfirmCallback);
-        }
+        openModal(modalText, confirmCallback);
       });
     });
   }
@@ -218,82 +312,21 @@ export const cases = () => {
 
       const caseId = e.getAttribute('data-edit-id');
 
-      console.log(caseId);
+      await editCase(Number(caseId));
 
-      const response = await fetch(`/case/${caseId}`, {
-        method: 'GET',
-      });
-      const caseData = await response.json();
-
-      const listOfStacks = caseData.stacks;
-      const listOfScreenshots = caseData.screenshots;
-
-      const title: HTMLInputElement =
-        document.querySelector('#edit-case-title');
-      const subTitle: HTMLInputElement = document.querySelector(
-        '#edit-case-sub-title',
-      );
-      const description: HTMLInputElement = document.querySelector(
-        '#edit-case-description',
-      );
-      const role: HTMLInputElement = document.querySelector('#edit-case-role');
-      const isActive: HTMLInputElement = document.querySelector(
-        '#edit-case-is-active',
-      );
-      const isMain: HTMLInputElement =
-        document.querySelector('#edit-case-is-main');
-      const stacks = document.querySelectorAll(
-        '#stacks input[type="checkbox"]',
-      );
-      const mainImage: HTMLImageElement = document.querySelector(
-        '#edit-case-main-image',
-      );
-      const previewImage: HTMLImageElement = document.querySelector(
-        '#edit-case-preview-image',
-      );
-
+      const editModalCloseBtn = document.querySelector('#editCaseModalClose');
       const divCaseScreenShoots = document.querySelector(
         '#edit-case-screenshots',
       );
 
-      listOfScreenshots.forEach((screenshot: string) => {
-        const img = document.createElement('img');
-        img.src = screenshot;
-        if (img) {
-          divCaseScreenShoots.appendChild(img);
-        }
-      });
-
-      const caseIdElement: HTMLInputElement =
-        document.querySelector('#caseIdEdit');
-
-      stacks.forEach((checkbox: HTMLInputElement) => {
-        const label = checkbox.nextElementSibling.textContent;
-
-        if (listOfStacks.includes(label)) {
-          checkbox.checked = true;
-        }
-      });
-
-      title.value = caseData.title;
-      subTitle.value = caseData.sub_title;
-      description.value = caseData.description;
-      role.value = caseData.role;
-      isActive.checked = caseData.is_active;
-      isMain.checked = caseData.is_main;
-      mainImage.src = caseData.main_image;
-      previewImage.src = caseData.preview_image;
-
-      caseIdElement.setAttribute('value', caseId);
-
-      const editModalCloseBtn = document.querySelector('#editCaseModalClose');
-
       if (editModalCloseBtn) {
         editModalCloseBtn.addEventListener('click', () => {
-          editCaseModal.hide();
-          while (divCaseScreenShoots.firstChild) {
-            divCaseScreenShoots.removeChild(divCaseScreenShoots.firstChild);
+          if (divCaseScreenShoots) {
+            while (divCaseScreenShoots.firstChild) {
+              divCaseScreenShoots.removeChild(divCaseScreenShoots.firstChild);
+            }
           }
+          editCaseModal.hide();
         });
       }
     });
