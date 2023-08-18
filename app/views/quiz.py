@@ -92,6 +92,7 @@ def save():
         if not question:
             log(log.ERROR, "Not found question by id : [%s]", form.id.data)
             flash("Cannot save question data", "danger")
+            return redirect(url_for("quiz.get_all"))
         question.text = form.text.data
         question.correct_answer_mark = form.correct_answer_mark.data
         question.save()
