@@ -25,10 +25,10 @@ def test_CRUD_questions(client: FlaskClient):
     assert question
     assert question.text == "Test question"
     assert question.correct_answer_mark == 1
-    action_log: m.Action = db.session.get(m.Action, 1)
-    assert action_log
-    assert action_log.action == m.ActionsType.CREATE
-    response: Response = client.post(
+    create_action_log: m.Action = db.session.get(m.Action, 1)
+    assert create_action_log
+    assert create_action_log.action == m.ActionsType.CREATE
+    res: Response = client.post(
         "/quiz/save",
         json=dict(
             id=question.id,
@@ -42,7 +42,7 @@ def test_CRUD_questions(client: FlaskClient):
         ),
         follow_redirects=True,
     )
-    assert response
+    assert res
     edited_question: m.Question = db.session.query(m.Question).first()
     assert edited_question
     assert edited_question.text == "Test question!!!"
@@ -50,14 +50,14 @@ def test_CRUD_questions(client: FlaskClient):
     action_log: m.Action = db.session.get(m.Action, 2)
     assert action_log
     assert action_log.action == m.ActionsType.EDIT
-    response: Response = client.delete(
+    res_quiz: Response = client.delete(
         "/quiz/delete/1",
         follow_redirects=True,
     )
-    assert response
-    assert response.status_code == 200
+    assert res_quiz
+    assert res_quiz.status_code == 200
     deleted_question: m.Question = db.session.query(m.Question).first()
     assert deleted_question.is_deleted
-    action_log: m.Action = db.session.get(m.Action, 3)
-    assert action_log
-    assert action_log.action == m.ActionsType.DELETE
+    delete_action_log: m.Action = db.session.get(m.Action, 3)
+    assert delete_action_log
+    assert delete_action_log.action == m.ActionsType.DELETE

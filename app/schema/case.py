@@ -19,7 +19,7 @@ class CaseOut(BaseModel):
     project_link: str = Field(alias="projectLink")
     role: str
 
-    stacks_names: list[str] = Field(alias="stacksNames")
+    stacks: list[str] = Field(alias="stacksNames")
     screenshots: list[CaseScreenshot]
 
     main_image_url: str = Field(alias="mainImageUrl")

@@ -35,7 +35,7 @@ def create():
 @login_required
 def delete():
     form = f.NewStackForm(request.form)
-    stack: str = form.stacks.data
+    stack: str = form.stacks.data  # -check-untyped-defs
 
     if stack:
         try:

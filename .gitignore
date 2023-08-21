@@ -9,3 +9,13 @@ node_modules/
 .env
 *.pyc
 /*.sqlite3
+
+# IOS
+.DS_Store
+*/.DS_Store
+*/.vscode
+
+# firebase credentials
+firebase_credentials.json
+
+.mypy_cache 

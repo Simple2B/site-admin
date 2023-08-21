@@ -35,6 +35,9 @@ class BaseConfig(BaseSettings):
     AWS_SECRET_ACCESS_KEY: str
     AWS_DOMAIN: str
 
+    # GOOGLE
+    GOOGLE_SERVICE_ACCOUNT_PATH: str = ""
+
     # Count of questions
     QUESTIONS_COUNT = 25
 

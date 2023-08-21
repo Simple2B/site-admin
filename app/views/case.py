@@ -11,6 +11,7 @@ from app.controllers import create_pagination
 from app.common import models as m
 from app import schema as s
 from app import forms as f
+from app.controllers import notify_case_created
 from app.logger import log
 from app.database import db
 from app import s3bucket
@@ -162,7 +163,10 @@ def create():
             session.add(new_stack)
         session.commit()
 
+        notify_case_created(new_case)
+        log(log.INFO, "Case created. Case: [%s]", new_case)
         flash("Case added!", "success")
+
     if form.errors:
         log(log.ERROR, "Case errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")

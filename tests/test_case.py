@@ -31,7 +31,7 @@ def test_crud_case(client, mocker):
         "/case/create", data=test_case, content_type="multipart/form-data"
     )
     assert res.status_code == 302
-    case: m.Case = db.session.get(m.Case, 1)
+    case: m.Case | None = db.session.get(m.Case, 1)
     assert case
     action_log_count = db.session.query(m.Action).count()
     assert action_log_count == 1
@@ -43,7 +43,7 @@ def test_crud_case(client, mocker):
     assert test_case["title"] in html
 
     # update active and main
-    case: m.Case = db.session.get(m.Case, 1)
+    case: m.Case | None = db.session.get(m.Case, 1)
     assert case.is_active == test_case["is_active"]
     res = client.patch(f"/case/update-status/{case.id}", data={"field": "is_active"})
     assert res.status_code == 200
@@ -82,5 +82,7 @@ def test_crud_case(client, mocker):
     assert not case.is_deleted
     res = client.delete(f"/case/delete/{case.id}")
     assert case.is_deleted
-    action_log: m.Action = db.session.get(m.Action, new_action_log_count + 3)
-    assert action_log.action == m.ActionsType.DELETE
+    delete_action_log: m.Action | None = db.session.get(
+        m.Action, new_action_log_count + 3
+    )
+    assert delete_action_log.action == m.ActionsType.DELETE
