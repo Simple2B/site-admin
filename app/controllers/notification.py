@@ -12,6 +12,21 @@ from app import schema as s
 from app.database import db
 from app.logger import log
 
+android_config = messaging.AndroidConfig(
+    ttl=3600,
+    priority="high",
+)
+
+APNSConfig = messaging.APNSConfig(
+    payload=messaging.APNSPayload(
+        aps=messaging.Aps(
+            content_available=True,
+            mutable_content=True,
+        ),
+        headers={"apns-priority": "5"},
+    ),
+)
+
 
 class PushHandler:
     _is_initialized = False
@@ -35,19 +50,8 @@ class PushHandler:
         message = messaging.MulticastMessage(
             tokens=message_data.device_tokens,
             data=message_data.payload.dict(),
-            android=messaging.AndroidConfig(
-                ttl=3600,
-                priority="high",
-            ),
-            apns=messaging.APNSConfig(
-                payload=messaging.APNSPayload(
-                    aps=messaging.Aps(
-                        content_available=True,
-                        mutable_content=True,
-                    ),
-                    headers={"apns-priority": "5"},
-                ),
-            ),
+            android=android_config,
+            apns=APNSConfig,
         )
 
         try:
@@ -66,7 +70,7 @@ class PushHandler:
             raise Conflict(description="Message arguments invalid")
 
 
-def case_created_notify(case: s.PushNotificationPayload):
+def notify_case_created(case: s.PushNotificationPayload):
     db.session.refresh(case)
     all_devices: list[m.Device] = db.session.query(m.Device).all()
 
@@ -81,7 +85,8 @@ def case_created_notify(case: s.PushNotificationPayload):
         s.PushNotificationMessage(
             device_tokens=devices,
             payload=get_notification_payload(
-                notification_type=s.NotificationType.CASE_CREATED.value, case=case
+                notification_type=s.NotificationType.CASE_CREATED.value,
+                case=case,
             ),
         )
     )
@@ -89,7 +94,7 @@ def case_created_notify(case: s.PushNotificationPayload):
     log(log.INFO, "[%d] notifications sended", len(devices))
 
 
-def get_notification_payload(notification_type: s.NotificationType, case: m.Case):
+def get_notification_payload(notification_type: str, case: s.PushNotificationPayload):
     return s.PushNotificationPayload(
         notification_type=notification_type,
         title=case.title,
