@@ -17,3 +17,5 @@ node_modules/
 
 # firebase credentials
 firebase_credentials.json
+
+.mypy_cache 
