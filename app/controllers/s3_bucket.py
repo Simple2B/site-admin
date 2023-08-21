@@ -21,7 +21,6 @@ class S3Bucket:
     def upload_cases_imgs(
         self, file: typing.BinaryIO, file_name: str, case_name: str, img_type="title"
     ) -> str:
-
         extension_files = file_name.split(".")[-1]
 
         re_file_name = f"{img_type}_{self._generate_img_uid()}.{extension_files}"

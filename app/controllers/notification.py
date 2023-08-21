@@ -5,7 +5,7 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import messaging
 from firebase_admin.exceptions import FirebaseError
-from werkzeug.exceptions import HTTPException
+from werkzeug.exceptions import Conflict
 
 from app.common import models as m
 from app import schema as s
@@ -57,14 +57,13 @@ class PushHandler:
 
         except FirebaseError:
             log(log.ERROR, "Error while sending message")
-            raise HTTPException(
-                code=409,
+            raise Conflict(
                 description="Error while sending message",
             )
 
         except (ValueError, TypeError):
             log(log.ERROR, "Message arguments invalid")
-            raise HTTPException(code=409, description="Message arguments invalid")
+            raise Conflict(description="Message arguments invalid")
 
 
 def case_created_notify(case: s.PushNotificationPayload):

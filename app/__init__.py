@@ -3,7 +3,6 @@ import os
 from flask import Flask, render_template
 from flask_login import LoginManager
 from werkzeug.exceptions import HTTPException
-from flask_migrate import Migrate
 from flask_mail import Mail
 from app.controllers.s3_bucket import S3Bucket
 
@@ -12,7 +11,6 @@ from .database import db, AnonymousUser
 
 # instantiate extensions
 login_manager = LoginManager()
-migration = Migrate()
 mail = Mail()
 s3bucket = S3Bucket()
 
@@ -44,7 +42,6 @@ def create_app(environment="development"):
 
     # Set up extensions.
     db.init_app(app)
-    migration.init_app(app, db)
     login_manager.init_app(app)
     mail.init_app(app)
     s3bucket.init_app(app)
