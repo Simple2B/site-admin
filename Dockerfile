@@ -22,9 +22,11 @@ COPY --chown=app:app poetry.lock .
 COPY --chown=app:app pyproject.toml .
 COPY --chown=app:app poetry.toml .
 
-RUN poetry install --no-dev --no-interaction --no-ansi
+RUN poetry install --without dev --no-interaction --no-ansi
 # add gunicorn
 RUN poetry add gunicorn
+EXPOSE 80
+
 
 COPY --chown=app:app . .
 RUN chmod +x ./start_server.sh
