@@ -4,7 +4,6 @@ from app import db
 import io
 from tests.utils import login
 from app import s3bucket
-import sqlalchemy as sa
 
 test_case = {
     "title": "test title",

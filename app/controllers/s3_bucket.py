@@ -1,5 +1,4 @@
 import uuid
-import typing
 
 import boto3
 import botocore
