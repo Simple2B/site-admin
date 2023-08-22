@@ -19,7 +19,7 @@ class S3Bucket:
         return str(uuid.uuid4())
 
     def upload_cases_imgs(
-        self, file: typing.BinaryIO, file_name: str, case_name: str, img_type="title"
+        self, file, file_name: str, case_name: str, img_type="title"
     ) -> str:
         extension_files = file_name.split(".")[-1]
 

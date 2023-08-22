@@ -4,6 +4,7 @@ from app import db
 import io
 from tests.utils import login
 from app import s3bucket
+import sqlalchemy as sa
 
 test_case = {
     "title": "test title",
@@ -19,6 +20,8 @@ test_case = {
     "sub_images": [(io.BytesIO(b"sub_images"), "sub_images.jpg")],
 }
 
+stack = {"name": "django"}
+
 
 def test_crud_case(client, mocker):
     login(client)
@@ -33,6 +36,14 @@ def test_crud_case(client, mocker):
     assert res.status_code == 302
     case: m.Case | None = db.session.get(m.Case, 1)
     assert case
+    # stack = m.Stack(name="django")
+    # case._stacks.append(stack)
+    # db.session.add(case)
+    # db.session.add(stack)
+    # db.session.commit()
+    # case: m.Case | None = db.session.get(m.Case, case.id)
+    # assert case.stacks_names == ["django"]
+
     action_log_count = db.session.query(m.Action).count()
     assert action_log_count == 1
 

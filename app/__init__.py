@@ -5,6 +5,7 @@ from flask_login import LoginManager
 from werkzeug.exceptions import HTTPException
 from flask_mail import Mail
 from app.controllers.s3_bucket import S3Bucket
+from flask_debugtoolbar import DebugToolbarExtension
 
 from app.logger import log
 from .database import db, AnonymousUser
@@ -13,6 +14,7 @@ from .database import db, AnonymousUser
 login_manager = LoginManager()
 mail = Mail()
 s3bucket = S3Bucket()
+toolbar = DebugToolbarExtension()
 
 
 def create_app(environment="development"):
@@ -39,12 +41,17 @@ def create_app(environment="development"):
     app.config.from_object(configuration)
     configuration.configure(app)
     log(log.INFO, "Configuration: [%s]", configuration.ENV)
+    app.config["SQLALCHEMY_ECHO"] = True
+    app.config["DEBUG_TB_INTERCEPT_REDIRECTS"] = False
+    app.config["SQLALCHEMY_RECORD_QUERIES"] = True
 
     # Set up extensions.
     db.init_app(app)
     login_manager.init_app(app)
     mail.init_app(app)
     s3bucket.init_app(app)
+    toolbar.init_app(app)
+    print(app.debug)
 
     # Register blueprints.
     app.register_blueprint(auth_blueprint)

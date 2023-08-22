@@ -906,6 +906,23 @@ async = ["asgiref (>=3.2)"]
 dotenv = ["python-dotenv"]
 
 [[package]]
+name = "flask-debugtoolbar"
+version = "0.13.1"
+description = "A toolbar overlay for debugging Flask applications."
+optional = false
+python-versions = ">=2.7"
+files = [
+    {file = "Flask-DebugToolbar-0.13.1.tar.gz", hash = "sha256:0c26aa013a9813b8886857bf0ec24d28ab494114a264baf06c951cadc4dd0dae"},
+    {file = "Flask_DebugToolbar-0.13.1-py3-none-any.whl", hash = "sha256:491c737f321830c06a2835784acf1fc8488fd257a0ef318810b3b6bed5f600d5"},
+]
+
+[package.dependencies]
+Blinker = "*"
+Flask = ">=0.8"
+itsdangerous = "*"
+werkzeug = "*"
+
+[[package]]
 name = "flask-login"
 version = "0.6.2"
 description = "User authentication and session management for Flask."
@@ -2285,4 +2302,4 @@ email = ["email-validator"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "3978a0c1c28e3a5b92c54f5a371ee4e219d3bd89ac068bfb7e88ce0959794d88"
+content-hash = "cf423cf3357c3b2bc5296239090c7bacaf9089c1f1fecb7eda81647a7a26370f"
