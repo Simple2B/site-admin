@@ -1,5 +1,4 @@
-from flask import Response
-from flask.testing import FlaskClient, TestResponse
+from flask.testing import FlaskClient
 from app.common import models as m
 from tests.utils import login
 from app.database import db
@@ -7,7 +6,7 @@ from app.database import db
 
 def test_CRUD_questions(client: FlaskClient):
     login(client)
-    response: TestResponse = client.post(
+    response = client.post(
         "/quiz/create",
         data=dict(
             text="Test question",
@@ -28,7 +27,7 @@ def test_CRUD_questions(client: FlaskClient):
     create_action_log: m.Action = db.session.get(m.Action, 1)
     assert create_action_log
     assert create_action_log.action == m.ActionsType.CREATE
-    res: TestResponse = client.post(
+    res = client.post(
         "/quiz/save",
         json=dict(
             id=question.id,
@@ -50,7 +49,7 @@ def test_CRUD_questions(client: FlaskClient):
     action_log: m.Action = db.session.get(m.Action, 2)
     assert action_log
     assert action_log.action == m.ActionsType.EDIT
-    res_quiz: TestResponse = client.delete(
+    res_quiz = client.delete(
         "/quiz/delete/1",
         follow_redirects=True,
     )
