@@ -27,7 +27,7 @@
   "python.testing.unittestEnabled": false,
   "python.testing.pytestArgs": ["tests"],
   "[python]": {
-    "editor.defaultFormatter": "ms-python.black-formatter"
+    "editor.defaultFormatter": "ms-python.python"
   },
   "python.linting.mypyEnabled": true
 }
