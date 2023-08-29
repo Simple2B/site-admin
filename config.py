@@ -14,7 +14,7 @@ class BaseConfig(BaseSettings):
     APP_NAME: str = "Simple Flask App"
     SECRET_KEY: str
     SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
-    WTF_CSRF_ENABLED: bool = False
+    WTF_CSRF_ENABLED: bool = True
 
     # Mail config
     MAIL_SERVER: str = ""
