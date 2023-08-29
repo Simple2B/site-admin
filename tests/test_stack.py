@@ -12,14 +12,12 @@ delete_stack = {
 }
 
 
-def test_create(client):
+def test_create_delete(client):
     login(client)
     res = client.post("/stack/create", data=add_stacks)
     assert res.status_code == 200
-    assert db.session.query(m.Stack).count() == 4
-
-
-def test_delete(client):
-    login(client)
-    res = client.delete("/stack/delete", data=delete_stack)
+    count = db.session.query(m.Stack).count()
+    assert count == 4
+    res = client.delete(f"/stack/delete/{4}", data=delete_stack)
     assert res.status_code == 200
+    assert db.session.query(m.Stack).count() == 3

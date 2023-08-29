@@ -21,7 +21,8 @@ def app():
 
 @pytest.fixture()
 def client(app: Flask, mocker):
-    mocker.patch("app.views.case.notify_case_created", return_value=None)
+    # mocker.patch("app.views.case.notify_case_created", return_value=None)
+    # will use in new version
 
     with app.test_client() as client:
         app_ctx = app.app_context()

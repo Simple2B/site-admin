@@ -13,7 +13,6 @@ from app.controllers import create_pagination
 from app.common import models as m
 from app import schema as s
 from app import forms as f
-from app.controllers import notify_case_created
 from app.logger import log
 from app.database import db
 from app import s3bucket
