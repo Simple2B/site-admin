@@ -1,5 +1,5 @@
 import {Modal} from 'flowbite';
-import type {ModalOptions, ModalInterface} from 'flowbite';
+import type {ModalInterface} from 'flowbite';
 import {modalOptions} from './utils';
 
 export const stack = () => {
@@ -12,10 +12,12 @@ export const stack = () => {
   );
   const scrfInput: HTMLInputElement = document.querySelector('#csrf_token');
 
-  let oldSpansName: string[];
-  stacksDiv
-    .querySelectorAll('span')
-    .forEach(span => oldSpansName.push(span.textContent));
+  let oldSpansName: string[] = [];
+  if (stacksDiv) {
+    stacksDiv
+      .querySelectorAll('span')
+      .forEach(span => oldSpansName.push(span.textContent));
+  }
 
   const listElementsCases: HTMLElement = document.getElementById('listOfCases');
   const $deleteStackModal: HTMLElement =
@@ -41,37 +43,13 @@ export const stack = () => {
 
   if (listOfStacks) {
     listOfStacks.forEach(button => {
-      const stackName = button.id.replace('button-', '');
+      const stackId = button.id.replace('button-', '');
       button.addEventListener('click', async () => {
-        const formData = new FormData();
-        formData.append('stacks', stackName);
-
-        const response = await fetch(`/stack/delete`, {
+        const response = await fetch(`/stack/delete/${stackId}`, {
           method: 'DELETE',
-          body: formData,
         });
 
-        if (response.status === 422 && listElementsCases) {
-          const stringList = await response.json();
-
-          // Clear existing content
-          listElementsCases.innerHTML = '';
-
-          // Create a <span> element for each string and append it to the container
-          stringList.forEach((item: string) => {
-            const span = document.createElement('span');
-            const lineBreak = document.createElement('br');
-
-            span.textContent = item;
-            span.setAttribute('class', 'font-semibold text-xl');
-            listElementsCases.appendChild(span);
-            listElementsCases.appendChild(lineBreak);
-          });
-
-          stackModalWarning.show();
-        }
-
-        if (response.status == 200) {
+        if (response.status == 200 || response.status == 422) {
           location.reload();
         }
       });
