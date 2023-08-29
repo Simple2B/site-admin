@@ -57,6 +57,9 @@ const editCase = async (caseId: number) => {
   const description: HTMLInputElement = document.querySelector(
     '#edit-case-description',
   );
+  const projectLink: HTMLInputElement = document.querySelector(
+    '#edit-case-project-link',
+  );
   const role: HTMLInputElement = document.querySelector('#edit-case-role');
   const isActive: HTMLInputElement = document.querySelector(
     '#edit-case-is-active',
@@ -96,6 +99,7 @@ const editCase = async (caseId: number) => {
     divCaseScreenShoots,
     mainImageInput,
     subMainImageInput,
+    projectLink,
   ];
 
   if (elements.includes(undefined)) {
@@ -130,6 +134,7 @@ const editCase = async (caseId: number) => {
   subTitle.value = caseData.subTitle.trim();
   description.value = caseData.description;
   role.value = caseData.role;
+  projectLink.value = caseData.projectLink;
   isActive.checked = caseData.isActive;
   isMain.checked = caseData.isMain;
   mainImage.src =
