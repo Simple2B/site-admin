@@ -335,7 +335,8 @@ def delete(id: int):
         return "no case", 404
     delete_datetime = datetime.now().strftime("%m/%d/%Y")
     case.is_deleted = True
-    case.title = f"{case.title}@d_{delete_datetime}"
+    new_case_title = f"{case.title}@d_{delete_datetime}"
+    case.title = new_case_title if len(new_case_title) < 32 else new_case_title[:31]
     db.session.commit()
     ActionLogs.create_case_log(m.ActionsType.DELETE, case.id)
     log(log.INFO, "Case deleted. Case: [%s]", case)
