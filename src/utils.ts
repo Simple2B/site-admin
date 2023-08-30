@@ -2,7 +2,7 @@ import {Modal} from 'flowbite';
 import type {ModalOptions, ModalInterface} from 'flowbite';
 
 export const modalOptions: ModalOptions = {
-  backdrop: 'static',
+  backdrop: 'dynamic',
   closable: true,
   onHide: () => {},
   onShow: () => {},
@@ -25,6 +25,7 @@ const useConfirmModal = (): IConfirmModal => {
 
   const openModal = (textModal: string, confirmCallBack: () => void) => {
     confirmCaseModal.show();
+
     const caseConfirmModalText: HTMLElement = document.querySelector(
       '#confirm-modal-text',
     );
@@ -43,6 +44,10 @@ const useConfirmModal = (): IConfirmModal => {
       closeModalBtn
     ) {
       caseConfirmModalText.innerHTML = textModal;
+
+      confirmCaseModal._options.onHide = () => {
+        agreeConfirmModalBtn.removeEventListener('click', confirmCallBack);
+      };
 
       const notConfirmCallback = async () => {
         confirmCaseModal.hide();

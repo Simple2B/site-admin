@@ -19,7 +19,6 @@ export const stack = () => {
       .forEach(span => oldSpansName.push(span.textContent));
   }
 
-  const listElementsCases: HTMLElement = document.getElementById('listOfCases');
   const $deleteStackModal: HTMLElement =
     document.querySelector('#deleteStackModal');
 
