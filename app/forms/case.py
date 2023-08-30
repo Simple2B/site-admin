@@ -12,7 +12,7 @@ from wtforms import (
     MultipleFileField,
     ValidationError,
 )
-from wtforms.validators import DataRequired, Length
+from wtforms.validators import DataRequired, Length, URL
 
 
 class MultiCheckboxField(SelectMultipleField):
@@ -28,12 +28,16 @@ class NewCaseForm(FlaskForm):
     description = StringField("description", [DataRequired(), Length(1, 512)])
     is_active = BooleanField("is_active")
     is_main = BooleanField("is_main")
-    project_link = StringField("project_link")
+    project_link = StringField("project_link", [DataRequired(), URL()])
     role = StringField("role", [DataRequired(), Length(2, 32)])
     stacks = MultiCheckboxField("stacks")
     sub_images = MultipleFileField("sub_images", [DataRequired()])
 
     submit = SubmitField("Save")
+
+    def validate_stacks(form, field):
+        if not field.data:
+            raise ValidationError("Select at least one stack.")
 
     def validate_title_image(self, field):
         is_file = filetype.guess(field.data)
@@ -71,6 +75,10 @@ class UpdateCase(FlaskForm):
     screenshots = MultipleFileField(
         "screenshots",
     )
+
+    def validate_stacks(form, field):
+        if not field.data:
+            raise ValidationError("Select at least one stack.")
 
     def validate_title_image(self, field):
         if not field.data:

@@ -2,7 +2,7 @@ import {Modal} from 'flowbite';
 import type {ModalOptions, ModalInterface} from 'flowbite';
 
 export const modalOptions: ModalOptions = {
-  backdrop: 'static',
+  backdrop: 'dynamic',
   closable: true,
   onHide: () => {},
   onShow: () => {},
@@ -25,10 +25,10 @@ const useConfirmModal = (): IConfirmModal => {
 
   const openModal = (textModal: string, confirmCallBack: () => void) => {
     confirmCaseModal.show();
+
     const caseConfirmModalText: HTMLElement = document.querySelector(
       '#confirm-modal-text',
     );
-    const closeModalBtn = document.querySelector('#close-confirm-modal-btn');
     const agreeConfirmModalBtn = document.querySelector(
       '#agree-confirm-modal-btn',
     );
@@ -39,21 +39,23 @@ const useConfirmModal = (): IConfirmModal => {
     if (
       caseConfirmModalText &&
       agreeConfirmModalBtn &&
-      disagreeConfirmModalBtn &&
-      closeModalBtn
+      disagreeConfirmModalBtn
     ) {
       caseConfirmModalText.innerHTML = textModal;
+
+      confirmCaseModal._options.onHide = () => {
+        agreeConfirmModalBtn.removeEventListener('click', confirmCallBack);
+      };
 
       const notConfirmCallback = async () => {
         confirmCaseModal.hide();
         agreeConfirmModalBtn.removeEventListener('click', confirmCallBack);
       };
 
-      if (agreeConfirmModalBtn && disagreeConfirmModalBtn && closeModalBtn) {
+      if (agreeConfirmModalBtn && disagreeConfirmModalBtn) {
         agreeConfirmModalBtn.addEventListener('click', confirmCallBack);
 
         disagreeConfirmModalBtn.addEventListener('click', notConfirmCallback);
-        closeModalBtn.addEventListener('click', notConfirmCallback);
       }
     }
   };

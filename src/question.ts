@@ -26,16 +26,6 @@ export const questions = () => {
       addQuestionModal.show();
     });
 
-    // closing add user modal
-    const addModalCloseBtn = document.querySelector(
-      '#modalAddQuestionCloseButton',
-    );
-    if (addModalCloseBtn) {
-      addModalCloseBtn.addEventListener('click', () => {
-        addQuestionModal.hide();
-      });
-    }
-
     // // search flow
     const searchInput: HTMLInputElement = document.querySelector(
       '#table-search-question',
@@ -132,15 +122,5 @@ export const questions = () => {
         }
       });
     });
-
-    // closing add user modal
-    const editModalCloseBtn = document.querySelector(
-      '#modalEditQuestionCloseButton',
-    );
-    if (editModalCloseBtn) {
-      editModalCloseBtn.addEventListener('click', () => {
-        editQuestionModal.hide();
-      });
-    }
   }
 };

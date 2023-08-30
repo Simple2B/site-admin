@@ -1,4 +1,6 @@
 # flake8: noqa E712
+from datetime import datetime
+
 from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify
 from flask_login import login_required
 import sqlalchemy as sa
@@ -11,7 +13,6 @@ from app.controllers import create_pagination
 from app.common import models as m
 from app import schema as s
 from app import forms as f
-from app.controllers import notify_case_created
 from app.logger import log
 from app.database import db
 from app import s3bucket
@@ -163,7 +164,7 @@ def create():
             session.add(new_stack)
         session.commit()
 
-        notify_case_created(new_case)
+        # notify_case_created(new_case) this will be provided in new version
         log(log.INFO, "Case created. Case: [%s]", new_case)
         flash("Case added!", "success")
 
@@ -332,8 +333,9 @@ def delete(id: int):
         log(log.INFO, "There is no case with id: [%s]", id)
         flash("There is no such case", "danger")
         return "no case", 404
-
+    delete_datetime = datetime.now().strftime("%m/%d/%Y")
     case.is_deleted = True
+    case.title = f"{case.title}@d_{delete_datetime}"
     db.session.commit()
     ActionLogs.create_case_log(m.ActionsType.DELETE, case.id)
     log(log.INFO, "Case deleted. Case: [%s]", case)

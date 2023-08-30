@@ -24,7 +24,7 @@ export const candidate = () => {
     button.addEventListener('click', async () => {
       const id = button.getAttribute('data-candidate-id');
 
-      const textModal = `Are you sure you want to delete question ${id}?`;
+      const textModal = `Are you sure you want to delete candidate ${id}?`;
 
       const confirmCallback = async () => {
         const response = await fetch(`/candidate/delete/${id}`, {

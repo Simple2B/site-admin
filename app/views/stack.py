@@ -1,6 +1,7 @@
 # flake8: noqa E712
-from flask import Blueprint, request, flash, jsonify
+from flask import Blueprint, request, flash
 from flask_login import login_required
+
 
 from app.common import models as m
 from app import forms as f
@@ -31,38 +32,25 @@ def create():
     return "ok", 200
 
 
-@bp.route("/delete", methods=["DELETE"])
+@bp.route("/delete/<int:stack_id>", methods=["DELETE"])
 @login_required
-def delete():
-    form = f.NewStackForm(request.form)
-    stack: str = form.stacks.data
+def delete(stack_id):
+    stack = db.session.get(m.Stack, stack_id)
+    if not stack:
+        log(log.INFO, "Deletion failed. Stack not found: [%d]", stack_id)
+        flash("Deletion failed stack not found", "danger")
+        return "ok", 404
 
-    if stack:
-        try:
-            stack_object = db.session.query(m.Stack).filter_by(name=stack)
-            stack_object.delete()
-            db.session.commit()
-
-        except Exception as e:
-            db.session.rollback()
-
-            cases_with_stack = (
-                db.session.query(m.Case)
-                .filter(m.Case._stacks.any(m.Stack.name == stack))
-                .all()
-            )
-
-            title_list: list[str] = []
-
-            for case in cases_with_stack:
-                title_list.append(case.title)
-
-            return jsonify(title_list), 422
-
-    else:
-        log(log.INFO, "Deletion failed. Stack: [%s]", stack)
-        flash("Deletion failed", "danger")
+    if stack._cases:
+        log(log.INFO, "Deletion failed. Stack in use: [%d]", stack_id)
+        flash(
+            f"Deletion failed stack are using in Cases {' , '.join(map(str, stack._cases))}",
+            "danger",
+        )
         return "ok", 422
+
+    db.session.delete(stack)
+    db.session.commit()
 
     log(log.INFO, "Stack deleted!. Stack: [%s]", stack)
     flash("Successfully deleted!", "success")

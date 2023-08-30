@@ -1,4 +1,6 @@
 # flake8: noqa E712
+from datetime import datetime
+
 from flask import Blueprint, render_template, request, current_app, flash
 from flask_login import login_required
 import sqlalchemy as sa
@@ -76,10 +78,11 @@ def delete(id: int):
         log(log.INFO, "There is no candidate with id: [%s]", id)
         flash("There is no such candidate", "danger")
         return "no candidate", 404
+    delete_datetime = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
     candidate.is_deleted = True
-    candidate.email = f"{candidate.email}@"
-    candidate.git_hub_id = f"{candidate.git_hub_id}@"
-    candidate.username = f"{candidate.username}@deleted"
+    candidate.email = f"{candidate.email}@{delete_datetime}"
+    candidate.git_hub_id = f"{candidate.git_hub_id}@{delete_datetime}"
+    candidate.username = f"{candidate.username}@deleted_{delete_datetime}"
     db.session.commit()
     ActionLogs.create_candidate_log(candidate.id)
 

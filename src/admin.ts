@@ -28,14 +28,6 @@ export const admin = () => {
     addAdminButton.addEventListener('click', () => {
       addModal.show();
     });
-
-    // closing add user modal
-    const addModalCloseBtn = document.querySelector('#modalAddCloseButton');
-    if (addModalCloseBtn) {
-      addModalCloseBtn.addEventListener('click', () => {
-        addModal.hide();
-      });
-    }
   }
   // delete admin
   const deleteAdminButtons = document.querySelectorAll('#delete-admin-btn');

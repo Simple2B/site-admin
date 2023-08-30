@@ -25,6 +25,10 @@ stack = {"name": "django"}
 def test_crud_case(client, mocker):
     login(client)
     # create
+    stack = m.Stack(name="django")
+    db.session.add(stack)
+    db.session.commit()
+    test_case.update({"stacks": [stack.id]})
     mocker.patch.object(s3bucket, "upload_cases_imgs", return_value="https://test.com")
     mocker.patch.object(s3bucket, "delete_cases_imgs", return_value="https://test.com")
     mocker.patch.object(filetype, "is_image", return_value=True)
@@ -32,14 +36,11 @@ def test_crud_case(client, mocker):
     res = client.post(
         "/case/create", data=test_case, content_type="multipart/form-data"
     )
+
     assert res.status_code == 302
     case: m.Case | None = db.session.get(m.Case, 1)
     assert case
-    # stack = m.Stack(name="django")
-    # case._stacks.append(stack)
-    # db.session.add(case)
-    # db.session.add(stack)
-    # db.session.commit()
+
     # case: m.Case | None = db.session.get(m.Case, case.id)
     # assert case.stacks_names == ["django"]
 
@@ -72,6 +73,7 @@ def test_crud_case(client, mocker):
             "sub_title": "test sub title",
             "description": "test description",
             "project_link": "https://test.com",
+            "stacks": [stack.id],
         },
         content_type="multipart/form-data",
     )

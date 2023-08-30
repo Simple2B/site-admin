@@ -10,7 +10,7 @@
       class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
     >
       <tr>
-        <th scope="col" class="px-6 py-3">#</th> <th scope="col" class="px-6 py-3">Log</th> <th scope="col" class="px-6 py-3">Action</th><th scope="col" class="px-6 py-3">Entity</th><th scope="col" class="px-6 py-3">Time</th>
+        <th scope="col" class="px-6 py-3">#</th><th scope="col" class="px-6 py-3">Username</th> <th scope="col" class="px-6 py-3">Log</th> <th scope="col" class="px-6 py-3">Action</th><th scope="col" class="px-6 py-3">Entity</th><th scope="col" class="px-6 py-3">Time</th>
       </tr>
     </thead>
     <tbody>
@@ -23,27 +23,26 @@
               {{ loop.index + page.skip }}
             </div>
         </td>
+        <td class="w-4 p-4">
+          <div class="flex items-center">
+                {{ action._user.username }}
+              </div>
+          </td>
         <td
           scope="row"
           class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white"
         >
-          <div class="pl-3">
             <div class="text-base font-semibold">{{ action.text }}</div>
-          </div>
         </td>
         <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="flex items-center">
             <!-- prettier-ignore -->
-          <div class="pl-3">
             <div class="text-base font-semibold"><span class="text-base font-semibold"><span class="{% if action.action.name =='CREATE' %} text-green-500 {% elif action.action.name=='EDIT' %} text-yellow-300 {% elif action.action.name =='DELETE' %} text-red-500 {% endif %}">{{ action.action.name }}</span></div>
-          </div>
         </td>
         <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="flex items-center">
             <!-- prettier-ignore -->
-          <div class="pl-3">
             <div  >{{ action.entity.name }}</span></div>
-          </div>
         </td>
         <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white"> <div class="flex items-center"> <div class="pl-3 text-base font-semibold">{{ action.created_at.strftime('%d/%B/%Y, %X') }}</div> </div> </td>
       </tr>

@@ -57,6 +57,9 @@ const editCase = async (caseId: number) => {
   const description: HTMLInputElement = document.querySelector(
     '#edit-case-description',
   );
+  const projectLink: HTMLInputElement = document.querySelector(
+    '#edit-case-project-link',
+  );
   const role: HTMLInputElement = document.querySelector('#edit-case-role');
   const isActive: HTMLInputElement = document.querySelector(
     '#edit-case-is-active',
@@ -96,6 +99,7 @@ const editCase = async (caseId: number) => {
     divCaseScreenShoots,
     mainImageInput,
     subMainImageInput,
+    projectLink,
   ];
 
   if (elements.includes(undefined)) {
@@ -130,6 +134,7 @@ const editCase = async (caseId: number) => {
   subTitle.value = caseData.subTitle.trim();
   description.value = caseData.description;
   role.value = caseData.role;
+  projectLink.value = caseData.projectLink;
   isActive.checked = caseData.isActive;
   isMain.checked = caseData.isMain;
   mainImage.src =
@@ -245,14 +250,6 @@ export const cases = () => {
     stackButton.addEventListener('click', () => {
       stackModal.show();
     });
-
-    // closing add stack modal
-    const stackModalCloseBtn = document.querySelector('#modalStackCloseButton');
-    if (stackModalCloseBtn) {
-      stackModalCloseBtn.addEventListener('click', () => {
-        stackModal.hide();
-      });
-    }
   }
 
   // opening add user modal
@@ -261,14 +258,6 @@ export const cases = () => {
     addCaseButton.addEventListener('click', () => {
       addModal.show();
     });
-
-    // closing add user modal
-    const addModalCloseBtn = document.querySelector('#modalAddCaseCloseButton');
-    if (addModalCloseBtn) {
-      addModalCloseBtn.addEventListener('click', () => {
-        addModal.hide();
-      });
-    }
 
     // search flow
     const searchInput: HTMLInputElement = document.querySelector(
@@ -314,21 +303,16 @@ export const cases = () => {
 
       await editCase(Number(caseId));
 
-      const editModalCloseBtn = document.querySelector('#editCaseModalClose');
       const divCaseScreenShoots = document.querySelector(
         '#edit-case-screenshots',
       );
-
-      if (editModalCloseBtn) {
-        editModalCloseBtn.addEventListener('click', () => {
-          if (divCaseScreenShoots) {
-            while (divCaseScreenShoots.firstChild) {
-              divCaseScreenShoots.removeChild(divCaseScreenShoots.firstChild);
-            }
+      editCaseModal._options.onHide = () => {
+        if (divCaseScreenShoots) {
+          while (divCaseScreenShoots.firstChild) {
+            divCaseScreenShoots.removeChild(divCaseScreenShoots.firstChild);
           }
-          editCaseModal.hide();
-        });
-      }
+        }
+      };
     });
   });
 };

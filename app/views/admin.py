@@ -24,6 +24,7 @@ bp = Blueprint("admin", __name__, url_prefix="/admin")
 @bp.route("/", methods=["GET"])
 @login_required
 def get_all():
+    new_user_form = f.NewUserForm()
     q = request.args.get("q", type=str, default=None)
     query = (
         m.SuperUser.select()
@@ -70,6 +71,7 @@ def get_all():
         ).scalars(),
         page=pagination,
         search_query=q,
+        new_user_form=new_user_form,
     )
 
 
