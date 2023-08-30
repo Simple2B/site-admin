@@ -40,13 +40,13 @@ class ActionLogs:
         case: m.Case = db.session.get(m.Case, entity_id)
         match action:
             case m.ActionsType.CREATE:
-                text = f"{current_user.username} create a new case {case.title}"
+                text = f"Create a new case {case.title}"
 
             case m.ActionsType.DELETE:
-                text = f"{current_user.username} delete case {case.title}"
+                text = f"Delete case {case.title}"
 
             case m.ActionsType.EDIT:
-                text = f"{current_user.username} edit case {case.title}"
+                text = f"Edit case {case.title}"
 
         ActionLogs._create(m.Entity.CASE, entity_id, action, text)
 
@@ -56,7 +56,7 @@ class ActionLogs:
         entity_id: int,
     ):
         candidate: m.Candidate = db.session.get(m.Candidate, entity_id)
-        text = f"{current_user.username} delete candidate {candidate.username}"
+        text = f"Delete candidate {candidate.username}"
 
         ActionLogs._create(m.Entity.CANDIDATE, entity_id, m.ActionsType.DELETE, text)
 
@@ -70,10 +70,10 @@ class ActionLogs:
         admin: m.Case = db.session.get(m.SuperUser, entity_id)
         match action:
             case m.ActionsType.DELETE:
-                text = f"{current_user.username.upper() } delete admin {admin.username.upper() }"
+                text = f"Delete admin ({admin.username })"
 
             case m.ActionsType.CREATE:
-                text = f"{current_user.username.upper() } create a new admin {admin.username.upper() }"
+                text = f"Create a new admin ({admin.username })"
 
         ActionLogs._create(m.Entity.ADMIN, entity_id, action, text)
 
@@ -87,11 +87,11 @@ class ActionLogs:
         question: m.Case = db.session.get(m.Question, entity_id)
         match action:
             case m.ActionsType.DELETE:
-                text = f"{current_user.username.upper() } delete question '{question.text}'"
+                text = f"Delete question '{question.text}'"
 
             case m.ActionsType.CREATE:
-                text = f"{current_user.username.upper() } create a new question {question.id }"
+                text = f"Create a new question {question.id }"
             case m.ActionsType.EDIT:
-                text = f"{current_user.username.upper() } changed a question {question.id }"
+                text = f"Changed a question {question.id }"
 
         ActionLogs._create(m.Entity.QUESTION, entity_id, action, text)
