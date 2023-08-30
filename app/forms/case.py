@@ -1,5 +1,6 @@
 import filetype
 
+from sqlalchemy import select
 from flask_wtf import FlaskForm
 from wtforms import (
     IntegerField,
@@ -13,6 +14,8 @@ from wtforms import (
     ValidationError,
 )
 from wtforms.validators import DataRequired, Length, URL
+from app.database import db
+from app.common.models import Case
 
 
 class MultiCheckboxField(SelectMultipleField):
@@ -34,6 +37,13 @@ class NewCaseForm(FlaskForm):
     sub_images = MultipleFileField("sub_images", [DataRequired()])
 
     submit = SubmitField("Save")
+
+    def validate_title(self, field):
+        case_name = db.session.scalars(
+            select(Case).where(Case.title == field.data)
+        ).first()
+        if case_name:
+            raise ValidationError("This case name is already taken. Must be unique.")
 
     def validate_stacks(form, field):
         if not field.data:
@@ -75,6 +85,15 @@ class UpdateCase(FlaskForm):
     screenshots = MultipleFileField(
         "screenshots",
     )
+
+    def validate_title(self, field):
+        case_name = db.session.scalars(
+            select(Case)
+            .where(Case.title == field.data)
+            .where(Case.id != int(self.case_id.data))
+        ).first()
+        if case_name:
+            raise ValidationError("This case name is already taken. Must be unique.")
 
     def validate_stacks(form, field):
         if not field.data:
