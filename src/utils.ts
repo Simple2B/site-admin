@@ -29,7 +29,6 @@ const useConfirmModal = (): IConfirmModal => {
     const caseConfirmModalText: HTMLElement = document.querySelector(
       '#confirm-modal-text',
     );
-    const closeModalBtn = document.querySelector('#close-confirm-modal-btn');
     const agreeConfirmModalBtn = document.querySelector(
       '#agree-confirm-modal-btn',
     );
@@ -40,8 +39,7 @@ const useConfirmModal = (): IConfirmModal => {
     if (
       caseConfirmModalText &&
       agreeConfirmModalBtn &&
-      disagreeConfirmModalBtn &&
-      closeModalBtn
+      disagreeConfirmModalBtn
     ) {
       caseConfirmModalText.innerHTML = textModal;
 
@@ -54,11 +52,10 @@ const useConfirmModal = (): IConfirmModal => {
         agreeConfirmModalBtn.removeEventListener('click', confirmCallBack);
       };
 
-      if (agreeConfirmModalBtn && disagreeConfirmModalBtn && closeModalBtn) {
+      if (agreeConfirmModalBtn && disagreeConfirmModalBtn) {
         agreeConfirmModalBtn.addEventListener('click', confirmCallBack);
 
         disagreeConfirmModalBtn.addEventListener('click', notConfirmCallback);
-        closeModalBtn.addEventListener('click', notConfirmCallback);
       }
     }
   };

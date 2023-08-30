@@ -250,14 +250,6 @@ export const cases = () => {
     stackButton.addEventListener('click', () => {
       stackModal.show();
     });
-
-    // closing add stack modal
-    const stackModalCloseBtn = document.querySelector('#modalStackCloseButton');
-    if (stackModalCloseBtn) {
-      stackModalCloseBtn.addEventListener('click', () => {
-        stackModal.hide();
-      });
-    }
   }
 
   // opening add user modal
@@ -266,14 +258,6 @@ export const cases = () => {
     addCaseButton.addEventListener('click', () => {
       addModal.show();
     });
-
-    // closing add user modal
-    const addModalCloseBtn = document.querySelector('#modalAddCaseCloseButton');
-    if (addModalCloseBtn) {
-      addModalCloseBtn.addEventListener('click', () => {
-        addModal.hide();
-      });
-    }
 
     // search flow
     const searchInput: HTMLInputElement = document.querySelector(
@@ -319,21 +303,16 @@ export const cases = () => {
 
       await editCase(Number(caseId));
 
-      const editModalCloseBtn = document.querySelector('#editCaseModalClose');
       const divCaseScreenShoots = document.querySelector(
         '#edit-case-screenshots',
       );
-
-      if (editModalCloseBtn) {
-        editModalCloseBtn.addEventListener('click', () => {
-          if (divCaseScreenShoots) {
-            while (divCaseScreenShoots.firstChild) {
-              divCaseScreenShoots.removeChild(divCaseScreenShoots.firstChild);
-            }
+      editCaseModal._options.onHide = () => {
+        if (divCaseScreenShoots) {
+          while (divCaseScreenShoots.firstChild) {
+            divCaseScreenShoots.removeChild(divCaseScreenShoots.firstChild);
           }
-          editCaseModal.hide();
-        });
-      }
+        }
+      };
     });
   });
 };

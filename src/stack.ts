@@ -28,15 +28,6 @@ export const stack = () => {
     stackModalWarning = new Modal($deleteStackModal, modalOptions);
   }
 
-  const stackModalCloseBtn = document.querySelector(
-    '#modalStackCloseButtonError',
-  );
-  if (stackModalCloseBtn) {
-    stackModalCloseBtn.addEventListener('click', () => {
-      stackModalWarning.hide();
-    });
-  }
-
   // This selects elements where the id attribute starts with the string "button-"
   const listOfStacks = document.querySelectorAll('[id^="button-"]');
 
