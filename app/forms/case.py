@@ -36,6 +36,15 @@ class NewCaseForm(FlaskForm):
     stacks = MultiCheckboxField("stacks")
     sub_images = MultipleFileField("sub_images", [DataRequired()])
 
+    germany_title = StringField("germany_title", [DataRequired(), Length(2, 32)])
+    germany_sub_title = StringField(
+        "germany_sub_title", [DataRequired(), Length(2, 64)]
+    )
+    germany_description = StringField(
+        "germany_description", [DataRequired(), Length(1, 512)]
+    )
+    germany_role = StringField("germany_role", [DataRequired(), Length(2, 32)])
+
     submit = SubmitField("Save")
 
     def validate_title(self, field):
