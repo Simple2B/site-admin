@@ -12,11 +12,17 @@ test_case = {
     "sub_title": "test sub title",
     "title_image": (io.BytesIO(b"title"), "test.jpg"),
     "sub_title_image": (io.BytesIO(b"sub_title"), "test.jpg"),
-    "description": "test description",
     "is_active": True,
     "project_link": "https://test.com",
     "role": "test role",
     "sub_images": [(io.BytesIO(b"sub_images"), "sub_images.jpg")],
+}
+
+case_translation = {
+    "title": "test title",
+    "sub_title": "test sub title",
+    "description": "test description",
+    "role": "test role",
 }
 
 stack = {"name": "django"}
