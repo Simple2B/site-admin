@@ -325,7 +325,7 @@ def update_case():
 
     case_translation = case.germany_translation
     # this if to check if we do not have any translation for case
-    if case.title != case_translation.title:
+    if case != case_translation:
         case_translation.title = form.germany_title.data
         case_translation.sub_title = form.germany_sub_title.data
         case_translation.description = form.germany_description.data
