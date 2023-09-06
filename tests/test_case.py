@@ -12,18 +12,17 @@ test_case = {
     "sub_title": "test sub title",
     "title_image": (io.BytesIO(b"title"), "test.jpg"),
     "sub_title_image": (io.BytesIO(b"sub_title"), "test.jpg"),
+    "description": "test description",
     "is_active": True,
     "project_link": "https://test.com",
     "role": "test role",
     "sub_images": [(io.BytesIO(b"sub_images"), "sub_images.jpg")],
+    "germany_title": "test title",
+    "germany_sub_title": "test sub title",
+    "germany_description": "test description",
+    "germany_role": "test role",
 }
 
-case_translation = {
-    "title": "test title",
-    "sub_title": "test sub title",
-    "description": "test description",
-    "role": "test role",
-}
 
 stack = {"name": "django"}
 
@@ -46,6 +45,11 @@ def test_crud_case(client, mocker):
     assert res.status_code == 302
     case: m.Case | None = db.session.get(m.Case, 1)
     assert case
+    assert case.germany_translation
+
+    case_translation: m.CaseTranslation | None = db.session.get(m.CaseTranslation, 1)
+    assert case_translation
+    assert case_translation.case_id == case.id
 
     # case: m.Case | None = db.session.get(m.Case, case.id)
     # assert case.stacks_names == ["django"]
@@ -80,6 +84,10 @@ def test_crud_case(client, mocker):
             "description": "test description",
             "project_link": "https://test.com",
             "stacks": [stack.id],
+            "germany_title": "test germany title",
+            "germany_sub_title": "test germany sub title",
+            "germany_description": "test germany description",
+            "germany_role": "test germany role",
         },
         content_type="multipart/form-data",
     )
@@ -89,6 +97,8 @@ def test_crud_case(client, mocker):
     # get case by id
     res = client.get(f"/case/{case.id}")
     assert res.status_code == 200
+    case_translation: m.CaseTranslation | None = db.session.get(m.CaseTranslation, 1)
+    assert case_translation.title == "test germany title"
 
     # test delete case screenshot
     assert case.screenshots

@@ -9,6 +9,17 @@ class CaseScreenshot(BaseModel):
         orm_mode = True
 
 
+class CaseTranslationOut(BaseModel):
+    title: str
+    sub_title: str = Field(alias="subTitle")
+    description: str
+    role: str
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+
+
 class CaseOut(BaseModel):
     id: int
     title: str
@@ -24,6 +35,8 @@ class CaseOut(BaseModel):
 
     main_image_url: str = Field(alias="mainImageUrl")
     preview_image_url: str = Field(alias="previewImageUrl")
+
+    germany_translation: CaseTranslationOut
 
     class Config:
         orm_mode = True

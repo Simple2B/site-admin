@@ -7,6 +7,18 @@ interface ICaseScreenshot {
   url: string;
 }
 
+enum CaseAction {
+  add = 'add',
+  edit = 'edit',
+}
+
+interface ICaseTranslation {
+  title: string;
+  subTitle: string;
+  description: string;
+  role: string;
+}
+
 interface ICaseOut {
   id: number;
   title: string;
@@ -20,6 +32,7 @@ interface ICaseOut {
   screenshots: ICaseScreenshot[];
   mainImageUrl: string;
   previewImageUrl: string;
+  germany_translation: ICaseTranslation;
 }
 
 const createCaseScreenshot = (screenshot: ICaseScreenshot): HTMLElement => {
@@ -54,7 +67,6 @@ const switchInputs = (
   btnTwo: HTMLButtonElement,
   visibleElements: HTMLDivElement[],
   hiddenElements: HTMLDivElement[],
-  isRequired = false,
 ) => {
   const isActive = btnOne.getAttribute('active') === 'true';
   if (isActive) {
@@ -77,81 +89,78 @@ const switchInputs = (
     div.style.display = 'block';
     const inputEl = div.lastElementChild as HTMLInputElement;
     inputEl.setAttribute('required', '');
-    if (isRequired) {
-      inputEl.className = 'w-full rounded-lg';
-    }
   });
 };
 
-const switchLanguage = () => {
+const switchLanguage = (action: CaseAction) => {
   const englishBtn: HTMLButtonElement = document.querySelector(
-    `#add-case-english-btn`,
+    `#${action}-case-english-btn`,
   );
   const germanyBtn: HTMLButtonElement = document.querySelector(
-    `#add-case-germany-btn`,
+    `#${action}-case-germany-btn`,
   );
 
-  const addCaseEnglishTitle: HTMLDivElement = document.querySelector(
-    '#add-case-english-title',
+  const caseEnglishTitle: HTMLDivElement = document.querySelector(
+    `#${action}-case-english-title`,
   );
-  const addCaseGermanyTitle: HTMLDivElement = document.querySelector(
-    '#add-case-germany-title',
-  );
-
-  const addCaseEnglishSubTitle: HTMLDivElement = document.querySelector(
-    '#add-case-english-subtitle',
-  );
-  const addCaseGermanySubTitle: HTMLDivElement = document.querySelector(
-    '#add-case-germany-subtitle',
+  const caseGermanyTitle: HTMLDivElement = document.querySelector(
+    `#${action}-case-germany-title`,
   );
 
-  const addCaseEnglishDescription: HTMLDivElement = document.querySelector(
-    '#add-case-english-description',
+  const caseEnglishSubTitle: HTMLDivElement = document.querySelector(
+    `#${action}-case-english-subtitle`,
   );
-  const addCaseGermanyDescription: HTMLDivElement = document.querySelector(
-    '#add-case-germany-description',
-  );
-
-  const addCaseEnglishOurRole: HTMLDivElement = document.querySelector(
-    '#add-case-english-our-role',
-  );
-  const addCaseGermanyOurRole: HTMLDivElement = document.querySelector(
-    '#add-case-germany-our-role',
+  const caseGermanySubTitle: HTMLDivElement = document.querySelector(
+    `#${action}-case-germany-subtitle`,
   );
 
-  const addCaseSubmitBtn: HTMLButtonElement = document.querySelector(
-    '#add-case-submit-btn',
+  const caseEnglishDescription: HTMLDivElement = document.querySelector(
+    `#${action}-case-english-description`,
+  );
+  const caseGermanyDescription: HTMLDivElement = document.querySelector(
+    `#${action}-case-germany-description`,
+  );
+
+  const caseEnglishOurRole: HTMLDivElement = document.querySelector(
+    `#${action}-case-english-our-role`,
+  );
+  const caseGermanyOurRole: HTMLDivElement = document.querySelector(
+    `#${action}-case-germany-our-role`,
+  );
+
+  const caseSubmitBtn: HTMLButtonElement = document.querySelector(
+    `#${action}-case-submit-btn`,
   );
 
   if (
     [
       englishBtn,
       germanyBtn,
-      addCaseEnglishTitle,
-      addCaseGermanyTitle,
-      addCaseEnglishSubTitle,
-      addCaseGermanySubTitle,
-      addCaseEnglishDescription,
-      addCaseGermanyDescription,
-      addCaseEnglishOurRole,
-      addCaseGermanyOurRole,
-      addCaseSubmitBtn,
+      caseEnglishTitle,
+      caseGermanyTitle,
+      caseEnglishSubTitle,
+      caseGermanySubTitle,
+      caseEnglishDescription,
+      caseGermanyDescription,
+      caseEnglishOurRole,
+      caseGermanyOurRole,
+      caseSubmitBtn,
     ].includes(null)
   ) {
     return;
   }
 
   const englishDivs = [
-    addCaseEnglishTitle,
-    addCaseEnglishSubTitle,
-    addCaseEnglishDescription,
-    addCaseEnglishOurRole,
+    caseEnglishTitle,
+    caseEnglishSubTitle,
+    caseEnglishDescription,
+    caseEnglishOurRole,
   ];
   const germanyDivs = [
-    addCaseGermanyTitle,
-    addCaseGermanySubTitle,
-    addCaseGermanyDescription,
-    addCaseGermanyOurRole,
+    caseGermanyTitle,
+    caseGermanySubTitle,
+    caseGermanyDescription,
+    caseGermanyOurRole,
   ];
 
   englishBtn.addEventListener('click', () => {
@@ -162,20 +171,18 @@ const switchLanguage = () => {
     switchInputs(germanyBtn, englishBtn, englishDivs, germanyDivs);
   });
 
-  addCaseSubmitBtn.addEventListener('click', e => {
+  caseSubmitBtn.addEventListener('click', e => {
     englishDivs.forEach(div => {
       const inputEl = div.lastElementChild as HTMLInputElement;
       if (!inputEl.value) {
-        switchInputs(englishBtn, germanyBtn, germanyDivs, englishDivs, true);
-        e.preventDefault();
+        switchInputs(englishBtn, germanyBtn, germanyDivs, englishDivs);
         return;
       }
     });
     germanyDivs.forEach(div => {
       const inputEl = div.lastElementChild as HTMLInputElement;
       if (!inputEl.value) {
-        switchInputs(germanyBtn, englishBtn, englishDivs, germanyDivs, true);
-        e.preventDefault();
+        switchInputs(germanyBtn, englishBtn, englishDivs, germanyDivs);
         return;
       }
     });
@@ -219,6 +226,20 @@ const editCase = async (caseId: number) => {
     '#edit-case-sub-main-image-input',
   );
 
+  const germanyTitleInput: HTMLInputElement = document.querySelector(
+    '#edit-case-germany-title-input',
+  );
+  const germanySubTitleInput: HTMLInputElement = document.querySelector(
+    '#edit-case-germany-subtitle-input',
+  );
+
+  const germanyDescriptionInput: HTMLInputElement = document.querySelector(
+    '#edit-case-germany-description-input',
+  );
+  const germanyRoleInput: HTMLInputElement = document.querySelector(
+    '#edit-case-germany-role-input',
+  );
+
   const elements = [
     title,
     subTitle,
@@ -233,9 +254,13 @@ const editCase = async (caseId: number) => {
     mainImageInput,
     subMainImageInput,
     projectLink,
+    germanyTitleInput,
+    germanySubTitleInput,
+    germanyDescriptionInput,
+    germanyRoleInput,
   ];
 
-  if (elements.includes(undefined)) {
+  if (elements.includes(null)) {
     return;
   }
   let response;
@@ -248,6 +273,8 @@ const editCase = async (caseId: number) => {
     return;
   }
   const caseData: ICaseOut = await response.json();
+
+  const germanyTranslation = caseData.germany_translation;
 
   const listOfScreenshots: ICaseScreenshot[] = caseData.screenshots;
 
@@ -265,8 +292,8 @@ const editCase = async (caseId: number) => {
 
   title.value = caseData.title.trim();
   subTitle.value = caseData.subTitle.trim();
-  description.value = caseData.description;
-  role.value = caseData.role;
+  description.value = caseData.description.trim();
+  role.value = caseData.role.trim();
   projectLink.value = caseData.projectLink;
   isActive.checked = caseData.isActive;
   isMain.checked = caseData.isMain;
@@ -278,6 +305,11 @@ const editCase = async (caseId: number) => {
     subMainImageInput.files.length > 0
       ? URL.createObjectURL(subMainImageInput.files[0])
       : caseData.previewImageUrl;
+
+  germanyTitleInput.value = germanyTranslation.title.trim();
+  germanySubTitleInput.value = germanyTranslation.subTitle.trim();
+  germanyDescriptionInput.value = germanyTranslation.description.trim();
+  germanyRoleInput.value = germanyTranslation.role.trim();
 
   caseIdElement.setAttribute('value', caseId.toString());
 
@@ -323,7 +355,8 @@ export const cases = () => {
     modalOptions,
   );
 
-  switchLanguage();
+  switchLanguage(CaseAction.add);
+  switchLanguage(CaseAction.edit);
 
   // callBack on btn is_active and is_main
   const caseConfirmModalListener = (

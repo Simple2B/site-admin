@@ -95,6 +95,11 @@ class UpdateCase(FlaskForm):
         "screenshots",
     )
 
+    germany_title = StringField("germany_title", [Length(2, 32)])
+    germany_sub_title = StringField("germany_sub_title", [Length(2, 64)])
+    germany_description = StringField("germany_description", [Length(1, 512)])
+    germany_role = StringField("germany_role", [Length(2, 32)])
+
     def validate_title(self, field):
         case_name = db.session.scalars(
             select(Case)
