@@ -12,11 +12,9 @@ enum CaseAction {
   edit = 'edit',
 }
 
-interface ICaseTranslation {
-  title: string;
-  subTitle: string;
-  description: string;
-  role: string;
+enum Languages {
+  ENGLISH = 'en',
+  GERMANY = 'de',
 }
 
 interface ICaseOut {
@@ -32,7 +30,7 @@ interface ICaseOut {
   screenshots: ICaseScreenshot[];
   mainImageUrl: string;
   previewImageUrl: string;
-  germany_translation: ICaseTranslation;
+  language: Languages;
 }
 
 const createCaseScreenshot = (screenshot: ICaseScreenshot): HTMLElement => {
@@ -226,18 +224,8 @@ const editCase = async (caseId: number) => {
     '#edit-case-sub-main-image-input',
   );
 
-  const germanyTitleInput: HTMLInputElement = document.querySelector(
-    '#edit-case-germany-title-input',
-  );
-  const germanySubTitleInput: HTMLInputElement = document.querySelector(
-    '#edit-case-germany-subtitle-input',
-  );
-
-  const germanyDescriptionInput: HTMLInputElement = document.querySelector(
-    '#edit-case-germany-description-input',
-  );
-  const germanyRoleInput: HTMLInputElement = document.querySelector(
-    '#edit-case-germany-role-input',
+  const selectLanguage: HTMLSelectElement = document.querySelector(
+    '#edit-case-language-select',
   );
 
   const elements = [
@@ -254,16 +242,19 @@ const editCase = async (caseId: number) => {
     mainImageInput,
     subMainImageInput,
     projectLink,
-    germanyTitleInput,
-    germanySubTitleInput,
-    germanyDescriptionInput,
-    germanyRoleInput,
+    selectLanguage,
   ];
-
   if (elements.includes(null)) {
     return;
   }
   let response;
+
+  let value = selectLanguage.value;
+  selectLanguage.addEventListener('change', async () => {
+    value = selectLanguage.value;
+    console.log(value);
+  });
+
   try {
     response = await fetch(`/case/${caseId}`, {
       method: 'GET',
@@ -272,9 +263,8 @@ const editCase = async (caseId: number) => {
     console.error(error);
     return;
   }
-  const caseData: ICaseOut = await response.json();
 
-  const germanyTranslation = caseData.germany_translation;
+  const caseData: ICaseOut = await response.json();
 
   const listOfScreenshots: ICaseScreenshot[] = caseData.screenshots;
 
@@ -306,11 +296,6 @@ const editCase = async (caseId: number) => {
       ? URL.createObjectURL(subMainImageInput.files[0])
       : caseData.previewImageUrl;
 
-  germanyTitleInput.value = germanyTranslation.title.trim();
-  germanySubTitleInput.value = germanyTranslation.subTitle.trim();
-  germanyDescriptionInput.value = germanyTranslation.description.trim();
-  germanyRoleInput.value = germanyTranslation.role.trim();
-
   caseIdElement.setAttribute('value', caseId.toString());
 
   mainImageInput.addEventListener('change', () => {
@@ -329,6 +314,11 @@ const editCase = async (caseId: number) => {
 };
 
 export const cases = () => {
+  const selectLanguage: HTMLSelectElement = document.querySelector('#language');
+  if (selectLanguage) {
+    selectLanguage.className =
+      'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500';
+  }
   const $addUserModalElement: HTMLElement =
     document.querySelector('#addCaseModal');
   const $stackModalElement: HTMLElement = document.querySelector('#stackModal');
@@ -355,8 +345,8 @@ export const cases = () => {
     modalOptions,
   );
 
-  switchLanguage(CaseAction.add);
-  switchLanguage(CaseAction.edit);
+  // switchLanguage(CaseAction.add);
+  // switchLanguage(CaseAction.edit);
 
   // callBack on btn is_active and is_main
   const caseConfirmModalListener = (

@@ -11,72 +11,55 @@
       <input id="caseIdEdit" type="hidden" name="case_id" value="" />
       <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
         <h3 class="text-xl font-semibold text-gray-900 dark:text-white"> Edit case </h3>
-        <div>
-          <button active="true" id="edit-case-english-btn" type="button" class="px-3 py-2 text-xs font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">English</button>
-          <button required active="false" id="edit-case-germany-btn" type="button" class="px-3 py-2 text-xs font-medium text-center text-blue-700 hover:text-white border rounded-lg border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800">Germany</button>
+        <div class="flex gap-2 items-center">
+          <button type="button" class=" w-full px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Create copy</button>
+          <select id="edit-case-language-select" class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
+            {% for name, value in options %}
+            <option value="{{ value }}" >{{ name }}</option>
+            {% endfor %}
+          </select>
         </div>
       </div>
       <!-- Modal body -->
       <div class="p-6 space-y-6">
         <div class="grid grid-cols-6 gap-6">
-          <div id="edit-case-english-title" class="col-span-6 sm:col-span-3">
-            <label for="title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Title(English)<span
+          <div  class="col-span-6 sm:col-span-3">
+            <label for="title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Title<span
                 class="text-red-500">*</span></label>
             <input id="edit-case-title" type="text" name="title"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Title" required />
           </div>
-          <div id="edit-case-germany-title" style="display: none" class="col-span-6 sm:col-span-3">
-            <label for="title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Title(Germany)<span
-                class="text-red-500">*</span></label>
-            <input type="text" name="germany_title"
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Title" id="edit-case-germany-title-input"  />
-          </div>
-          <div id="edit-case-english-subtitle" class="col-span-6 sm:col-span-3">
-            <label for="sub_title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Sub title(English)<span class="text-red-500">*</span></label>
+          <div  class="col-span-6 sm:col-span-3">
+            <label for="sub_title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Sub title<span class="text-red-500">*</span></label>
             </label>
             <input id="edit-case-sub-title" type="text" name="sub_title"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Sub title" required />
           </div>
-          <div id="edit-case-germany-subtitle" class="col-span-6 sm:col-span-3" style="display: none">
-            <label for="sub_title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Sub
-              title(Germany)<span class="text-red-500">*</span></label>
-            <input type="text" name="germany_sub_title"
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Sub title" id="edit-case-germany-subtitle-input"  />
-          </div>
+
           <div class="col-span-6 sm:col-span-3 "><img id="edit-case-main-image" class="max-h-48" src="" alt=""></div>
           <div class="col-span-6 sm:col-span-3 "><img id="edit-case-preview-image" class="max-h-48" src="" alt=""></div>
           <div class="col-span-6 sm:col-span-3">
             <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
               title="This image will be displayed on the Case single page">Upload main
               image<span class="text-red-500">*</span></label>
-            <input id="edit-case-main-image-input" type="file" name="main_image"  accept="image/*">
+            <input id="edit-case-main-image-input" type="file" name="title_image"  accept="image/*">
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
               title="This image will be displayed in the lists of Cases">Upload preview image<span
                 class="text-red-500">*</span></label>
-            <input id="edit-case-sub-main-image-input" type="file" name="preview_image"  accept="image/*">
+            <input id="edit-case-sub-main-image-input" type="file" name="sub_title_image"  accept="image/*">
           </div>
 
-          <div  id="edit-case-english-description" class="col-span-6 sm:col-span-3">
+          <div class="col-span-6 sm:col-span-3">
             <label for="description"
-              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description(English)<span
+              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description<span
                 class="text-red-500">*</span></label>
             <input id="edit-case-description" type="text" name="description"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Description" required />
-          </div>
-          <div id="edit-case-germany-description" class="col-span-6 sm:col-span-3" style="display: none">
-            <label for="description"
-              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description(Germany)<span
-                class="text-red-500">*</span></label>
-            <input type="text" name="germany_description"
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Description" id="edit-case-germany-description-input" />
           </div>
           <div class="col-span-6 sm:col-span-3 flex justify-evenly">
             <label for="is_active" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -96,19 +79,12 @@
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="https://some.com" />
           </div>
-          <div id="edit-case-english-our-role" class="col-span-full">
+          <div class="col-span-full">
             <label for="role" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Our
-              role(English)<span class="text-red-500">*</span></label>
+              role<span class="text-red-500">*</span></label>
             <input id="edit-case-role" type="role" name="role"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Type here" required  />
-          </div>
-          <div id="edit-case-germany-our-role" class="col-span-full" style="display: none">
-            <label for="role" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Our
-              role(Germany)<span class="text-red-500">*</span></label>
-            <input type="text" name="germany_role" id="edit-case-germany-role-input"
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Type here"  />
           </div>
           <div class="col-span-full">
             <label for="role" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Stacks</label>
@@ -122,7 +98,7 @@
             <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
               title="Screenshots of the current Case will be displayed on its page">Upload screenshots<span
                 class="text-red-500">*</span></label>
-            <input type="file" name="screenshots" multiple accept="image/*">
+            <input type="file" name="sub_images" multiple accept="image/*">
           </div>
           <div id="edit-case-screenshots" class="col-span-6 sm:col-span-3 overflow-x-scroll h-52 p-4"></div>
         </div>

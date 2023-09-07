@@ -11,6 +11,7 @@ from app.common.models.case_image import EnumCaseImageType
 from app.controllers import create_pagination
 
 from app.common import models as m
+from app.common.models import Languages
 from app import schema as s
 from app import forms as f
 from app.logger import log
@@ -57,6 +58,7 @@ def get_all():
         page=pagination,
         search_query=q,
         form=form,
+        options=[(lan.name, lan.value) for lan in m.Languages],
     )
 
 
@@ -119,6 +121,10 @@ def create():
     except TypeError as error:
         flash(error.args[0], "danger")
         return redirect(url_for("case.get_all"))
+    try:
+        lang = Languages(form.language.data)
+    except ValueError:
+        lang = Languages.ENGLISH
 
     new_case = m.Case(
         title=form.title.data,
@@ -128,6 +134,7 @@ def create():
         is_main=form.is_main.data,
         project_link=form.project_link.data,
         role=form.role.data,
+        language=lang,
     )
     session.add(new_case)
     session.commit()
@@ -162,15 +169,6 @@ def create():
     for id in form.stacks.data:
         new_stack = m.CaseStack(case_id=new_case.id, stack_id=int(id))
         session.add(new_stack)
-
-    case_translation = m.CaseTranslation(
-        case_id=new_case.id,
-        title=form.germany_title.data,
-        sub_title=form.germany_sub_title.data,
-        description=form.germany_description.data,
-        role=form.germany_role.data,
-    )
-    session.add(case_translation)
     session.commit()
 
     # notify_case_created(new_case) this will be provided in new version
@@ -222,7 +220,7 @@ def update_case():
         flash("There is no such case", "danger")
         return redirect(url_for("case.get_all"))
 
-    main_image_obj: FileStorage = form.main_image.data
+    main_image_obj: FileStorage = form.title_image.data
     if main_image_obj:
         try:
             s3bucket.delete_cases_imgs(case.main_image_url)
@@ -250,7 +248,7 @@ def update_case():
             )
         )
 
-    preview_image_obj: FileStorage = form.preview_image.data
+    preview_image_obj: FileStorage = form.sub_title_image.data
     if preview_image_obj:
         try:
             s3bucket.delete_cases_imgs(case.preview_image_url)
@@ -278,7 +276,7 @@ def update_case():
                 type_of_image=EnumCaseImageType.case_preview_image,
             )
         )
-    sub_images = form.screenshots.data
+    sub_images = form.sub_images.data
     if sub_images:
         for idx, screenshot in enumerate(sub_images):
             if screenshot.content_type == "application/octet-stream":
@@ -322,14 +320,6 @@ def update_case():
         if stack_id not in cases_stacks_ids:
             new_stack = m.CaseStack(case_id=case.id, stack_id=int(stack_id))
             db.session.add(new_stack)
-
-    case_translation = case.germany_translation
-    # this if to check if we do not have any translation for case
-    if case != case_translation:
-        case_translation.title = form.germany_title.data
-        case_translation.sub_title = form.germany_sub_title.data
-        case_translation.description = form.germany_description.data
-        case_translation.role = form.germany_role.data
 
     db.session.commit()
     log(log.INFO, "Case updated. Case: [%s]", case)
