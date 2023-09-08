@@ -74,6 +74,25 @@ def get_case(id: int):
     return s.CaseOut.from_orm(case).json(by_alias=True)
 
 
+# @bp.route("/<int:id>", methods=["POST"])
+# @login_required
+# def create_copy_case(id: int):
+#     lang = request.args.get("lang", type=str, default="en")
+#     try:
+#         lang = Languages(lang)
+#     except ValueError:
+#         lang = Languages.ENGLISH
+#     case: m.Case = db.session.scalar(m.Case.select().where(m.Case.id == id))
+#     if not case or case.language == lang:
+#         log(log.INFO, "There is no case with id or case already exist: [%s]", id)
+#         flash("There is no such case", "danger")
+#         return "no case", 404
+
+#     # db.session.add()
+
+#     return s.CaseOut.from_orm(case).json(by_alias=True)
+
+
 @bp.route("/create", methods=["POST"])
 @login_required
 def create():

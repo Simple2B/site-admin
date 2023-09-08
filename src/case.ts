@@ -90,103 +90,6 @@ const switchInputs = (
   });
 };
 
-const switchLanguage = (action: CaseAction) => {
-  const englishBtn: HTMLButtonElement = document.querySelector(
-    `#${action}-case-english-btn`,
-  );
-  const germanyBtn: HTMLButtonElement = document.querySelector(
-    `#${action}-case-germany-btn`,
-  );
-
-  const caseEnglishTitle: HTMLDivElement = document.querySelector(
-    `#${action}-case-english-title`,
-  );
-  const caseGermanyTitle: HTMLDivElement = document.querySelector(
-    `#${action}-case-germany-title`,
-  );
-
-  const caseEnglishSubTitle: HTMLDivElement = document.querySelector(
-    `#${action}-case-english-subtitle`,
-  );
-  const caseGermanySubTitle: HTMLDivElement = document.querySelector(
-    `#${action}-case-germany-subtitle`,
-  );
-
-  const caseEnglishDescription: HTMLDivElement = document.querySelector(
-    `#${action}-case-english-description`,
-  );
-  const caseGermanyDescription: HTMLDivElement = document.querySelector(
-    `#${action}-case-germany-description`,
-  );
-
-  const caseEnglishOurRole: HTMLDivElement = document.querySelector(
-    `#${action}-case-english-our-role`,
-  );
-  const caseGermanyOurRole: HTMLDivElement = document.querySelector(
-    `#${action}-case-germany-our-role`,
-  );
-
-  const caseSubmitBtn: HTMLButtonElement = document.querySelector(
-    `#${action}-case-submit-btn`,
-  );
-
-  if (
-    [
-      englishBtn,
-      germanyBtn,
-      caseEnglishTitle,
-      caseGermanyTitle,
-      caseEnglishSubTitle,
-      caseGermanySubTitle,
-      caseEnglishDescription,
-      caseGermanyDescription,
-      caseEnglishOurRole,
-      caseGermanyOurRole,
-      caseSubmitBtn,
-    ].includes(null)
-  ) {
-    return;
-  }
-
-  const englishDivs = [
-    caseEnglishTitle,
-    caseEnglishSubTitle,
-    caseEnglishDescription,
-    caseEnglishOurRole,
-  ];
-  const germanyDivs = [
-    caseGermanyTitle,
-    caseGermanySubTitle,
-    caseGermanyDescription,
-    caseGermanyOurRole,
-  ];
-
-  englishBtn.addEventListener('click', () => {
-    switchInputs(englishBtn, germanyBtn, germanyDivs, englishDivs);
-  });
-
-  germanyBtn.addEventListener('click', () => {
-    switchInputs(germanyBtn, englishBtn, englishDivs, germanyDivs);
-  });
-
-  caseSubmitBtn.addEventListener('click', e => {
-    englishDivs.forEach(div => {
-      const inputEl = div.lastElementChild as HTMLInputElement;
-      if (!inputEl.value) {
-        switchInputs(englishBtn, germanyBtn, germanyDivs, englishDivs);
-        return;
-      }
-    });
-    germanyDivs.forEach(div => {
-      const inputEl = div.lastElementChild as HTMLInputElement;
-      if (!inputEl.value) {
-        switchInputs(germanyBtn, englishBtn, englishDivs, germanyDivs);
-        return;
-      }
-    });
-  });
-};
-
 const editCase = async (caseId: number) => {
   const title: HTMLInputElement = document.querySelector('#edit-case-title');
   const subTitle: HTMLInputElement = document.querySelector(
@@ -224,10 +127,6 @@ const editCase = async (caseId: number) => {
     '#edit-case-sub-main-image-input',
   );
 
-  const selectLanguage: HTMLSelectElement = document.querySelector(
-    '#edit-case-language-select',
-  );
-
   const elements = [
     title,
     subTitle,
@@ -242,18 +141,11 @@ const editCase = async (caseId: number) => {
     mainImageInput,
     subMainImageInput,
     projectLink,
-    selectLanguage,
   ];
   if (elements.includes(null)) {
     return;
   }
   let response;
-
-  let value = selectLanguage.value;
-  selectLanguage.addEventListener('change', async () => {
-    value = selectLanguage.value;
-    console.log(value);
-  });
 
   try {
     response = await fetch(`/case/${caseId}`, {
@@ -344,9 +236,6 @@ export const cases = () => {
     $caseEditModalElement,
     modalOptions,
   );
-
-  // switchLanguage(CaseAction.add);
-  // switchLanguage(CaseAction.edit);
 
   // callBack on btn is_active and is_main
   const caseConfirmModalListener = (
@@ -455,16 +344,56 @@ export const cases = () => {
 
   editCaseButton.forEach(e => {
     e.addEventListener('click', async () => {
+      // const createCopyBtn: HTMLButtonElement = document.querySelector(
+      //   '#create-copy-case-btn',
+      // );
+      // const editSelectLanguage: HTMLSelectElement = document.querySelector(
+      //   '#edit-case-language-select',
+      // );
+      // if (!createCopyBtn || !selectLanguage) {
+      //   return;
+      // }
       editCaseModal.show();
+      // let selectValue = selectLanguage.value;
+      // console.log(selectValue, 'start');
 
-      const caseId = e.getAttribute('data-edit-id');
+      const caseId = Number(e.getAttribute('data-edit-id'));
 
-      await editCase(Number(caseId));
+      await editCase(caseId);
+
+      // const onChange = () => {
+      //   selectValue = editSelectLanguage.value;
+      //   selectLanguage.value = selectValue;
+      //   console.log(selectValue);
+      // };
+
+      // const onClick = async () => {
+      // const formData = new FormData();
+      // const target = event.target as HTMLSelectElement;
+      // Access the selected value
+      // const selectedValue = target.value;
+      // formData.append('language', selectValue);
+      // console.log(selectValue, caseId);
+      // formData.append('csrf_token', scrfInput ? scrfInput.value : '');
+      // const response = await fetch(`/case/${caseId}/copy`, {
+      //   method: 'POST',
+      //   body: formData,
+      // });
+      // if (response.status == 200) {
+      //   location.reload();
+      // }
+      // };
+
+      // createCopyBtn.addEventListener('click', onClick);
+      // editSelectLanguage.addEventListener('change', onChange);
 
       const divCaseScreenShoots = document.querySelector(
         '#edit-case-screenshots',
       );
       editCaseModal._options.onHide = () => {
+        // createCopyBtn.removeEventListener('click', onClick);
+        // editSelectLanguage.removeEventListener('change', onChange);
+
         if (divCaseScreenShoots) {
           while (divCaseScreenShoots.firstChild) {
             divCaseScreenShoots.removeChild(divCaseScreenShoots.firstChild);

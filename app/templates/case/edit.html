@@ -11,14 +11,6 @@
       <input id="caseIdEdit" type="hidden" name="case_id" value="" />
       <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
         <h3 class="text-xl font-semibold text-gray-900 dark:text-white"> Edit case </h3>
-        <div class="flex gap-2 items-center">
-          <button type="button" class=" w-full px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Create copy</button>
-          <select id="edit-case-language-select" class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
-            {% for name, value in options %}
-            <option value="{{ value }}" >{{ name }}</option>
-            {% endfor %}
-          </select>
-        </div>
       </div>
       <!-- Modal body -->
       <div class="p-6 space-y-6">
