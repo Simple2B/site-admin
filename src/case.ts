@@ -7,6 +7,16 @@ interface ICaseScreenshot {
   url: string;
 }
 
+enum CaseAction {
+  add = 'add',
+  edit = 'edit',
+}
+
+enum Languages {
+  ENGLISH = 'en',
+  GERMANY = 'de',
+}
+
 interface ICaseOut {
   id: number;
   title: string;
@@ -20,6 +30,7 @@ interface ICaseOut {
   screenshots: ICaseScreenshot[];
   mainImageUrl: string;
   previewImageUrl: string;
+  language: Languages;
 }
 
 const createCaseScreenshot = (screenshot: ICaseScreenshot): HTMLElement => {
@@ -47,6 +58,36 @@ const createCaseScreenshot = (screenshot: ICaseScreenshot): HTMLElement => {
   });
 
   return screenshotDiv;
+};
+
+const switchInputs = (
+  btnOne: HTMLButtonElement,
+  btnTwo: HTMLButtonElement,
+  visibleElements: HTMLDivElement[],
+  hiddenElements: HTMLDivElement[],
+) => {
+  const isActive = btnOne.getAttribute('active') === 'true';
+  if (isActive) {
+    return;
+  }
+  btnOne.setAttribute('active', 'true');
+  btnTwo.setAttribute('active', 'false');
+  const activeClassNames = btnTwo.className.split(' ');
+  const notActiveClassNames = btnOne.className.split(' ');
+  btnTwo.className = '';
+  btnTwo.className = notActiveClassNames.join(' ');
+  btnOne.className = '';
+  btnOne.className = activeClassNames.join(' ');
+
+  visibleElements.forEach(div => {
+    div.style.display = 'none';
+    div.lastElementChild.attributes.removeNamedItem('required');
+  });
+  hiddenElements.forEach(div => {
+    div.style.display = 'block';
+    const inputEl = div.lastElementChild as HTMLInputElement;
+    inputEl.setAttribute('required', '');
+  });
 };
 
 const editCase = async (caseId: number) => {
@@ -101,11 +142,11 @@ const editCase = async (caseId: number) => {
     subMainImageInput,
     projectLink,
   ];
-
-  if (elements.includes(undefined)) {
+  if (elements.includes(null)) {
     return;
   }
   let response;
+
   try {
     response = await fetch(`/case/${caseId}`, {
       method: 'GET',
@@ -114,6 +155,7 @@ const editCase = async (caseId: number) => {
     console.error(error);
     return;
   }
+
   const caseData: ICaseOut = await response.json();
 
   const listOfScreenshots: ICaseScreenshot[] = caseData.screenshots;
@@ -132,8 +174,8 @@ const editCase = async (caseId: number) => {
 
   title.value = caseData.title.trim();
   subTitle.value = caseData.subTitle.trim();
-  description.value = caseData.description;
-  role.value = caseData.role;
+  description.value = caseData.description.trim();
+  role.value = caseData.role.trim();
   projectLink.value = caseData.projectLink;
   isActive.checked = caseData.isActive;
   isMain.checked = caseData.isMain;
@@ -164,6 +206,11 @@ const editCase = async (caseId: number) => {
 };
 
 export const cases = () => {
+  const selectLanguage: HTMLSelectElement = document.querySelector('#language');
+  if (selectLanguage) {
+    selectLanguage.className =
+      'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500';
+  }
   const $addUserModalElement: HTMLElement =
     document.querySelector('#addCaseModal');
   const $stackModalElement: HTMLElement = document.querySelector('#stackModal');
@@ -297,16 +344,56 @@ export const cases = () => {
 
   editCaseButton.forEach(e => {
     e.addEventListener('click', async () => {
+      // const createCopyBtn: HTMLButtonElement = document.querySelector(
+      //   '#create-copy-case-btn',
+      // );
+      // const editSelectLanguage: HTMLSelectElement = document.querySelector(
+      //   '#edit-case-language-select',
+      // );
+      // if (!createCopyBtn || !selectLanguage) {
+      //   return;
+      // }
       editCaseModal.show();
+      // let selectValue = selectLanguage.value;
+      // console.log(selectValue, 'start');
 
-      const caseId = e.getAttribute('data-edit-id');
+      const caseId = Number(e.getAttribute('data-edit-id'));
 
-      await editCase(Number(caseId));
+      await editCase(caseId);
+
+      // const onChange = () => {
+      //   selectValue = editSelectLanguage.value;
+      //   selectLanguage.value = selectValue;
+      //   console.log(selectValue);
+      // };
+
+      // const onClick = async () => {
+      // const formData = new FormData();
+      // const target = event.target as HTMLSelectElement;
+      // Access the selected value
+      // const selectedValue = target.value;
+      // formData.append('language', selectValue);
+      // console.log(selectValue, caseId);
+      // formData.append('csrf_token', scrfInput ? scrfInput.value : '');
+      // const response = await fetch(`/case/${caseId}/copy`, {
+      //   method: 'POST',
+      //   body: formData,
+      // });
+      // if (response.status == 200) {
+      //   location.reload();
+      // }
+      // };
+
+      // createCopyBtn.addEventListener('click', onClick);
+      // editSelectLanguage.addEventListener('change', onChange);
 
       const divCaseScreenShoots = document.querySelector(
         '#edit-case-screenshots',
       );
       editCaseModal._options.onHide = () => {
+        // createCopyBtn.removeEventListener('click', onClick);
+        // editSelectLanguage.removeEventListener('change', onChange);
+
         if (divCaseScreenShoots) {
           while (divCaseScreenShoots.firstChild) {
             divCaseScreenShoots.removeChild(divCaseScreenShoots.firstChild);

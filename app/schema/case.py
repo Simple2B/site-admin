@@ -1,5 +1,7 @@
 from pydantic import BaseModel, Field
 
+from app.common import models as m
+
 
 class CaseScreenshot(BaseModel):
     id: int
@@ -24,7 +26,9 @@ class CaseOut(BaseModel):
 
     main_image_url: str = Field(alias="mainImageUrl")
     preview_image_url: str = Field(alias="previewImageUrl")
+    language: m.Languages
 
     class Config:
         orm_mode = True
+        use_enum_values = True
         allow_population_by_field_name = True

@@ -15,33 +15,34 @@
       <!-- Modal body -->
       <div class="p-6 space-y-6">
         <div class="grid grid-cols-6 gap-6">
-          <div class="col-span-6 sm:col-span-3">
+          <div  class="col-span-6 sm:col-span-3">
             <label for="title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Title<span
                 class="text-red-500">*</span></label>
             <input id="edit-case-title" type="text" name="title"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Title" />
+              placeholder="Title" required />
           </div>
-          <div class="col-span-6 sm:col-span-3">
+          <div  class="col-span-6 sm:col-span-3">
             <label for="sub_title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Sub title<span class="text-red-500">*</span></label>
             </label>
             <input id="edit-case-sub-title" type="text" name="sub_title"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Sub title"  />
+              placeholder="Sub title" required />
           </div>
+
           <div class="col-span-6 sm:col-span-3 "><img id="edit-case-main-image" class="max-h-48" src="" alt=""></div>
           <div class="col-span-6 sm:col-span-3 "><img id="edit-case-preview-image" class="max-h-48" src="" alt=""></div>
           <div class="col-span-6 sm:col-span-3">
             <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
               title="This image will be displayed on the Case single page">Upload main
               image<span class="text-red-500">*</span></label>
-            <input id="edit-case-main-image-input" type="file" name="main_image"  accept="image/*">
+            <input id="edit-case-main-image-input" type="file" name="title_image"  accept="image/*">
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
               title="This image will be displayed in the lists of Cases">Upload preview image<span
                 class="text-red-500">*</span></label>
-            <input id="edit-case-sub-main-image-input" type="file" name="preview_image"  accept="image/*">
+            <input id="edit-case-sub-main-image-input" type="file" name="sub_title_image"  accept="image/*">
           </div>
 
           <div class="col-span-6 sm:col-span-3">
@@ -50,7 +51,7 @@
                 class="text-red-500">*</span></label>
             <input id="edit-case-description" type="text" name="description"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Description"  />
+              placeholder="Description" required />
           </div>
           <div class="col-span-6 sm:col-span-3 flex justify-evenly">
             <label for="is_active" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -75,7 +76,7 @@
               role<span class="text-red-500">*</span></label>
             <input id="edit-case-role" type="role" name="role"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Type here"  />
+              placeholder="Type here" required  />
           </div>
           <div class="col-span-full">
             <label for="role" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Stacks</label>
@@ -89,14 +90,14 @@
             <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
               title="Screenshots of the current Case will be displayed on its page">Upload screenshots<span
                 class="text-red-500">*</span></label>
-            <input type="file" name="screenshots" multiple accept="image/*">
+            <input type="file" name="sub_images" multiple accept="image/*">
           </div>
           <div id="edit-case-screenshots" class="col-span-6 sm:col-span-3 overflow-x-scroll h-52 p-4"></div>
         </div>
       </div>
       <!-- Modal footer -->
       <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
-        <button name="submit" type="submit"
+        <button id="edit-case-submit-btn" name="submit" type="submit"
           class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
           Save </button>
       </div>

@@ -12,10 +12,11 @@ from wtforms import (
     FileField,
     MultipleFileField,
     ValidationError,
+    SelectField,
 )
 from wtforms.validators import DataRequired, Length, URL
 from app.database import db
-from app.common.models import Case
+from app.common.models import Case, Languages
 
 
 class MultiCheckboxField(SelectMultipleField):
@@ -23,18 +24,15 @@ class MultiCheckboxField(SelectMultipleField):
     option_widget = widgets.CheckboxInput()
 
 
-class NewCaseForm(FlaskForm):
+class CaseForm(FlaskForm):
     title = StringField("title", [DataRequired(), Length(2, 32)])
     sub_title = StringField("sub_title", [DataRequired(), Length(2, 64)])
-    title_image = FileField("title_image", [DataRequired()])
-    sub_title_image = FileField("sub_title_image", [DataRequired()])
     description = StringField("description", [DataRequired(), Length(1, 512)])
     is_active = BooleanField("is_active")
     is_main = BooleanField("is_main")
     project_link = StringField("project_link", [DataRequired(), URL()])
     role = StringField("role", [DataRequired(), Length(2, 32)])
     stacks = MultiCheckboxField("stacks")
-    sub_images = MultipleFileField("sub_images", [DataRequired()])
 
     submit = SubmitField("Save")
 
@@ -49,42 +47,28 @@ class NewCaseForm(FlaskForm):
         if not field.data:
             raise ValidationError("Select at least one stack.")
 
-    def validate_title_image(self, field):
-        is_file = filetype.guess(field.data)
-        if not is_file or not filetype.is_image(field.data):
-            raise ValidationError("File must be an image")
 
-    def validate_sub_title_image(self, field):
-        is_file = filetype.guess(field.data)
-        if not is_file or not filetype.is_image(field.data):
-            raise ValidationError("File must be an image")
-
-    def validate_sub_images(self, field):
-        for file in field.data:
-            is_file = filetype.guess(file)
-            if not is_file or not filetype.is_image(file):
-                raise ValidationError("File must be an image")
+class NewCaseForm(CaseForm):
+    title_image = FileField("title_image", [DataRequired()])
+    sub_title_image = FileField("sub_title_image", [DataRequired()])
+    sub_images = MultipleFileField("sub_images", [DataRequired()])
+    language = SelectField(
+        "language",
+        choices=[(lan.value, lan.name) for lan in Languages],
+        validators=[DataRequired()],
+    )
 
 
 class UpdateCaseState(FlaskForm):
     field = StringField("filed")
 
 
-class UpdateCase(FlaskForm):
+class UpdateCase(CaseForm):
     case_id = IntegerField("case_id", [DataRequired()])
-    title = StringField("title", [Length(2, 32)])
-    sub_title = StringField("sub_title", [Length(2, 64)])
-    main_image = FileField("title_image")
-    preview_image = FileField("sub_title_image")
-    description = StringField("description", [Length(1, 512)])
-    is_active = BooleanField("is_active")
-    is_main = BooleanField("is_main")
-    project_link = StringField("project_link")
-    role = StringField("role", [Length(2, 32)])
     stacks = MultiCheckboxField("stacks")
-    screenshots = MultipleFileField(
-        "screenshots",
-    )
+    title_image = FileField("title_image")
+    sub_title_image = FileField("sub_title_image")
+    sub_images = MultipleFileField("sub_images")
 
     def validate_title(self, field):
         case_name = db.session.scalars(
@@ -95,23 +79,17 @@ class UpdateCase(FlaskForm):
         if case_name:
             raise ValidationError("This case name is already taken. Must be unique.")
 
-    def validate_stacks(form, field):
-        if not field.data:
-            raise ValidationError("Select at least one stack.")
-
     def validate_title_image(self, field):
-        if not field.data:
-            return
-        is_file = filetype.guess(field.data)
-        if not is_file or not filetype.is_image(field.data):
-            raise ValidationError("File must be an image")
+        if field.data:
+            is_file = filetype.guess(field.data)
+            if not is_file or not filetype.is_image(field.data):
+                raise ValidationError("File must be an image")
 
     def validate_sub_title_image(self, field):
-        if not field.data:
-            return
-        is_file = filetype.guess(field.data)
-        if not is_file or not filetype.is_image(field.data):
-            raise ValidationError("File must be an image")
+        if field.data:
+            is_file = filetype.guess(field.data)
+            if not is_file or not filetype.is_image(field.data):
+                raise ValidationError("File must be an image")
 
     def validate_sub_images(self, field):
         for file in field.data:

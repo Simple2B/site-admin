@@ -29,6 +29,7 @@
           d="M15.75 15.75l-2.489-2.489m0 0a3.375 3.375 0 10-4.773-4.773 3.375 3.375 0 004.774 4.774zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>Search</button>
     <div class="flex items-center ml-auto space-x-2 sm:space-x-3">
+      {%include 'components/sort_case_lang_btn.html' %}
       <button type="button" id="modal-stack-btn"
         class="inline-flex items-center justify-center w-1/2 px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 sm:w-auto dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
         <svg class="w-5 h-5 mr-2 -ml-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -53,10 +54,10 @@
     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
       <tr>
         <th scope="col" class="px-6 py-3">#</th>
-        <th scope="col" class="px-6 py-3">title</th>
+        <th scope="col" class="px-6 py-3">Title</th>
+        <th scope="col" class="px-6 py-3">Language</th>
         <th scope="col" class="px-6 py-3">Is active</th>
         <th scope="col" class="px-6 py-3">Is main</th>
-        <th scope="col" class="px-6 py-3">Delete</th>
       </tr>
     </thead>
     <tbody>
@@ -70,6 +71,11 @@
         <td class="w-4 p-4">
           <div class="pl-3">
             <div class="text-base font-semibold">{{ case.title }}</div>
+          </div>
+        </td>
+        <td class="w-4 p-4">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ case.language }}</div>
           </div>
         </td>
         <td class="w-4 p-4">
@@ -100,7 +106,6 @@
             </svg>
             Edit case
           </button>
-
           <button data-case-id={{ case.id }} id="delete-case-btn" type="button"
             class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900 delete-user-btn">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">

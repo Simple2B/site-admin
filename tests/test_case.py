@@ -17,7 +17,9 @@ test_case = {
     "project_link": "https://test.com",
     "role": "test role",
     "sub_images": [(io.BytesIO(b"sub_images"), "sub_images.jpg")],
+    "languages": "en",
 }
+
 
 stack = {"name": "django"}
 
@@ -74,6 +76,7 @@ def test_crud_case(client, mocker):
             "description": "test description",
             "project_link": "https://test.com",
             "stacks": [stack.id],
+            "languages": "en",
         },
         content_type="multipart/form-data",
     )
