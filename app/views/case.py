@@ -26,27 +26,25 @@ bp = Blueprint("case", __name__, url_prefix="/case")
 @bp.route("/", methods=["GET"])
 @login_required
 def get_all():
+
     form = f.NewCaseForm()
     form.stacks.choices = [(str(s.id), s.name) for s in db.session.query(m.Stack).all()]
     q = request.args.get("q", type=str, default=None)
+    lang = request.args.get("lang", type=str, default=None)
     query = m.Case.select().where(m.Case.is_deleted == False).order_by(m.Case.id)
-    count_query = (
-        sa.select(sa.func.count()).where(m.Case.is_deleted == False).select_from(m.Case)
-    )
 
+    if lang:
+        try:
+            lang = Languages(lang)
+            query = query.where(m.Case.language == lang)
+        except ValueError:
+            log(log.WARNING, "There is no language with name: [%s]", lang)
     if q:
-        query = (
-            m.Case.select()
-            .where(sa.and_(m.Case.title.ilike(f"%{q}%"), m.Case.is_deleted == False))
-            .order_by(m.Case.id)
-        )
-        count_query = (
-            sa.select(sa.func.count())
-            .where(sa.and_(m.Case.title.ilike(f"%{q}%"), m.Case.is_deleted == False))
-            .select_from(m.Case)
-        )
+        query = query.where(m.Case.title.ilike(f"%{q}%"))
 
-    pagination = create_pagination(total=db.session.scalar(count_query))
+    pagination = create_pagination(
+        total=db.session.scalar(sa.select(sa.func.count()).select_from(query))
+    )
 
     return render_template(
         "case/cases.html",
