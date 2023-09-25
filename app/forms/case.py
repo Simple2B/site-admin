@@ -30,7 +30,7 @@ class CaseForm(FlaskForm):
     description = StringField("description", [DataRequired(), Length(1, 512)])
     is_active = BooleanField("is_active")
     is_main = BooleanField("is_main")
-    project_link = StringField("project_link", [DataRequired(), URL()])
+    project_link = StringField("project_link", [URL()])
     role = StringField("role", [DataRequired(), Length(2, 32)])
     stacks = MultiCheckboxField("stacks")
 
