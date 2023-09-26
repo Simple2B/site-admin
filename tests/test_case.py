@@ -17,7 +17,7 @@ test_case = {
     "project_link": "https://test.com",
     "role": "test role",
     "sub_images": [(io.BytesIO(b"sub_images"), "sub_images.jpg")],
-    "languages": "en",
+    "language": m.Languages.ENGLISH.value,
 }
 
 
