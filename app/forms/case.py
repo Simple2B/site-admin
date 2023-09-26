@@ -1,6 +1,5 @@
 import filetype
 
-from sqlalchemy import select
 from flask_wtf import FlaskForm
 from wtforms import (
     IntegerField,
@@ -15,8 +14,7 @@ from wtforms import (
     SelectField,
 )
 from wtforms.validators import DataRequired, Length, URL, Optional
-from app.database import db
-from app.common.models import Case, Languages
+from app.common.models import Languages
 
 
 class MultiCheckboxField(SelectMultipleField):
