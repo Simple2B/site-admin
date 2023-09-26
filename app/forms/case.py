@@ -14,7 +14,7 @@ from wtforms import (
     ValidationError,
     SelectField,
 )
-from wtforms.validators import DataRequired, Length, URL
+from wtforms.validators import DataRequired, Length, URL, Optional
 from app.database import db
 from app.common.models import Case, Languages
 
@@ -30,18 +30,11 @@ class CaseForm(FlaskForm):
     description = StringField("description", [DataRequired(), Length(1, 512)])
     is_active = BooleanField("is_active")
     is_main = BooleanField("is_main")
-    project_link = StringField("project_link", [URL()])
+    project_link = StringField("project_link", validators=[Optional(), URL()])
     role = StringField("role", [DataRequired(), Length(2, 32)])
     stacks = MultiCheckboxField("stacks")
 
     submit = SubmitField("Save")
-
-    def validate_title(self, field):
-        case_name = db.session.scalars(
-            select(Case).where(Case.title == field.data)
-        ).first()
-        if case_name:
-            raise ValidationError("This case name is already taken. Must be unique.")
 
     def validate_stacks(form, field):
         if not field.data:
@@ -57,6 +50,15 @@ class NewCaseForm(CaseForm):
         choices=[(lan.value, lan.name) for lan in Languages],
         validators=[DataRequired()],
     )
+
+    def validate_title(self, field):
+        case_name = db.session.scalars(
+            select(Case)
+            .where(Case.title == field.data)
+            .where(Case.language == Languages(self.language.data))
+        ).first()
+        if case_name:
+            raise ValidationError("This case name is already taken. Must be unique.")
 
 
 class UpdateCaseState(FlaskForm):

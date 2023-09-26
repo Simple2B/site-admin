@@ -99,7 +99,7 @@ def create():
     if not form.validate_on_submit():
         log(log.ERROR, "Case errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
-        redirect(url_for("case.get_all"))
+        return redirect(url_for("case.get_all"))
     log(log.INFO, "Form submitted. Case: [%s]", form)
     session = db.session
 
