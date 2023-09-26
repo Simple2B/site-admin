@@ -51,15 +51,6 @@ class NewCaseForm(CaseForm):
         validators=[DataRequired()],
     )
 
-    def validate_title(self, field):
-        case_name = db.session.scalars(
-            select(Case)
-            .where(Case.title == field.data)
-            .where(Case.language == Languages(self.language.data))
-        ).first()
-        if case_name:
-            raise ValidationError("This case name is already taken. Must be unique.")
-
 
 class UpdateCaseState(FlaskForm):
     field = StringField("filed")
@@ -71,15 +62,6 @@ class UpdateCase(CaseForm):
     title_image = FileField("title_image")
     sub_title_image = FileField("sub_title_image")
     sub_images = MultipleFileField("sub_images")
-
-    def validate_title(self, field):
-        case_name = db.session.scalars(
-            select(Case)
-            .where(Case.title == field.data)
-            .where(Case.id != int(self.case_id.data))
-        ).first()
-        if case_name:
-            raise ValidationError("This case name is already taken. Must be unique.")
 
     def validate_title_image(self, field):
         if field.data:
