@@ -30,20 +30,30 @@ def get_all():
     form = f.NewCaseForm()
     form.stacks.choices = [(str(s.id), s.name) for s in db.session.query(m.Stack).all()]
     q = request.args.get("q", type=str, default=None)
-    lang: str = request.args.get("lang", type=str, default=None)
-    query = m.Case.select().where(m.Case.is_deleted == False).order_by(m.Case.id)
+    lang_str = request.args.get("lang", type=str, default=Languages.ENGLISH.value)
 
-    if lang:
-        try:
-            lang = Languages(lang)
-            query = query.where(m.Case.language == lang)
-        except ValueError:
-            log(log.WARNING, "There is no language with name: [%s]", lang)
+    try:
+        lang = Languages(lang_str)
+    except ValueError:
+        lang = Languages.ENGLISH
+
+    query = (
+        m.Case.select()
+        .where(
+            sa.and_(
+                m.Case.is_deleted == sa.false(),
+                m.Case.language == lang,
+            )
+        )
+        .order_by(m.Case.id)
+    )
     if q:
         query = query.where(m.Case.title.ilike(f"%{q}%"))
 
     pagination = create_pagination(
-        total=db.session.scalar(sa.select(sa.func.count()).select_from(query))
+        total=db.session.scalar(
+            sa.select(sa.func.count()).select_from(query.subquery())
+        )
     )
 
     return render_template(
@@ -111,13 +121,13 @@ def create():
     try:
         main_image_url = s3bucket.upload_cases_imgs(
             file=main_image_obj,
-            file_name=main_image_obj.filename,
+            file_name=main_image_obj.filename or "unknown.jpg",
             case_name=title,
             img_type=EnumCaseImageType.case_main_image.value,
         )
         preview_image_url = s3bucket.upload_cases_imgs(
             file=preview_image_obj,
-            file_name=preview_image_obj.filename,
+            file_name=preview_image_obj.filename or "unknown.jpg",
             case_name=title,
             img_type=EnumCaseImageType.case_preview_image.value,
         )
@@ -130,7 +140,7 @@ def create():
         for screenshot in case_screenshots:
             file_image = s3bucket.upload_cases_imgs(
                 file=screenshot,
-                file_name=screenshot.filename,
+                file_name=screenshot.filename or "unknown.jpg",
                 case_name=title,
                 img_type="screenshots",
             )
@@ -233,7 +243,7 @@ def update_case():
         return redirect(url_for("case.get_all"))
     case = db.session.get(m.Case, form.case_id.data)
     if not case:
-        log(log.INFO, "There is no case with id: [%s]", id)
+        log(log.INFO, "There is no case with id: [%s]", form.case_id.data)
         flash("There is no such case", "danger")
         return redirect(url_for("case.get_all"))
 
@@ -241,14 +251,14 @@ def update_case():
     if main_image_obj:
         try:
             s3bucket.delete_cases_imgs(case.main_image_url)
-        except botocore.exceptions.ClientError:
+        except botocore.exceptions.ClientError as error:
             log(log.ERROR, "Can't delete main image in case: [%s]", case.id)
             flash(error.args[0], "danger")
             return redirect(url_for("case.get_all"))
         try:
             main_image_url = s3bucket.upload_cases_imgs(
                 file=main_image_obj,
-                file_name=main_image_obj.filename,
+                file_name=main_image_obj.filename or "unknown.jpg",
                 case_name=form.title.data,
                 img_type=EnumCaseImageType.case_main_image.value,
             )
