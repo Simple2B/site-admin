@@ -15,7 +15,6 @@ env:
   # DEPLOY_HOST: ${{ secrets.DEVELOP_HOST }}
   # DEPLOY_USER_NAME: ${{ secrets.DEVELOP_USERNAME }}
   # DEPLOY_SSH_KEY: ${{ secrets.DEVELOP_SSH_KEY }}
-  # SITE_DOCKER_ACCESS_TOKEN: ${{ secrets.SITE_DOCKER_ACCESS_TOKEN }}
 
 jobs:
   tests:
@@ -58,7 +57,6 @@ jobs:
         poetry-version: [1.5.1]
         os: [Linux]
     runs-on: ${{ matrix.os }}
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
     needs: tests
     steps:
       - name: Checkout
