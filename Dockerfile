@@ -25,7 +25,7 @@ COPY --chown=app:app poetry.toml .
 RUN poetry install --without dev --no-interaction --no-ansi
 # add gunicorn
 RUN poetry add gunicorn
-# EXPOSE 80
+EXPOSE 80
 
 
 COPY --chown=app:app . .
