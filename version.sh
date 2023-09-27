@@ -12,7 +12,7 @@ case $1 in
         ;;
     *)
         echo "Invalid argument! Usage: $0 [patch|minor|major]"
-        VERSION=$(node -p "require('./front/package.json').version")
+        VERSION=$(node -p "require('./package.json').version")
         echo "Current version: $VERSION"
         exit 1
         ;;
@@ -33,10 +33,7 @@ git pull
 # goto script directory
 cd "$(dirname "$0")"
 
-# increment front-end version
-cd front
-
-
+# increment fronend version
 npm version $1
 
 if [ $? -ne 0 ]; then
@@ -45,9 +42,7 @@ fi
 # get current package version
 VERSION=$(node -p "require('./package.json').version")
 
-cd -
-cd back
-
+# update poetry version
 poetry version $VERSION
 
 cd -
