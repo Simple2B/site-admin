@@ -45,7 +45,9 @@ jobs:
         run: |
           poetry run flake8 . --count --show-source --statistics
           poetry run flake8 . --count --exit-zero --max-complexity=10 --statistics
-          poetry run mypy .
+      - name: Run mypy
+        run: |
+          poetry run mypy app --check-untyped-defs
       - name: Run Flask tests
         run: |
           poetry run pytest

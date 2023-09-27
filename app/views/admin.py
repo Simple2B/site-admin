@@ -85,6 +85,7 @@ def save():
         if not u:
             log(log.ERROR, "Not found user by id : [%s]", form.SuperUser_id.data)
             flash("Cannot save user data", "danger")
+            return redirect(url_for("admin.get_all"))
         u.username = form.username.data
         u.email = form.email.data
         u.activated = form.activated.data

@@ -30,7 +30,7 @@ def get_all():
     form = f.NewCaseForm()
     form.stacks.choices = [(str(s.id), s.name) for s in db.session.query(m.Stack).all()]
     q = request.args.get("q", type=str, default=None)
-    lang = request.args.get("lang", type=str, default=None)
+    lang: str = request.args.get("lang", type=str, default=None)
     query = m.Case.select().where(m.Case.is_deleted == False).order_by(m.Case.id)
 
     if lang:
@@ -259,7 +259,7 @@ def update_case():
         db.session.add(
             m.CaseImage(
                 url=main_image_url,
-                origin_file_name=main_image_obj.filename,
+                origin_file_name=main_image_obj.filename or "unknown.jpg",
                 case_id=case.id,
                 type_of_image=EnumCaseImageType.case_main_image,
             )
@@ -269,14 +269,14 @@ def update_case():
     if preview_image_obj:
         try:
             s3bucket.delete_cases_imgs(case.preview_image_url)
-        except botocore.exceptions.ClientError:
+        except botocore.exceptions.ClientError as error:
             log(log.ERROR, "Can't delete preview image in case: [%s]", case.id)
             flash(error.args[0], "danger")
             return redirect(url_for("case.get_all"))
         try:
             preview_image_url = s3bucket.upload_cases_imgs(
                 file=preview_image_obj,
-                file_name=preview_image_obj.filename,
+                file_name=preview_image_obj.filename or "unknown.jpg",
                 case_name=form.title.data,
                 img_type=EnumCaseImageType.case_preview_image.value,
             )
