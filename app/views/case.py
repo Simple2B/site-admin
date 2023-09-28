@@ -40,10 +40,7 @@ def get_all():
     query = (
         m.Case.select()
         .where(
-            sa.and_(
-                m.Case.is_deleted == sa.false(),
-                m.Case.language == lang,
-            )
+            m.Case.is_deleted == sa.false(),
         )
         .order_by(m.Case.id)
     )
