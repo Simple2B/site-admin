@@ -20,3 +20,4 @@ TODO.md
 **/package.json
 **/tox.ini
 **/yarn.lock
+.env
