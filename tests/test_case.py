@@ -56,7 +56,6 @@ def test_crud_case(client, mocker):
     assert test_case["title"] in html
 
     # update active and main
-    case: m.Case | None = db.session.get(m.Case, 1)
     assert case.is_active == test_case["is_active"]
     res = client.patch(f"/case/update-status/{case.id}", data={"field": "is_active"})
     assert res.status_code == 200

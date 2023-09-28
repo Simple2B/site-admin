@@ -35,7 +35,7 @@ def get_all():
     try:
         lang = Languages(lang_str)
     except ValueError:
-        lang = Languages.ENGLISH
+        lang = None
 
     query = (
         m.Case.select()
@@ -47,6 +47,8 @@ def get_all():
         )
         .order_by(m.Case.id)
     )
+    if lang:
+        query = query.where(m.Case.language == lang)
     if q:
         query = query.where(m.Case.title.ilike(f"%{q}%"))
 
