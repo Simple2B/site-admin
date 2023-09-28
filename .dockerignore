@@ -21,3 +21,4 @@ TODO.md
 **/tox.ini
 **/yarn.lock
 .env
+.env.*
