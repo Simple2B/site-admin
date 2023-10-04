@@ -30,7 +30,7 @@ def get_all():
     form = f.NewCaseForm()
     form.stacks.choices = [(str(s.id), s.name) for s in db.session.query(m.Stack).all()]
     q = request.args.get("q", type=str, default=None)
-    lang_str = request.args.get("lang", type=str, default=Languages.ENGLISH.value)
+    lang_str = request.args.get("lang", type=str, default="")
 
     try:
         lang = Languages(lang_str)
