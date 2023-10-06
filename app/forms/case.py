@@ -81,3 +81,12 @@ class UpdateCase(CaseForm):
             is_file = filetype.guess(file)
             if not is_file or not filetype.is_image(file):
                 raise ValidationError("File must be an image")
+
+
+class CreateCaseCopy(FlaskForm):
+    case_id = IntegerField("case_id", [DataRequired()])
+    language = SelectField(
+        "language",
+        choices=[(lan.value, lan.name) for lan in Languages],
+        validators=[DataRequired()],
+    )

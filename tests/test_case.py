@@ -86,6 +86,20 @@ def test_crud_case(client, mocker):
     res = client.get(f"/case/{case.id}")
     assert res.status_code == 200
 
+    # copy case by other language
+    res = client.post(
+        "/case/copy",
+        data={
+            "case_id": case.id,
+            "language": "de",
+        },
+        content_type="multipart/form-data",
+    )
+    assert res
+    copy_case: m.Case | None = db.session.get(m.Case, case.id + 1)
+    assert copy_case
+    assert copy_case.title == case.title
+
     # test delete case screenshot
     assert case.screenshots
     res = client.delete(f"/case/delete/{case.screenshots[0].id}/screenshot")
@@ -97,6 +111,6 @@ def test_crud_case(client, mocker):
     res = client.delete(f"/case/delete/{case.id}")
     assert case.is_deleted
     delete_action_log: m.Action | None = db.session.get(
-        m.Action, new_action_log_count + 3
+        m.Action, new_action_log_count + 4
     )
     assert delete_action_log.action == m.ActionsType.DELETE

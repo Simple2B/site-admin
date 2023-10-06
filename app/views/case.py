@@ -1,7 +1,15 @@
 # flake8: noqa E712
 from datetime import datetime
 
-from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify
+from flask import (
+    Blueprint,
+    render_template,
+    request,
+    flash,
+    redirect,
+    url_for,
+    Response,
+)
 from flask_login import login_required
 import sqlalchemy as sa
 from werkzeug.datastructures import FileStorage
@@ -28,6 +36,7 @@ bp = Blueprint("case", __name__, url_prefix="/case")
 def get_all():
 
     form = f.NewCaseForm()
+    copy_case_form = f.CreateCaseCopy()
     form.stacks.choices = [(str(s.id), s.name) for s in db.session.query(m.Stack).all()]
     q = request.args.get("q", type=str, default=None)
     lang_str = request.args.get("lang", type=str, default="")
@@ -65,6 +74,7 @@ def get_all():
         page=pagination,
         search_query=q,
         form=form,
+        copy_case_form=copy_case_form,
         options=[(lan.name, lan.value) for lan in m.Languages],
     )
 
@@ -81,23 +91,64 @@ def get_case(id: int):
     return s.CaseOut.from_orm(case).json(by_alias=True)
 
 
-# @bp.route("/<int:id>", methods=["POST"])
-# @login_required
-# def create_copy_case(id: int):
-#     lang = request.args.get("lang", type=str, default="en")
-#     try:
-#         lang = Languages(lang)
-#     except ValueError:
-#         lang = Languages.ENGLISH
-#     case: m.Case = db.session.scalar(m.Case.select().where(m.Case.id == id))
-#     if not case or case.language == lang:
-#         log(log.INFO, "There is no case with id or case already exist: [%s]", id)
-#         flash("There is no such case", "danger")
-#         return "no case", 404
+@bp.route("/copy", methods=["POST"])
+@login_required
+def create_copy_case():
+    form = f.CreateCaseCopy()
+    if not form.validate_on_submit():
+        log(log.ERROR, "Case errors: [%s]", form.errors)
+        flash(f"{form.errors}", "danger")
+        return Response(status="422", headers={"HX-Refresh": "true"})
 
-#     # db.session.add()
+    case = db.session.get(m.Case, form.case_id.data)
+    lang = Languages(form.language.data)
+    if not case or case.language == lang:
+        log(
+            log.ERROR,
+            "Case not found or case with language:[%s] already exist",
+            form.language.data,
+        )
+        flash(
+            f"Case not found or case with language:{form.case_id.data} already exist",
+            "danger",
+        )
+        return Response(status="422", headers={"HX-Refresh": "true"})
 
-#     return s.CaseOut.from_orm(case).json(by_alias=True)
+    copy_case = m.Case(
+        title=case.title,
+        sub_title=case.sub_title,
+        description=case.description,
+        language=lang,
+        role=case.role,
+        project_link=case.project_link,
+    )
+    db.session.add(copy_case)
+    db.session.commit()
+    for case_stack in case._stacks:
+        copy_case._stacks.append(case_stack)
+    for case_screenshot in case._screenshots:
+        copy_case_screenshot = m.CaseScreenshot(
+            case_id=copy_case.id,
+            url=case_screenshot.url,
+            origin_file_name=case_screenshot.origin_file_name,
+        )
+        db.session.add(copy_case_screenshot)
+
+    for case_image in db.session.scalars(
+        case.case_images.select().where(m.CaseImage.is_deleted.is_(False))
+    ):
+        copy_case_images = m.CaseImage(
+            case_id=copy_case.id,
+            url=case_image.url,
+            type_of_image=case_image.type_of_image,
+            origin_file_name=case_image.origin_file_name,
+        )
+        db.session.add(copy_case_images)
+    db.session.commit()
+    log(log.INFO, "Case copy created")
+    ActionLogs.create_case_log(m.ActionsType.EDIT, copy_case.id)
+    flash(f"Case copy created", "success")
+    return Response(status="200", headers={"HX-Refresh": "true"})
 
 
 @bp.route("/create", methods=["POST"])
@@ -381,11 +432,12 @@ def delete_screenshot(id: int):
         flash("There is no such case screenshot", "danger")
         return "no case", 404
 
-    try:
-        s3bucket.delete_cases_imgs(case_screenshot.url)
-    except TypeError:
-        log(log.ERROR, "Can't delete case screenshot: [%s]", case_screenshot.id)
-        return "Can't delete case screenshot", 422
+    # I comment it because when we create create copy case we copy screenshots so screenshots will be deleted from s3bucket
+    # try:
+    #     s3bucket.delete_cases_imgs(case_screenshot.url)
+    # except TypeError:
+    #     log(log.ERROR, "Can't delete case screenshot: [%s]", case_screenshot.id)
+    #     return "Can't delete case screenshot", 422
 
     case_id = case_screenshot.case_id
     db.session.delete(case_screenshot)
