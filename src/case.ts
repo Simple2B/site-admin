@@ -119,6 +119,8 @@ const editCase = async (caseId: number) => {
     '#edit-case-screenshots',
   );
   const caseIdElement: HTMLInputElement = document.querySelector('#caseIdEdit');
+  const caseIdCopyElement: HTMLInputElement =
+    document.querySelector('#caseIdEditCopy');
 
   const mainImageInput: HTMLInputElement = document.querySelector(
     '#edit-case-main-image-input',
@@ -141,6 +143,7 @@ const editCase = async (caseId: number) => {
     mainImageInput,
     subMainImageInput,
     projectLink,
+    caseIdCopyElement,
   ];
   if (elements.includes(null)) {
     return;
@@ -189,7 +192,7 @@ const editCase = async (caseId: number) => {
       : caseData.previewImageUrl;
 
   caseIdElement.setAttribute('value', caseId.toString());
-
+  caseIdCopyElement.setAttribute('value', caseId.toString());
   mainImageInput.addEventListener('change', () => {
     const files = mainImageInput.files;
     if (files.length > 0) {

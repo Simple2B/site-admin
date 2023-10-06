@@ -98,21 +98,21 @@ def create_copy_case():
     if not form.validate_on_submit():
         log(log.ERROR, "Case errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
-        return Response(status="422", headers={"HX-Refresh": "true"})
+        return redirect(url_for("case.get_all"))
 
     case = db.session.get(m.Case, form.case_id.data)
     lang = Languages(form.language.data)
     if not case or case.language == lang:
         log(
             log.ERROR,
-            "Case not found or case with language:[%s] already exist",
+            "Case not found or case with language: [%s] already exist",
             form.language.data,
         )
         flash(
-            f"Case not found or case with language:{form.case_id.data} already exist",
+            f"Case not found or case with language: {form.case_id.data} already exist",
             "danger",
         )
-        return Response(status="422", headers={"HX-Refresh": "true"})
+        return redirect(url_for("case.get_all"))
 
     copy_case = m.Case(
         title=case.title,
@@ -148,7 +148,7 @@ def create_copy_case():
     log(log.INFO, "Case copy created")
     ActionLogs.create_case_log(m.ActionsType.EDIT, copy_case.id)
     flash(f"Case copy created", "success")
-    return Response(status="200", headers={"HX-Refresh": "true"})
+    return redirect(url_for("case.get_all"))
 
 
 @bp.route("/create", methods=["POST"])
