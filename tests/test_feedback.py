@@ -9,17 +9,18 @@ def test_crud_feedback(client):
     fds = db.session.scalars(sa.select(m.FeedBack)).all()
     assert not fds
 
-    res  = client.get("/feedbacks/get_add_form")
+    res  = client.get("/feedbacks/add")
     assert res.status_code == 200
     assert "Add feedback" in res.data.decode()
 
-    feedback = {
+    feedback_data = {
         "client_name": "test client",
         "project_name": "test project",
         "link": "https://test.com",
         "language": m.Languages.ENGLISH.value,
+        'comment': 'test comment',
     }
-    res = client.post("/feedbacks/add", data=feedback)
+    res = client.post("/feedbacks/add", data=feedback_data, follow_redirects=True)
     assert res.status_code == 200
     feedback = db.session.get(m.FeedBack, 1)
     assert feedback
@@ -34,21 +35,21 @@ def test_crud_feedback(client):
     assert feedback.client_name in html
 
 
-    res = client.get(f"/feedback/get_edit_form/{feedback.uuid}")
+    res = client.get(f"/feedbacks/edit/{feedback.uuid}")
     assert res.status_code == 200
     assert "Edit feedback" in res.data.decode()
 
-    feedback['uuid'] = feedback.uuid
-    feedback['client_name'] = "updated client"
+    feedback_data['uuid'] = feedback.uuid
+    feedback_data['client_name'] = "updated client"
 
 
-    res = client.post("/feedback/edit", data=feedback)
+    res = client.post("/feedbacks/edit", data=feedback_data, follow_redirects=True)
     assert res.status_code == 200
     feedback = db.session.get(m.FeedBack, 1)
     assert feedback
     assert feedback.client_name == "updated client"
 
-    res = client.delete(f"/feedback/delete/{feedback.id}")
+    res = client.delete(f"/feedbacks/delete/{feedback.uuid}")
     assert res.status_code == 200
     feedback = db.session.get(m.FeedBack, 1)
     assert not feedback

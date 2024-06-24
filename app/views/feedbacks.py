@@ -49,9 +49,10 @@ def get_all():
         search_query=q,
     )
 
-@bp.route("/get_add_form", methods=["GET"])
+@bp.route("/add", methods=["GET"])
 @login_required
 def get_add_form():
+    '''htmx'''
     form = f.NewFeedBackForm()
     return render_template("feedback/add_feedback.html", form=form)
 
@@ -72,5 +73,53 @@ def add():
         
     return redirect(url_for("feedback.get_all"))
 
+@bp.route("/edit/<uuid>", methods=["GET"])
+@login_required
+def get_edit_form(uuid:str):
+    '''htmx'''
+    feedback = db.session.scalar(sa.select(m.FeedBack).where(m.FeedBack.uuid == uuid))
+    if not feedback:
+        log(log.ERROR, f"Feedback with uuid {uuid} not found")
+        return render_template("toast.html", message="Feedback not found", category="danger")
+        
+    form = f.EditFeedBackForm(obj=feedback)
+    return render_template("feedback/edit_feedback.html", form=form)
 
 
+@bp.route("/edit", methods=["POST"])
+@login_required
+def edit():
+    form = f.EditFeedBackForm()
+    if not form.validate_on_submit():
+        log(log.ERROR, "Form validation failed")
+        flash(f"Form validation failed {form.errors}", "danger")
+        return redirect(url_for("feedback.get_all"))
+    feedback = db.session.scalar(sa.select(m.FeedBack).where(m.FeedBack.uuid == form.uuid.data))
+    if not feedback:
+        log(log.ERROR, f"Feedback with uuid {feedback.uuid.data} not found")
+        flash("Feedback not found", "danger")
+        return redirect(url_for("feedback.get_all"))
+    
+    feedback.client_name = form.client_name.data
+    feedback.project_name = form.project_name.data
+    feedback.link = form.link.data
+    feedback.language = form.language.data
+    feedback.comment = form.comment.data
+    db.session.commit()
+
+    flash("Feedback updated successfully", "success")
+    return redirect(url_for("feedback.get_all"))
+
+
+@bp.route("/delete/<uuid>", methods=["DELETE"])
+@login_required
+def delete(uuid:str):
+    '''htmx'''
+    feedback = db.session.scalar(sa.select(m.FeedBack).where(m.FeedBack.uuid == uuid))
+    if not feedback:
+        log(log.ERROR, f"Feedback with uuid {uuid} not found")
+        return render_template("toast.html", message="Feedback not found", category="danger")
+        
+    db.session.delete(feedback)
+    db.session.commit()
+    return render_template("toast.html", message="Feedback deleted", category="success")

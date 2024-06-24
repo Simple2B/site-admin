@@ -3,7 +3,8 @@ from flask_wtf import FlaskForm
 from wtforms import (
     StringField,
     SelectField,
-    TextAreaField
+    TextAreaField,
+    HiddenField
 )
 from wtforms.validators import DataRequired, Length, URL, Optional
 from app.common.models import Languages
@@ -22,5 +23,5 @@ class NewFeedBackForm(FlaskForm):
     )
 
 class EditFeedBackForm(NewFeedBackForm):
-    uuid = StringField("uuid", [DataRequired()])
+    uuid = HiddenField("uuid", [DataRequired()])
     
