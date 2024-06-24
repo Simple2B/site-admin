@@ -27,6 +27,7 @@ def create_app(environment="development"):
         stack_blueprint,
         candidate_blueprint,
         action_blueprint,
+        feedback_blueprint
     )
     from app.common import models as m
 
@@ -56,6 +57,7 @@ def create_app(environment="development"):
     app.register_blueprint(stack_blueprint)
     app.register_blueprint(candidate_blueprint)
     app.register_blueprint(action_blueprint)
+    app.register_blueprint(feedback_blueprint)
 
     # Set up flask login.
     @login_manager.user_loader
