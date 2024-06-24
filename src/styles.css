@@ -9,3 +9,21 @@
 .w-box{
     width:calc(100% - 255px);
 }
+
+
+label:has(+ *:required):after,
+label:has(~ div *:required):after {
+  content: ' *';
+  color: red;
+}
+
+
+.htmx-indicator{
+    display: none;
+}
+.htmx-request .htmx-indicator{
+    display:inline;
+}
+.htmx-request.htmx-indicator{
+    display:inline;
+}

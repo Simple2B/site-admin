@@ -4,3 +4,4 @@ from .user import UserForm, NewUserForm
 from .question import NewQuestionForm, EditQuestionForm
 from .case import NewCaseForm, UpdateCaseState, UpdateCase, CreateCaseCopy
 from .stack import NewStackForm
+from .feedback import NewFeedBackForm, EditFeedBackForm
