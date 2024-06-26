@@ -16,7 +16,7 @@ class NewFeedBackForm(FlaskForm):
         render_kw={"placeholder": "Project Name"},
     )
     link = StringField(
-        "link", [Optional(), URL()], render_kw={"placeholder": "https://example.com"}
+        "link", [Optional(), URL()], render_kw={"placeholder": "https://example.com"}, default=None
     )
     comment = TextAreaField(
         "comment",
