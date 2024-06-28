@@ -60,7 +60,13 @@ def add():
         log(log.ERROR, "Form validation failed")
         flash(f"Form validation failed {form.errors}", "danger")
         return redirect(url_for("feedback.get_all"))
-    feedback = m.FeedBack(**form.data)
+    feedback = m.FeedBack(
+        client_name=form.client_name.data,
+        project_name=form.project_name.data,
+        link=form.link.data,
+        language=form.language.data,
+        comment=form.comment.data,
+    )
     db.session.add(feedback)
     db.session.commit()
 
