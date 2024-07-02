@@ -121,6 +121,7 @@ def create_copy_case():
         language=lang,
         role=case.role,
         project_link=case.project_link,
+        order_index=case.order_index,
     )
     db.session.add(copy_case)
     db.session.commit()
@@ -147,7 +148,7 @@ def create_copy_case():
     db.session.commit()
     log(log.INFO, "Case copy created")
     ActionLogs.create_case_log(m.ActionsType.EDIT, copy_case.id)
-    flash(f"Case copy created", "success")
+    flash("Case copy created", "success")
     return redirect(url_for("case.get_all"))
 
 
@@ -212,6 +213,7 @@ def create():
         project_link=form.project_link.data,
         role=form.role.data,
         language=lang,
+        order_index=int(form.order_index.data)
     )
     session.add(new_case)
     session.commit()
@@ -382,6 +384,7 @@ def update_case():
     case.is_main = form.is_main.data
     case.project_link = form.project_link.data
     case.role = form.role.data
+    case.order_index = form.order_index.data
 
     cases_stacks_ids = set(s.id for s in case.stacks)
     form_stacks_ids = set(int(id) for id in form.stacks.data)

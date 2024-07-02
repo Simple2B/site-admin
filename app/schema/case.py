@@ -20,6 +20,7 @@ class CaseOut(BaseModel):
     is_main: bool = Field(alias="isMain")
     project_link: str = Field(alias="projectLink")
     role: str
+    order_index: int = Field(alias="orderIndex")
 
     stacks_names: list[str] = Field(alias="stacksNames")
     screenshots: list[CaseScreenshot]

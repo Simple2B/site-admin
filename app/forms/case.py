@@ -31,6 +31,7 @@ class CaseForm(FlaskForm):
     project_link = StringField("project_link", validators=[Optional(), URL()])
     role = StringField("role", [DataRequired(), Length(2, 32)])
     stacks = MultiCheckboxField("stacks")
+    order_index = IntegerField("order_index", [DataRequired()])
 
     submit = SubmitField("Save")
 
