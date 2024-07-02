@@ -31,6 +31,7 @@ interface ICaseOut {
   mainImageUrl: string;
   previewImageUrl: string;
   language: Languages;
+  orderIndex: number;
 }
 
 const createCaseScreenshot = (screenshot: ICaseScreenshot): HTMLElement => {
@@ -98,6 +99,9 @@ const editCase = async (caseId: number) => {
   const description: HTMLInputElement = document.querySelector(
     '#edit-case-description',
   );
+  const order_index: HTMLInputElement = document.querySelector(
+    '#edit-case-order-index',
+  );
   const projectLink: HTMLInputElement = document.querySelector(
     '#edit-case-project-link',
   );
@@ -144,6 +148,7 @@ const editCase = async (caseId: number) => {
     subMainImageInput,
     projectLink,
     caseIdCopyElement,
+    order_index
   ];
   if (elements.includes(null)) {
     return;
@@ -182,6 +187,7 @@ const editCase = async (caseId: number) => {
   projectLink.value = caseData.projectLink;
   isActive.checked = caseData.isActive;
   isMain.checked = caseData.isMain;
+  order_index.value = caseData.orderIndex.toString();
   mainImage.src =
     mainImageInput.files.length > 0
       ? URL.createObjectURL(mainImageInput.files[0])

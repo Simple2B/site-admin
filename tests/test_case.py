@@ -18,6 +18,7 @@ test_case = {
     "role": "test role",
     "sub_images": [(io.BytesIO(b"sub_images"), "sub_images.jpg")],
     "language": m.Languages.ENGLISH.value,
+    "order_index": "1",
 }
 
 
@@ -76,6 +77,7 @@ def test_crud_case(client, mocker):
             "project_link": "https://test.com",
             "stacks": [stack.id],
             "languages": "en",
+            "order_index": "1",
         },
         content_type="multipart/form-data",
     )

@@ -11,7 +11,8 @@
       <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
         <h3 class="text-xl font-semibold text-gray-900 dark:text-white"> Add new case </h3>
         <div class="flex gap-4 items-center">
-          <label for="title" class="block text-sm font-medium text-gray-900 dark:text-white"> {{ form.language.label }}:</label>
+          <label for="title" class="block text-sm font-medium text-gray-900 dark:text-white"> {{ form.language.label
+            }}:</label>
           {{ form.language }}
         </div>
       </div>
@@ -25,12 +26,12 @@
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Title" required />
           </div>
-          <div  class="col-span-6 sm:col-span-3">
+          <div class="col-span-6 sm:col-span-3">
             <label for="sub_title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Sub
               title<span class="text-red-500">*</span></label>
             <input type="text" name="sub_title"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Sub title"required />
+              placeholder="Sub title" required />
           </div>
 
           <div class="col-span-6 sm:col-span-3">
@@ -43,7 +44,7 @@
             <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
               title="This image will be displayed in the lists of Cases">Upload preview image<span
                 class="text-red-500">*</span></label>
-            <input type="file" name="sub_title_image"  accept="image/*">
+            <input type="file" name="sub_title_image" accept="image/*">
           </div>
 
           <div id="add-case-english-description" class="col-span-6 sm:col-span-3">
@@ -54,7 +55,14 @@
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Description" required />
           </div>
-          <div class="col-span-6 sm:col-span-3 flex justify-evenly">
+          <div class="col-span-6 sm:col-span-3">
+            <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">order
+              index<span class="text-red-500">*</span></label>
+            <input type="number" name="order_index"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="1" required />
+          </div>
+          <div class="col-span-6 flex justify-evenly">
             <label for="is_active" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
               title="Will Case be displayed on the site">Is
               active</label>
